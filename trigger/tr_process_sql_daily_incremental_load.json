@@ -1,0 +1,42 @@
+{
+	"name": "tr_process_sql_daily_incremental_load",
+	"properties": {
+		"description": "Incremental pipeline run for Tower data to Snowflake.",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "TOWER_INCREMENTAL_LOAD",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TRUX_INCREMENTAL_LOAD",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-09-14T07:56:00",
+				"timeZone": "Central Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						8,
+						20,
+						11,
+						14
+					]
+				}
+			}
+		}
+	}
+}

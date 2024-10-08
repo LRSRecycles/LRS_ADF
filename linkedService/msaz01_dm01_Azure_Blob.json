@@ -1,0 +1,16 @@
+{
+	"name": "msaz01_dm01_Azure_Blob",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": "https://lakeshoreblob.blob.core.windows.net/",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJjNzAwZmFhZC02M2FhLTQyN2ItYmNmMi04MDUwNjkyZTU0NWUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "msaz01-dm01",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

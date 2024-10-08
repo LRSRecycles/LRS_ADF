@@ -1,0 +1,126 @@
+{
+	"name": "TOWER_FULL_LOAD_DIM_DC",
+	"properties": {
+		"activities": [
+			{
+				"name": "Tower Table Names",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"query": "SELECT *\r\n  FROM lrs_raw.master_data.tower_Table_names\r\n WHERE Load_type = 'Full'",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "TOWER_TABLE_NAMES",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Tower Copy Activities",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Tower Table Names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Tower Table Names').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy tables",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"preCopyScript": {
+										"value": "@{concat('truncate table ',item().Schema_name,'.',item().Table_name)}",
+										"type": "Expression"
+									},
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "@item().Table_name",
+										"Snowflake_Schema": "@item().Schema_name"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Test/Tower_DC"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

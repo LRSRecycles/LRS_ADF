@@ -1,0 +1,75 @@
+{
+	"name": "TOWER_DAILY_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Tower Fact table Full Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TOWER_FULL_LOAD_FACT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Tower Dim table Full Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Tower Fact table Full Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TOWER_FULL_LOAD_DIM",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Pipeline Full Load 2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Tower Dim table Full Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TOWER FULL LOAD PIPELINE_2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-01-12T14:18:18Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

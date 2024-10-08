@@ -1,0 +1,81 @@
+{
+	"name": "VENA_Raw_Archive_Each",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"pFileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Vena"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().pFileName",
+					"type": "Expression"
+				},
+				"folderPath": "processed",
+				"container": "vena"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "_Account",
+				"type": "String"
+			},
+			{
+				"name": "_Location",
+				"type": "String"
+			},
+			{
+				"name": "_Line/Dept",
+				"type": "String"
+			},
+			{
+				"name": "_Material Type/Customer",
+				"type": "String"
+			},
+			{
+				"name": "_Data Source",
+				"type": "String"
+			},
+			{
+				"name": "_Year",
+				"type": "String"
+			},
+			{
+				"name": "_Period",
+				"type": "String"
+			},
+			{
+				"name": "_Scenario",
+				"type": "String"
+			},
+			{
+				"name": "_Measure",
+				"type": "String"
+			},
+			{
+				"name": "_value",
+				"type": "String"
+			},
+			{
+				"name": "_etl_id",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

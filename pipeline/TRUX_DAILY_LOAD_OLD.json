@@ -1,0 +1,138 @@
+{
+	"name": "TRUX_DAILY_LOAD_OLD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run TRUX LEGACY DIM",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run TRUX LEGACY Fact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_LEGACY_FULL_LOAD_DIM",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32
+					}
+				}
+			},
+			{
+				"name": "Run TRUX MIDWEST DIM",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Run TRUX MIDWEST Fact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MIDWEST_FULL_LOAD_DIM",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32
+					}
+				}
+			},
+			{
+				"name": "Run TRUX LEGACY Fact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Master Data Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_LEGACY_FULL_LOAD_FACT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32
+					}
+				}
+			},
+			{
+				"name": "Run TRUX MIDWEST Fact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Master Data Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MIDWEST_FULL_LOAD_FACT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32
+					}
+				}
+			},
+			{
+				"name": "Master Data Load",
+				"description": "Reloading TRUX master metadata.",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MASTER_DATA_FULL_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/TRUX_OLD"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-16T19:01:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

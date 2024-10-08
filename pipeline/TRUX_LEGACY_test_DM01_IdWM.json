@@ -1,0 +1,216 @@
+{
+	"name": "TRUX_LEGACY_test_DM01_IdWM",
+	"properties": {
+		"activities": [
+			{
+				"name": "DM01 Watermark Lookup",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"query": "select\r\n'TRUX_DC_COMP' as Sql_db_name,\r\n'TRUX_DC_COMP_RAW' as Snowflake_schema,\r\n'DM01' as table_name,\r\ncast(max(dm01_id)as varchar) as latest_watermark\r\nfrom\r\n  lrs_raw.TRUX_DC_COMP_RAW.dm01\r\n\r\nunion all\r\n\r\nselect\r\n'TRUX_WA_COMP' as Sql_db_name,\r\n'TRUX_WA_COMP_RAW' as Snowflake_schema,\r\n'DM01' as table_name,\r\ncast(max(dm01_id)as varchar) as latest_watermark\r\nfrom\r\n  lrs_raw.TRUX_WA_COMP_RAW.dm01;",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DATABASE_LKPWATERMARK_TRUX_LEGACY",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Loop over databases",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "DM01 Watermark Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('DM01 Watermark Lookup').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Lookup1",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * from @{item().table_name}\nwhere dm01_id > '@{item().LATEST_WATERMARK}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "TRUX_LEGACY01",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "dbo",
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"database": {
+											"value": "@item().Sql_db_name",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lookup1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * from @{item().table_name}\nwhere dm01_id > '@{item().LATEST_WATERMARK}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TRUX_LEGACY01",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "dbo",
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"database": {
+											"value": "@item().Sql_db_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "@concat(item().table_name,'_1')",
+										"Snowflake_Schema": "@item().snowflake_schema"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Maximum_DIU": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"Degree_Copy_Parallelism": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"LastProcessedId": {
+				"type": "string"
+			},
+			"CurrentDate": {
+				"type": "string"
+			},
+			"SchemaName": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"tempArray": {
+				"type": "Array"
+			},
+			"TempResult": {
+				"type": "Array"
+			},
+			"ResultsArray": {
+				"type": "Array"
+			},
+			"OutputArray": {
+				"type": "Array"
+			},
+			"append": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,97 @@
+{
+	"name": "TRUX_INCREMENTAL_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Run TRUX LEGACY Incremental",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_LEGACY_INCREMENTAL_LOAD_FACT_NEW",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32,
+						"Incremental_Range": "14"
+					}
+				}
+			},
+			{
+				"name": "Run TRUX MIDWEST Incremental",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32,
+						"Incremental_Range": "14"
+					}
+				}
+			},
+			{
+				"name": "Run TRUX LEGACY LOGGING Incremental",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_LEGACY_LOGGING_INCREMENTAL_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32,
+						"Incremental_Range": 14
+					}
+				}
+			},
+			{
+				"name": "Run TRUX MIDWEST LOGGING Incremental",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32,
+						"Incremental_Range": 14
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-05-13T23:45:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

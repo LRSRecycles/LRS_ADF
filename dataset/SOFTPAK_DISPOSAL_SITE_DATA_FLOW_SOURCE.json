@@ -1,0 +1,89 @@
+{
+	"name": "SOFTPAK_DISPOSAL_SITE_DATA_FLOW_SOURCE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"pFileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "SOFTPAK"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().pFileName",
+					"type": "Expression"
+				},
+				"folderPath": "Variable_disposal_site_report",
+				"container": "softpak"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "CO",
+				"type": "String"
+			},
+			{
+				"name": "DISPOSAL",
+				"type": "String"
+			},
+			{
+				"name": "MATERIAL",
+				"type": "String"
+			},
+			{
+				"name": "DATE",
+				"type": "String"
+			},
+			{
+				"name": "ROUTE",
+				"type": "String"
+			},
+			{
+				"name": "DRIVER",
+				"type": "String"
+			},
+			{
+				"name": "VEHICLE",
+				"type": "String"
+			},
+			{
+				"name": "TAX BODY",
+				"type": "String"
+			},
+			{
+				"name": "TICKET",
+				"type": "String"
+			},
+			{
+				"name": "UNITS",
+				"type": "String"
+			},
+			{
+				"name": "COST",
+				"type": "String"
+			},
+			{
+				"name": "BIL$",
+				"type": "String"
+			},
+			{
+				"name": "ROUTE TYPE",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

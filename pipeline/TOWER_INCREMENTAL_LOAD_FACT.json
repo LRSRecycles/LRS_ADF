@@ -1,0 +1,3475 @@
+{
+	"name": "TOWER_INCREMENTAL_LOAD_FACT",
+	"properties": {
+		"activities": [
+			{
+				"name": "Tower Table Names",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VW_TOWER_WATERMARK_PVT",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DateTime Incremental Loop",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Tower Table Names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Tower Table Names').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Ardetail Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for ARDetail",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from ARdetail where createddatetime > DATEADD(day,-', \n    pipeline().parameters.Incremental_Range,\n    ', GETDATE())'\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "ARDetailUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "ARDETAILUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SourceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SOURCEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CustID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CUSTID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SiteID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SITEID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Material",
+												"type": "String"
+											},
+											"sink": {
+												"name": "MATERIAL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "DetailType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "DETAILTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Tax",
+												"type": "String"
+											},
+											"sink": {
+												"name": "TAX",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "DebitAcct",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DEBITACCT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditAcct",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CREDITACCT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Period",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PERIOD",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "INVOICEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "TransactionDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "TRANSACTIONDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "DueDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "DUEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "GLExportBatchUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "GLEXPORTBATCHUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Quantity",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "QUANTITY",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "UnitRate",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "UNITRATE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "OriginalAmount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "ORIGINALAMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Balance",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "BALANCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "BilledAppliedAmount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "BILLEDAPPLIEDAMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DisplayOnInvoice",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "DISPLAYONINVOICE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DetailSource",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "DETAILSOURCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CompanyID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPANYID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CreatedDateTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "CREATEDDATETIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditAcctSegType",
+												"type": "Byte"
+											},
+											"sink": {
+												"name": "CREDITACCTSEGTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DebitAcctSegType",
+												"type": "Byte"
+											},
+											"sink": {
+												"name": "DEBITACCTSEGTYPE",
+												"type": "Int64"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "ARdetail"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "ARDETAIL_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "ARDetail Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Ardetail Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW.ARDETAIL t \nusing \n    TOWER_RAW.ARDETAIL_STAGING s \non t.ardetailuid = s.ardetailuid  \nwhen matched then update set \n\tardetailuid = s.ardetailuid ,\n      t.sourceuid = s.sourceuid ,\n      t.status = s.status ,\n      t.custid = s.custid ,\n      t.siteid = s.siteid ,\n      t.material = s.material ,\n      t.detailtype = s.detailtype ,\n      t.tax = s.tax ,\n      t.debitacct = s.debitacct ,\n      t.creditacct = s.creditacct ,\n      t.period = s.period ,\n      t.invoiceuid = s.invoiceuid ,\n      t.transactiondate = s.transactiondate ,\n      t.duedate = s.duedate ,\n      t.glexportbatchuid = s.glexportbatchuid ,\n      t.quantity = s.quantity ,\n      t.unitrate = s.unitrate,\n      t.originalamount = s.originalamount ,\n      t.balance = s.balance ,\n      t.billedappliedamount = s.billedappliedamount ,\n      t.displayoninvoice = s.displayoninvoice ,\n      t.detailsource = s.detailsource ,\n      t.companyid = s. companyid ,\n      t.createddatetime = s.createddatetime ,\n      t.creditacctsegtype = s.creditacctsegtype ,\n      t.debitacctsegtype = s.debitacctsegtype \nwhen not matched then insert \n\t(\n\tardetailuid ,\n      t.sourceuid ,\n      t.status ,\n      t.custid ,\n      t.siteid ,\n      t.material ,\n      t.detailtype ,\n      t.tax ,\n      t.debitacct ,\n      t.creditacct ,\n      t.period ,\n      t.invoiceuid ,\n      t.transactiondate ,\n      t.duedate ,\n      t.glexportbatchuid ,\n      t.quantity ,\n      t.unitrate ,\n      t.originalamount ,\n      t.balance ,\n      t.billedappliedamount ,\n      t.displayoninvoice ,\n      t.detailsource ,\n      t.companyid ,\n      t.createddatetime ,\n      t.creditacctsegtype ,\n      t.debitacctsegtype \n\t)\nvalues \n\t(\n\t ardetailuid ,\n      s.sourceuid ,\n      s.status ,\n      s.custid ,\n      s.siteid ,\n      s.material ,\n      s.detailtype ,\n      s.tax ,\n      s.debitacct ,\n      s.creditacct ,\n      s.period ,\n      s.invoiceuid ,\n      s.transactiondate ,\n      s.duedate ,\n      s.glexportbatchuid ,\n      s.quantity ,\n      s.unitrate ,\n      s.originalamount ,\n      s.balance ,\n      s.billedappliedamount ,\n      s.displayoninvoice ,\n      s.detailsource ,\n      s.companyid ,\n      s.createddatetime ,\n      s.creditacctsegtype ,\n      s.debitacctsegtype)'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Create staging for ARDetail",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.ARDETAIL_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.ARDETAIL where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for AR Detail",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "ARDetail Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.ARDETAIL_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "GLExportBatch Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for GLExportBatch",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from GLEXPORTBATCH where exportdatetime > DATEADD(day,-', \n    pipeline().parameters.Incremental_Range,\n    ', GETDATE())'\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "GLExportBatchUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "GLEXPORTBATCHUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "GLExportBatchID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "GLEXPORTBATCHID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ExportDateTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "EXPORTDATETIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditTotal",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "CREDITTOTAL",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DebitTotal",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "DEBITTOTAL",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Description",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DESCRIPTION",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "FileCount",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "FILECOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "BatchType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "BATCHTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CompanyID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPANYID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Period",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PERIOD",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CompanyList",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPANYLIST",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PeriodList",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PERIODLIST",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "GLEXPORTBATCH"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "GLEXPORTBATCH_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "GLExportBatch Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "GLExportBatch Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW.GLEXPORTBATCH t \nusing \n    TOWER_RAW.GLEXPORTBATCH_STAGING s \non t.GLEXPORTBATCHUID = s.GLEXPORTBATCHUID  \nwhen matched then update set \n\tt.glexportbatchuid = s.glexportbatchuid ,\n\tt.glexportbatchid = s.glexportbatchid,\n\tt.exportdatetime= s.exportdatetime ,\n\tt.status = s.status ,\n\tt.credittotal = s.credittotal ,\n\tt.debittotal = s.debittotal ,\n\tt.description = s.description ,\n\tt.filecount = s.filecount,\n\tt.batchtype = s.batchtype,\n\tt.companyid = s.companyid,\n\tt.period = s.period ,\n\tt.companylist = s.companylist ,\n\tt.periodlist = s.periodlist \nwhen not matched then insert \n\t(\n\tt.glexportbatchuid,\n\tt.glexportbatchid ,\n\tt.exportdatetime,\n\tt.status ,\n\tt.credittotal ,\n\tt.debittotal ,\n\tt.description ,\n\tt.filecount ,\n\tt.batchtype ,\n\tt.companyid ,\n\tt.period ,\n\tt.companylist ,\n\tt.periodlist \n\t)\nvalues \n\t(\n\ts.glexportbatchuid ,\n\ts.glexportbatchid ,\n\ts.exportdatetime,\n\ts.status ,\n\ts.credittotal ,\n\ts.debittotal ,\n\ts.description ,\n\ts.filecount ,\n\ts.batchtype ,\n\ts.companyid ,\n\ts.period ,\n\ts.companylist,\n\ts.periodlist)'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Create staging for GLExportBatch",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.GLEXPORTBATCH_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.GLEXPORTBATCH where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for GLExportBatch",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "GLExportBatch Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.GLEXPORTBATCH_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Payment Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for Payment",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from PAYMENT where PAYMENTDATE > DATEADD(day,-', \n    pipeline().parameters.Incremental_Range,\n    ', GETDATE())'\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "PaymentUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "PAYMENTUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentBatchUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "PAYMENTBATCHUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BatchSequence",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "BATCHSEQUENCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "SourceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SOURCEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "PAYMENTDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ClearOrNSFDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "CLEARORNSFDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "CustID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CUSTID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentMethod",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "PAYMENTMETHOD",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditCardType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "CREDITCARDTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentBankAcct",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PAYMENTBANKACCT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentIDNbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PAYMENTIDNBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Amount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ApplicationMethod",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "APPLICATIONMETHOD",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "RemoveCreditHold",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "REMOVECREDITHOLD",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditAmount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "CREDITAMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CreditReason",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CREDITREASON",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PaymentNote",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PAYMENTNOTE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CustomerBalance",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "CUSTOMERBALANCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "BankAccountXRefUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "BANKACCOUNTXREFUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CollectionsNotified",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "COLLECTIONSNOTIFIED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CustomerPaymentAccountUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "CUSTOMERPAYMENTACCOUNTUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ReversedByDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "REVERSEDBYDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "ReversedByUserID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "REVERSEDBYUSERID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ReversalReasonNote",
+												"type": "String"
+											},
+											"sink": {
+												"name": "REVERSALREASONNOTE",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "Payment"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "PAYMENT_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "Payment Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Payment Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW.PAYMENT t \nusing \n    TOWER_RAW.PAYMENT_STAGING s \non t.PAYMENTUID = s.PAYMENTUID  \nwhen matched then update set \n\tt.paymentuid =s.paymentuid , \n\tt.paymentbatchuid =s.paymentbatchuid , \n\tt.batchsequence =s.batchsequence , \n\tt.sourceuid =s.sourceuid, \n\tt.paymentdate =s.paymentdate , \n\tt.status =s.status, \n\tt.clearornsfdate =s.clearornsfdate, \n\tt.custid =s. custid , \n\tt.paymentmethod =s.paymentmethod , \n\tt.creditcardtype =s.creditcardtype, \n\tt.paymentbankacct =s.paymentbankacct, \n\tt.paymentidnbr =s.paymentidnbr, \n\tt.amount =s.amount , \n\tt.applicationmethod =s.applicationmethod , \n\tt.removecredithold =s.removecredithold , \n\tt.creditamount =s.creditamount , \n\tt.creditreason =s.creditreason, \n\tt.paymentnote=s.paymentnote ,  \n\tt.customerbalance =s.customerbalance, \n\tt.bankaccountxrefuid =s.bankaccountxrefuid , \n\tt.collectionsnotified =s.collectionsnotified, \n\tt.customerpaymentaccountuid =s.customerpaymentaccountuid, \n\tt.reversedbydate=s.reversedbydate , \n\tt.reversedbyuserid =s.reversedbyuserid , \n\tt.reversalreasonnote = s.reversalreasonnote  \nwhen not matched then insert \n\t(\n\tt.paymentuid ,\n\tt.paymentbatchuid ,\n\tt.batchsequence ,\n\tt.sourceuid ,\n\tt.paymentdate ,\n\tt.status ,\n\tt.clearornsfdate ,\n\tt.custid ,\n\tt.paymentmethod ,\n\tt.creditcardtype ,\n\tt.paymentbankacct ,\n\tt.paymentidnbr ,\n\tt.amount ,\n\tt.applicationmethod ,\n\tt.removecredithold ,\n\tt.creditamount ,\n\tt.creditreason ,\n\tt.paymentnote, \n\tt.customerbalance ,\n\tt.bankaccountxrefuid ,\n\tt.collectionsnotified ,\n\tt.customerpaymentaccountuid,\n\tt.reversedbydate,\n\tt.reversedbyuserid ,\n\tt.reversalreasonnote \n\t)\nvalues \n\t(\n\ts.paymentuid ,\n\ts.paymentbatchuid ,\n\ts.batchsequence ,\n\ts.sourceuid ,\n\ts.paymentdate ,\n\ts.status ,\n\ts.clearornsfdate ,\n\ts.custid ,\n\ts.paymentmethod ,\n\ts.creditcardtype ,\n\ts.paymentbankacct ,\n\ts.paymentidnbr ,\n\ts.amount ,\n\ts.applicationmethod ,\n\ts.removecredithold ,\n\ts.creditamount ,\n\ts.creditreason ,\n\ts.paymentnote, \n\ts.customerbalance ,\n\ts.bankaccountxrefuid ,\n\ts.collectionsnotified ,\n\ts.customerpaymentaccountuid ,\n\ts.reversedbydate,\n\ts.reversedbyuserid ,\n\ts.reversalreasonnote )'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Create staging for Payment",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.PAYMENT_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.PAYMENT where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for Payment",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Payment Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.PAYMENT_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "InvoiceDetail Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for InvoiceDetail",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from INVOICEDETAIL \n    where STARTDATE > (SELECT MAX(STARTDATE) FROM INVOICEDETAIL) -' , \n  pipeline().parameters.Incremental_Range2\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "InvoiceDetailUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "INVOICEDETAILUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "INVOICEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SiteID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SITEID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SERVICEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SourceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SOURCEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SourceIDNbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SOURCEIDNBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LineType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "LINETYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LineSubType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "LINESUBTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "SvcCode",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SVCCODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Description",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DESCRIPTION",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Salesperson",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SALESPERSON",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SvcFrequency",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SVCFREQUENCY",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Quantity",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "QUANTITY",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Amount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "UnitPrice",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "UNITPRICE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TaxAmount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TAXAMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "StartDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "STARTDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "EndDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "ENDDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "PrintRecord",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "PRINTRECORD",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LineOrderKey1",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINEORDERKEY1",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LineOrderKey2",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINEORDERKEY2",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LineOrderKey3",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINEORDERKEY3",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LineOrderKey4",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINEORDERKEY4",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PONbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PONBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "POSource",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "POSOURCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AssignedToCollections",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "ASSIGNEDTOCOLLECTIONS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AssignedToCollectionsDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "ASSIGNEDTOCOLLECTIONSDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "DiscountAmount",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "DISCOUNTAMOUNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PriorARDStatus",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "PRIORARDSTATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LineLevel",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "LINELEVEL",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "SiteAddressUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SITEADDRESSUID",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "INVOICEDETAIL"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "INVOICEDETAIL_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "InvoiceDetail Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "InvoiceDetail Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW.INVOICEDETAIL t \nusing \n    TOWER_RAW.INVOICEDETAIL_STAGING s \non t.INVOICEDETAILUID= s.INVOICEDETAILUID  \nwhen matched then update set \nt.InvoiceDetailUID= s.InvoiceDetailUID,\n      t.InvoiceUID= s.InvoiceUID,\n      t.SiteID= s.SiteID,\n      t.ServiceUID= s.ServiceUID,\n      t.SourceUID= s.SourceUID,\n      t.SourceIDNbr= s.SourceIDNbr,\n      t.LineType= s.LineType,\n      t.LineSubType= s.LineSubType,\n      t.SvcCode= s.SvcCode,\n      t.Description= s.Description ,\n      t. Salesperson = s.Salesperson ,\n      t.SvcFrequency= s.SvcFrequency ,\n      t.Quantity= s.Quantity,\n      t.Amount= s.Amount ,\n      t.UnitPrice= s.UnitPrice,\n      t.TaxAmount= s.TaxAmount,\n      t.StartDate= s.StartDate,\n      t.EndDate= s.EndDate ,\n      t.PrintRecord= s.PrintRecord ,\n      t.LineOrderKey1= s.LineOrderKey1 ,\n      t.LineOrderKey2= s.LineOrderKey2 ,\n      t.LineOrderKey3= s.LineOrderKey3 ,\n      t.LineOrderKey4= s.LineOrderKey4 ,\n      t.PONbr= s.PONbr ,\n      t.POSource= s.POSource ,\n      t.AssignedToCollections= s.AssignedToCollections ,\n      t.AssignedToCollectionsDate= s.AssignedToCollectionsDate ,\n      t.DiscountAmount= s.DiscountAmount,\n      t.PriorARDStatus= s.PriorARDStatus ,\n      t.LineLevel= s.LineLevel,\n      t.SiteAddressUID= s.SiteAddressUID \nwhen not matched then insert \n\t(\n\tt.InvoiceDetailUID,\n      t.InvoiceUID,\n      t.SiteID,\n      t.ServiceUID,\n      t.SourceUID,\n      t.SourceIDNbr,\n      t.LineType,\n      t.LineSubType,\n      t.SvcCode,\n      t.Description,\n      t.Salesperson,\n      t.SvcFrequency,\n      t.Quantity,\n      t.Amount,\n      t.UnitPrice,\n      t.TaxAmount,\n      t.StartDate,\n      t.EndDate,\n      t.PrintRecord,\n      t.LineOrderKey1,\n      t.LineOrderKey2,\n      t.LineOrderKey3,\n      t.LineOrderKey4,\n      t.PONbr,\n      t.POSource,\n      t.AssignedToCollections,\n      t.AssignedToCollectionsDate,\n      t.DiscountAmount,\n      t.PriorARDStatus,\n      t.LineLevel,\n      t.SiteAddressUID\n\t)\nvalues \n\t(\n\ts.InvoiceDetailUID,\n      s.InvoiceUID,\n      s.SiteID,\n      s.ServiceUID,\n      s.SourceUID,\n      s.SourceIDNbr,\n      s.LineType,\n      s.LineSubType,\n      s.SvcCode,\n      s.Description,\n      s.Salesperson,\n      s.SvcFrequency,\n      s.Quantity,\n      s.Amount,\n      s.UnitPrice,\n      s.TaxAmount,\n      s.StartDate,\n      s.EndDate,\n      s.PrintRecord,\n      s.LineOrderKey1,\n      s.LineOrderKey2,\n      s.LineOrderKey3,\n      s.LineOrderKey4,\n      s.PONbr,\n      s.POSource,\n      s.AssignedToCollections,\n      s.AssignedToCollectionsDate,\n      s.DiscountAmount,\n      s.PriorARDStatus,\n      s.LineLevel,\n      s.SiteAddressUID)'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Create staging for InvoiceDetail",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.INVOICEDETAIL_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.INVOICEDETAIL where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for InvoiceDetail",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "InvoiceDetail Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.INVOICEDETAIL_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Invoice Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for Invoice",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from INVOICE \n    where DUEDATE > (SELECT MAX(DUEDATE) FROM INVOICE) -' , \n  pipeline().parameters.Incremental_Range3\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "InvoiceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "INVOICEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "INVOICEID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceContent",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "INVOICECONTENT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PrintInvoice",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "PRINTINVOICE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceOrderKey",
+												"type": "String"
+											},
+											"sink": {
+												"name": "INVOICEORDERKEY",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillBatchUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "BILLBATCHUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillCustID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLCUSTID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "BillSiteID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLSITEID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "BillName",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLNAME",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillContact",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLCONTACT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillAddressUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "BILLADDRESSUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillPhone",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLPHONE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillFax",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLFAX",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BillEmail",
+												"type": "String"
+											},
+											"sink": {
+												"name": "BILLEMAIL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SiteAddressUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SITEADDRESSUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "INVOICEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "LastInvoiceDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "LASTINVOICEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "DueDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "DUEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "FinanceChargeThruDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "FINANCECHARGETHRUDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "CustClass",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CUSTCLASS",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "BalForward",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "BALFORWARD",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AgingBal00",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AGINGBAL00",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AgingBal01",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AGINGBAL01",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AgingBal02",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AGINGBAL02",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AgingBal03",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AGINGBAL03",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AgingBal04",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "AGINGBAL04",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "NewBalance",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "NEWBALANCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotSvcOneTime",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTSVCONETIME",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotSvcRecurring",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTSVCRECURRING",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotSvcOnCall",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTSVCONCALL",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotSvcTaxes",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTSVCTAXES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotFinCharges",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTFINCHARGES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotCharges",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTCHARGES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotChargeTaxes",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTCHARGETAXES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotCredits",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTCREDITS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotCreditTaxes",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTCREDITTAXES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "TotPayments",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "TOTPAYMENTS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AutomaticPaymentType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "AUTOMATICPAYMENTTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CompanyID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPANYID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceMailingOption",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "INVOICEMAILINGOPTION",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceInsert",
+												"type": "String"
+											},
+											"sink": {
+												"name": "INVOICEINSERT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ExternalInvoiceNbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "EXTERNALINVOICENBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceDetailFormat",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "INVOICEDETAILFORMAT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LineOfBusiness",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LINEOFBUSINESS",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "INVOICE"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "INVOICE_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "Create staging for Invoice",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.INVOICE_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.INVOICE where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Invoice Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Invoice Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW.INVOICE t \nusing \n    TOWER_RAW.INVOICE_STAGING s \non t.INVOICEUID= s.INVOICEUID  \nwhen matched then update set \n\tt.invoiceuid = s.invoiceuid ,\n\tt.invoiceid = s.invoiceid ,\n\tt.status = s. status,\n\tt.invoicecontent = s.invoicecontent ,\n\tt.printinvoice = s.printinvoice ,\n\tt.invoiceorderkey = s.invoiceorderkey ,\n\tt.billbatchuid = s.billbatchuid ,\n\tt.billcustid = s.billcustid ,\n\tt.billsiteid = s.billsiteid ,\n\tt.billname = s.billname ,\n\tt.billcontact= s.billcontact ,\n\tt.billaddressuid = s.billaddressuid ,\n\tt.billphone = s.billphone ,\n\tt.billfax = s.billfax ,\n\tt.billemail = s.billemail ,\n\tt.siteaddressuid = s.siteaddressuid ,\n\tt.invoicedate = s.invoicedate ,\n\tt.lastinvoicedate = s.lastinvoicedate ,\n\tt.duedate = s.duedate ,\n\tt.financechargethrudate = s.financechargethrudate ,\n\tt.custclass = s.custclass ,\n\tt.balforward = s.balforward ,\n\tt.agingbal00 = s.agingbal00 ,\n\tt.agingbal01 = s.agingbal01 ,\n\tt.agingbal02 = s.agingbal02 ,\n\tt.agingbal03 = s.agingbal03 ,\n\tt.agingbal04 = s.agingbal04 ,\n\tt.newbalance = s.newbalance ,\n\tt.totsvconetime = s.totsvconetime ,\n\tt.totsvcrecurring = s.totsvcrecurring ,\n\tt.totsvconcall = s.totsvconcall ,\n\tt.totsvctaxes = s.totsvctaxes ,\n\tt.totfincharges = s.totfincharges ,\n\tt.totcharges = s.totcharges ,\n\tt.totchargetaxes = s.totchargetaxes ,\n\tt.totcredits = s.totcredits ,\n\tt.totcredittaxes = s.totcredittaxes ,\n\tt.totpayments = s.totpayments ,\n\tt.automaticpaymenttype = s.automaticpaymenttype ,\n\tt.companyid = s.companyid ,\n\tt.invoicemailingoption = s.invoicemailingoption ,\n\tt.invoiceinsert = s.invoiceinsert ,\n\tt.externalinvoicenbr = s.externalinvoicenbr ,\n\tt.invoicedetailformat = s.invoicedetailformat ,\n\tt.lineofbusiness =s.lineofbusiness \nwhen not matched then insert \n\t( \n\tt.invoiceuid ,\n\tt.invoiceid ,\n\tt.status ,\n\tt.invoicecontent ,\n\tt.printinvoice ,\n\tt.invoiceorderkey ,\n\tt.billbatchuid ,\n\tt.billcustid ,\n\tt.billsiteid ,\n\tt.billname ,\n\tt.billcontact,\n\tt.billaddressuid ,\n\tt.billphone ,\n\tt.billfax ,\n\tt.billemail ,\n\tt.siteaddressuid ,\n\tt.invoicedate ,\n\tt.lastinvoicedate ,\n\tt.duedate ,\n\tt.financechargethrudate ,\n\tt.custclass ,\n\tt.balforward ,\n\tt.agingbal00 ,\n\tt.agingbal01 ,\n\tt.agingbal02 ,\n\tt.agingbal03 ,\n\tt.agingbal04 ,\n\tt.newbalance ,\n\tt.totsvconetime ,\n\tt.totsvcrecurring ,\n\tt.totsvconcall ,\n\tt.totsvctaxes ,\n\tt.totfincharges ,\n\tt.totcharges ,\n\tt.totchargetaxes ,\n\tt.totcredits ,\n\tt.totcredittaxes ,\n\tt.totpayments ,\n\tt.automaticpaymenttype ,\n\tt.companyid ,\n\tt.invoicemailingoption ,\n\tt.invoiceinsert ,\n\tt.externalinvoicenbr ,\n\tt.invoicedetailformat ,\n\tt.lineofbusiness \n\t)\nvalues \n\t(\n\ts.invoiceuid ,\n\ts.invoiceid ,\n\ts.status ,\n\ts.invoicecontent ,\n\ts.printinvoice ,\n\ts.invoiceorderkey ,\n\ts.billbatchuid ,\n\ts.billcustid ,\n\ts.billsiteid ,\n\ts.billname ,\n\ts.billcontact,\n\ts.billaddressuid ,\n\ts.billphone ,\n\ts.billfax ,\n\ts.billemail ,\n\ts.siteaddressuid ,\n\ts.invoicedate ,\n\ts.lastinvoicedate ,\n\ts.duedate ,\n\ts.financechargethrudate ,\n\ts.custclass ,\n\ts.balforward ,\n\ts.agingbal00 ,\n\ts.agingbal01 ,\n\ts.agingbal02 ,\n\ts.agingbal03 ,\n\ts.agingbal04 ,\n\ts.newbalance ,\n\ts.totsvconetime ,\n\ts.totsvcrecurring ,\n\ts.totsvconcall ,\n\ts.totsvctaxes ,\n\ts.totfincharges ,\n\ts.totcharges ,\n\ts.totchargetaxes ,\n\ts.totcredits ,\n\ts.totcredittaxes ,\n\ts.totpayments ,\n\ts.automaticpaymenttype ,\n\ts.companyid ,\n\ts.invoicemailingoption ,\n\ts.invoiceinsert ,\n\ts.externalinvoicenbr ,\n\ts.invoicedetailformat ,\n\ts.lineofbusiness)'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for Invoice",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Invoice Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.INVOICE_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Create staging for Service History",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Create or replace table LRS_RAW.TOWER_RAW.SERVICEHISTORY_STAGING',\n    ' as select * from  \n    LRS_RAW.TOWER_RAW.SERVICEHISTORY where 1=0'\n    )\n    }",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Service History Delta Load",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Create staging for Service History",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat(\n    'select * from SERVICEHISTORY \n    where SERVICEDATE > (SELECT MAX(SERVICEDATE) FROM SERVICEHISTORY) -' , \n  pipeline().parameters.Incremental_Range3\n    )\n}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "ServiceHistoryUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SERVICEHISTORYUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceHistoryType",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "SERVICEHISTORYTYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkflowCode",
+												"type": "String"
+											},
+											"sink": {
+												"name": "WORKFLOWCODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceQueue",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SERVICEQUEUE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SourceUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SOURCEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceOrderID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SERVICEORDERID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceInfoUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SERVICEINFOUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceScheduleUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "SERVICESCHEDULEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "RescheduledHistoryUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "RESCHEDULEDHISTORYUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Status",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ReleasedToBilling",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "RELEASEDTOBILLING",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ReasonNote",
+												"type": "String"
+											},
+											"sink": {
+												"name": "REASONNOTE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Route",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ROUTE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "RouteSequence",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "ROUTESEQUENCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "SERVICEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "StartTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "STARTTIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "FinishTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "FINISHTIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceNote",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SERVICENOTE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkOrderID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "WORKORDERID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Quantity",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "QUANTITY",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "RequestedStartTime",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "REQUESTEDSTARTTIME",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "RequestedEndTime",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "REQUESTEDENDTIME",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LaborCost",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "LABORCOST",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "NonLaborCost",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "NONLABORCOST",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "OriginalServiceDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "ORIGINALSERVICEDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "GPSVerified",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "GPSVERIFIED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Latitude",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "LATITUDE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LiftArmUsed",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "LIFTARMUSED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Longitude",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "LONGITUDE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AllocatedRevenue",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "ALLOCATEDREVENUE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DriverNotified",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "DRIVERNOTIFIED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "DisposalTripUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "DISPOSALTRIPUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "OriginalWorkflowCode",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ORIGINALWORKFLOWCODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "UpsRoadNetSyncNotificationStatus",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "UPSROADNETSYNCNOTIFICATIONSTATUS",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "GeocodeDifference",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "GEOCODEDIFFERENCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "GeocodeUpdate",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "GEOCODEUPDATE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "AllocatedRebate",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "ALLOCATEDREBATE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PercentFull",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "PERCENTFULL",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CompletionSequence",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "COMPLETIONSEQUENCE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Odometer",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "ODOMETER",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "RecurringRevenue",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "RECURRINGREVENUE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "Surcharges",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "SURCHARGES",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkorderRevenue",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "WORKORDERREVENUE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ThirdPartyServiceCost",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "THIRDPARTYSERVICECOST",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ThirdPartyWorkorderCost",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "THIRDPARTYWORKORDERCOST",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "HolidayScheduleUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "HOLIDAYSCHEDULEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SerialNbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SERIALNBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "syncRowVersion",
+												"type": "Byte[]"
+											},
+											"sink": {
+												"name": "SYNCROWVERSION",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkStartTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "WORKSTARTTIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkStopTime",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "WORKSTOPTIME",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "RouteSubsectionUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "ROUTESUBSECTIONUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ThirdPartyPONbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "THIRDPARTYPONBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ThirdPartyServiceProvider",
+												"type": "String"
+											},
+											"sink": {
+												"name": "THIRDPARTYSERVICEPROVIDER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CompletedByVehicle",
+												"type": "String"
+											},
+											"sink": {
+												"name": "COMPLETEDBYVEHICLE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "PickupEquivalent",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "PICKUPEQUIVALENT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PickupEquivalentAdjustment",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "PICKUPEQUIVALENTADJUSTMENT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PickupEquivalentIsBilled",
+												"type": "Boolean"
+											},
+											"sink": {
+												"name": "PICKUPEQUIVALENTISBILLED",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "StatusSource",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "STATUSSOURCE",
+												"type": "Int64"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "SERVICEHISTORY"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "SERVICEHISTORY_STAGING",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						},
+						{
+							"name": "Service History Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Service History Delta Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into LRS_RAW.TOWER_RAW. SERVICEHISTORY t \nusing \n    TOWER_RAW.SERVICEHISTORY_STAGING s \non t.SERVICEHISTORYUID= s.SERVICEHISTORYUID \nwhen matched then update set\nt.ServiceHistoryUID= s.ServiceHistoryUID,\n      t.ServiceHistoryType= s.ServiceHistoryType,\n      t.WorkflowCode= s.WorkflowCode,\n      t.ServiceQueue= s.ServiceQueue,\n      t.SourceUID= s.SourceUID,\n      t.ServiceOrderID= s.ServiceOrderID,\n      t.ServiceInfoUID= s.ServiceInfoUID,\n      t.ServiceScheduleUID= s.ServiceScheduleUID,\n      t.RescheduledHistoryUID= s.RescheduledHistoryUID,\n      t.Status= s.Status,\n      t.ReleasedToBilling= s.ReleasedToBilling,\n      t.ReasonNote= s.ReasonNote,\n      t.Route= s.Route,\n      t.RouteSequence= s.RouteSequence,\n      t.ServiceDate= s.ServiceDate,\n      t.StartTime= s.StartTime,\n      t.FinishTime= s.FinishTime,\n      t.ServiceNote= s.ServiceNote,\n      t.WorkOrderID= s.WorkOrderID,\n      t.Quantity= s.Quantity,\n      t.RequestedStartTime= s.RequestedStartTime,\n      t.RequestedEndTime= s.RequestedEndTime,   \n      t.LaborCost= s. LaborCost,\n      t.NonLaborCost= s.NonLaborCost,\n      t.OriginalServiceDate= s.OriginalServiceDate,\n      t.GPSVerified= s.GPSVerified,\n      t.Latitude= s.Latitude,\n      t.LiftArmUsed= s.LiftArmUsed,\n      t.Longitude= s.Longitude,\n      t.AllocatedRevenue= s.AllocatedRevenue,\n      t.DriverNotified= s.DriverNotified,\n      t.DisposalTripUID= s.DisposalTripUID,\n      t.OriginalWorkflowCode= s.OriginalWorkflowCode,\n      t.UpsRoadNetSyncNotificationStatus= s.UpsRoadNetSyncNotificationStatus,\n      t.GeocodeDifference= s.GeocodeDifference,\n      t.GeocodeUpdate= s.GeocodeUpdate,\n      t.AllocatedRebate= s.AllocatedRebate,\n      t.PercentFull= s.PercentFull,\n      t.CompletionSequence= s.CompletionSequence,\n      t.Odometer= s.Odometer,\n      t.RecurringRevenue= s.RecurringRevenue,\n      t.Surcharges= s.Surcharges,\n      t.WorkorderRevenue= s.WorkorderRevenue,\n      t.ThirdPartyServiceCost= s.ThirdPartyServiceCost,\n      t.ThirdPartyWorkorderCost= s.ThirdPartyWorkorderCost,\n      t.HolidayScheduleUID= s.HolidayScheduleUID,\n      t.SerialNbr= s.SerialNbr,\n      t.syncRowVersion= s.syncRowVersion,\n      t.WorkStartTime= s.WorkStartTime,\n      t.WorkStopTime= s.WorkStopTime,\n      t.RouteSubsectionUID= s.RouteSubsectionUID,\n      t.ThirdPartyPONbr= s.ThirdPartyPONbr,\n      t.ThirdPartyServiceProvider= s.ThirdPartyServiceProvider,\n      t.CompletedByVehicle= s.CompletedByVehicle,\n      t.PickupEquivalent= s.PickupEquivalent,\n      t.PickupEquivalentAdjustment= s.PickupEquivalentAdjustment,\n      t.PickupEquivalentIsBilled= s.PickupEquivalentIsBilled,\n      t.StatusSource = s.StatusSource \nwhen not matched then insert \n    ( \nt.ServiceHistoryUID,\n      t.ServiceHistoryType,\n      t.WorkflowCode,\n      t.ServiceQueue,\n      t.SourceUID,\n      t.ServiceOrderID,\n      t.ServiceInfoUID,\n      t.ServiceScheduleUID,\n      t.RescheduledHistoryUID,\n      t.Status,\n      t.ReleasedToBilling,\n      t.ReasonNote,\n      t.Route,\n      t.RouteSequence,\n      t.ServiceDate,\n      t.StartTime,\n      t.FinishTime,\n      t.ServiceNote,\n      t.WorkOrderID,\n      t.Quantity,\n      t.RequestedStartTime,\n      t.RequestedEndTime,\n      t.LaborCost,\n      t.NonLaborCost,\n      t.OriginalServiceDate,\n      t.GPSVerified,\n      t.Latitude,\n      t.LiftArmUsed,\n      t.Longitude,\n      t.AllocatedRevenue,\n      t.DriverNotified,\n      t.DisposalTripUID,\n      t.OriginalWorkflowCode,\n      t.UpsRoadNetSyncNotificationStatus,\n      t.GeocodeDifference,\n      t.GeocodeUpdate,\n      t.AllocatedRebate,\n      t.PercentFull,\n      t.CompletionSequence,\n      t.Odometer,\n      t.RecurringRevenue,\n      t.Surcharges,\n      t.WorkorderRevenue,\n      t.ThirdPartyServiceCost,\n      t.ThirdPartyWorkorderCost,\n      t.HolidayScheduleUID,\n      t.SerialNbr,\n      t.syncRowVersion,\n      t.WorkStartTime,\n      t.WorkStopTime,\n      t.RouteSubsectionUID,\n      t.ThirdPartyPONbr,\n      t.ThirdPartyServiceProvider,\n      t.CompletedByVehicle,\n      t.PickupEquivalent,\n      t.PickupEquivalentAdjustment,\n      t.PickupEquivalentIsBilled,\n      t.StatusSource\n)\nValues\n(\ns.ServiceHistoryUID,\n      s.ServiceHistoryType,\n      s.WorkflowCode,\n      s.ServiceQueue,\n      s.SourceUID,\n      s.ServiceOrderID,\n      s.ServiceInfoUID,\n      s.ServiceScheduleUID,\n      s.RescheduledHistoryUID,\n      s.Status,\n      s.ReleasedToBilling,\n      s.ReasonNote,\n      s.Route,\n      s.RouteSequence,\n      s.ServiceDate,\n      s.StartTime,\n      s.FinishTime,\n      s.ServiceNote,\n      s.WorkOrderID,\n      s.Quantity,\n      s.RequestedStartTime,\n      s.RequestedEndTime,\n      s.LaborCost,\n      s.NonLaborCost,\n      s.OriginalServiceDate,\n      s.GPSVerified,\n      s.Latitude,\n      s.LiftArmUsed,\n      s.Longitude,\n      s.AllocatedRevenue,\n      s.DriverNotified,\n      s.DisposalTripUID,\n      s.OriginalWorkflowCode,\n      s.UpsRoadNetSyncNotificationStatus,\n      s.GeocodeDifference,\n      s.GeocodeUpdate,\n      s.AllocatedRebate,\n      s.PercentFull,\n      s.CompletionSequence,\n      s.Odometer,\n      s.RecurringRevenue,\n      s.Surcharges,\n      s.WorkorderRevenue,\n      s.ThirdPartyServiceCost,\n      s.ThirdPartyWorkorderCost,\n      s.HolidayScheduleUID,\n      s.SerialNbr,\n      s.syncRowVersion,\n      s.WorkStartTime,\n      s.WorkStopTime,\n      s.RouteSubsectionUID,\n      s.ThirdPartyPONbr,\n      s.ThirdPartyServiceProvider,\n      s.CompletedByVehicle,\n      s.PickupEquivalent,\n      s.PickupEquivalentAdjustment,\n      s.PickupEquivalentIsBilled,\n      s.StatusSource)'\n)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Drop staging table for Service History",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Service History Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat(\n    'Drop table LRS_RAW.TOWER_RAW.SERVICEHISTORY_STAGING'\n    )\n}",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ID Incremental Loop",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Tower Table Names",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Tower Table Names').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "WorkOrder ID Delta Load",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * from Workorder \nwhere workorderid >  @{item().WORKORDER}\n",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "CONTINUE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "msaz01_dm01_Azure_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "WorkOrderID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "WORKORDERID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkOrderUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "WORKORDERUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "WorkPONbr",
+												"type": "String"
+											},
+											"sink": {
+												"name": "WORKPONBR",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "DestCertificate",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DESTCERTIFICATE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CODRequired",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "CODREQUIRED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CustomerDataFileUID",
+												"type": "Guid"
+											},
+											"sink": {
+												"name": "CUSTOMERDATAFILEUID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "InvoiceMessage",
+												"type": "String"
+											},
+											"sink": {
+												"name": "INVOICEMESSAGE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Printed",
+												"type": "Int16"
+											},
+											"sink": {
+												"name": "PRINTED",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "PrintDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "PRINTDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "PrintUser",
+												"type": "String"
+											},
+											"sink": {
+												"name": "PRINTUSER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Destination",
+												"type": "String"
+											},
+											"sink": {
+												"name": "DESTINATION",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceQuantity",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "SERVICEQUANTITY",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ServiceUOM",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SERVICEUOM",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ReferenceNumber",
+												"type": "String"
+											},
+											"sink": {
+												"name": "REFERENCENUMBER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "TagNumber",
+												"type": "String"
+											},
+											"sink": {
+												"name": "TAGNUMBER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "FinalManifestDate",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "FINALMANIFESTDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "IsNoChargePickup",
+												"type": "Boolean"
+											},
+											"sink": {
+												"name": "ISNOCHARGEPICKUP",
+												"type": "String"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "MSAZ01_TOWER",
+									"type": "DatasetReference",
+									"parameters": {
+										"db": "Tower7",
+										"schema": "dbo",
+										"table": "WORKORDER"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_IR_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "WORKORDER",
+										"Snowflake_Schema": "TOWER_RAW"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Incremental_Range": {
+				"type": "string",
+				"defaultValue": "14"
+			},
+			"Incremental_Range2": {
+				"type": "string",
+				"defaultValue": "500"
+			},
+			"Incremental_Range3": {
+				"type": "string",
+				"defaultValue": "50"
+			}
+		},
+		"folder": {
+			"name": "Production/TOWER"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T18:09:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

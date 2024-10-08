@@ -1,0 +1,7 @@
+{
+	"name": "ildc93-dm01",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Virtual machine running in the LRS data center, primarily for access to Tower data."
+	}
+}

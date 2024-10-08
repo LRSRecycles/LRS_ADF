@@ -1,0 +1,430 @@
+{
+	"name": "VENA_FINANCIAL_MODEL DAILY_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load Latest File To Snowflake",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "FileName",
+								"value": "$$FILEPATH"
+							},
+							{
+								"name": "LastModified",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "finance_model*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE VENA_RAW.VENA_FINANCE_MODEL;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging"
+					},
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "msaz01_dm01_Azure_Blob",
+								"type": "LinkedServiceReference"
+							}
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "_Account",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Account",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Location",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Location",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Line/Dept",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Line/Dept",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Material Type/Customer",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Material Type/Customer",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Data Source",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Data Source",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Year",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Year",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Period",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Period",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Scenario",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Scenario",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Measure",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Measure",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_value",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_etl_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_etl_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FileName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_File Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LastModified",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ADF_TIMESTAMP",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "VENA_Raw_All_Files",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+							"Snowflake_Schema": "VENA_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Archive the File in Processed Folder",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Load Latest File To Snowflake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "finance_model*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ""
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "VENA_Raw_All_Files",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "VENA_Raw_Archive_All_Files",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Delete Archived File",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Archive the File in Processed Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "VENA_Raw_All_Files",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"wildcardFileName": "finance_model*",
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Flag Old Files For Deletion",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Delete Archived File",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "VENA_Raw_Archive_All_Files",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"modifiedDatetimeEnd": {
+							"value": "@adddays(utcnow(),-365)",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Delete Old Files",
+				"description": "For Loop to loop through files older than 365 days for deletion",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Flag Old Files For Deletion",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Flag Old Files For Deletion').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Delete Each File",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "VENA_Raw_Each_Files",
+									"type": "DatasetReference",
+									"parameters": {
+										"pFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/VENA"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

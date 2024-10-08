@@ -1,0 +1,36 @@
+{
+	"name": "LRS_Snowflake_Raw_V2",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msaz01_dm01_Snowflake_Raw_V2",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database": "LRS_RAW"
+			}
+		},
+		"parameters": {
+			"Snowflake_Sink_Table": {
+				"type": "string",
+				"defaultValue": "DESTINATION"
+			},
+			"Snowflake_Schema": {
+				"type": "string",
+				"defaultValue": "TOWER_RAW"
+			}
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().Snowflake_Schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().Snowflake_Sink_Table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

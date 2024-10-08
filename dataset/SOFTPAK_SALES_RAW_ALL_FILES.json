@@ -1,0 +1,320 @@
+{
+	"name": "SOFTPAK_SALES_RAW_ALL_FILES",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SOFTPAK"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "Variable_sales_report",
+				"container": "softpak"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "ACCT YYMM",
+				"type": "String"
+			},
+			{
+				"name": "COMPANY",
+				"type": "String"
+			},
+			{
+				"name": "CUST #",
+				"type": "String"
+			},
+			{
+				"name": "CUST NAME",
+				"type": "String"
+			},
+			{
+				"name": "TAXBODY",
+				"type": "String"
+			},
+			{
+				"name": "CYCLE",
+				"type": "String"
+			},
+			{
+				"name": "GL CODE",
+				"type": "String"
+			},
+			{
+				"name": "DATE",
+				"type": "String"
+			},
+			{
+				"name": "SIZE CD",
+				"type": "String"
+			},
+			{
+				"name": "CHG CD",
+				"type": "String"
+			},
+			{
+				"name": "DESCRIPTION",
+				"type": "String"
+			},
+			{
+				"name": "EQUIP CD",
+				"type": "String"
+			},
+			{
+				"name": "VAR 3",
+				"type": "String"
+			},
+			{
+				"name": "VAR 4",
+				"type": "String"
+			},
+			{
+				"name": "QTY",
+				"type": "String"
+			},
+			{
+				"name": "BILLED AMT",
+				"type": "String"
+			},
+			{
+				"name": "MASTER AMT",
+				"type": "String"
+			},
+			{
+				"name": "VARIANCE",
+				"type": "String"
+			},
+			{
+				"name": "VAR FLAG",
+				"type": "String"
+			},
+			{
+				"name": "INV #",
+				"type": "String"
+			},
+			{
+				"name": "W/O ACT DATE",
+				"type": "String"
+			},
+			{
+				"name": "SUB COMP",
+				"type": "String"
+			},
+			{
+				"name": "SUB CUST #",
+				"type": "String"
+			},
+			{
+				"name": "ORIG W/O#",
+				"type": "String"
+			},
+			{
+				"name": "ADJ USER",
+				"type": "String"
+			},
+			{
+				"name": "CUST START",
+				"type": "String"
+			},
+			{
+				"name": "CUST STOP",
+				"type": "String"
+			},
+			{
+				"name": "BILL FIRST NAME",
+				"type": "String"
+			},
+			{
+				"name": "BILL LAST NAME",
+				"type": "String"
+			},
+			{
+				"name": "BILL ADDRESS #",
+				"type": "String"
+			},
+			{
+				"name": "BILL ST DIR",
+				"type": "String"
+			},
+			{
+				"name": "BILL ST NAME",
+				"type": "String"
+			},
+			{
+				"name": "BILL ST SUFFIX",
+				"type": "String"
+			},
+			{
+				"name": "BILL ST DIR2",
+				"type": "String"
+			},
+			{
+				"name": "BILL APT",
+				"type": "String"
+			},
+			{
+				"name": "BILL ADDRESS-2",
+				"type": "String"
+			},
+			{
+				"name": "BILL CITY",
+				"type": "String"
+			},
+			{
+				"name": "BILL STATE",
+				"type": "String"
+			},
+			{
+				"name": "BILL ZIP",
+				"type": "String"
+			},
+			{
+				"name": "SERV NAME",
+				"type": "String"
+			},
+			{
+				"name": "SERV ADDRESS #",
+				"type": "String"
+			},
+			{
+				"name": "SERV ST DIR",
+				"type": "String"
+			},
+			{
+				"name": "SERV ST NAME",
+				"type": "String"
+			},
+			{
+				"name": "SERV ST SUFFIX",
+				"type": "String"
+			},
+			{
+				"name": "SERV ST DIR2",
+				"type": "String"
+			},
+			{
+				"name": "SERV APT",
+				"type": "String"
+			},
+			{
+				"name": "SERV ADDRESS-2",
+				"type": "String"
+			},
+			{
+				"name": "SERV CITY",
+				"type": "String"
+			},
+			{
+				"name": "SERV STATE",
+				"type": "String"
+			},
+			{
+				"name": "SERV ZIP",
+				"type": "String"
+			},
+			{
+				"name": "AREA CODE",
+				"type": "String"
+			},
+			{
+				"name": "PHONE #",
+				"type": "String"
+			},
+			{
+				"name": "CR LIMIT",
+				"type": "String"
+			},
+			{
+				"name": "VARIABLE 1",
+				"type": "String"
+			},
+			{
+				"name": "VARIABLE 2",
+				"type": "String"
+			},
+			{
+				"name": "CONTACT",
+				"type": "String"
+			},
+			{
+				"name": "RES CUSTOMER",
+				"type": "String"
+			},
+			{
+				"name": "PREV CYCLE",
+				"type": "String"
+			},
+			{
+				"name": "PRICE LIST",
+				"type": "String"
+			},
+			{
+				"name": "MATERIAL",
+				"type": "String"
+			},
+			{
+				"name": "UOM",
+				"type": "String"
+			},
+			{
+				"name": "UNITS",
+				"type": "String"
+			},
+			{
+				"name": "SALES ID",
+				"type": "String"
+			},
+			{
+				"name": "FEE CODE",
+				"type": "String"
+			},
+			{
+				"name": "ROUTE",
+				"type": "String"
+			},
+			{
+				"name": "VEHICLE",
+				"type": "String"
+			},
+			{
+				"name": "DRIVER",
+				"type": "String"
+			},
+			{
+				"name": "LANDFILL CODE",
+				"type": "String"
+			},
+			{
+				"name": "TICKET #",
+				"type": "String"
+			},
+			{
+				"name": "COST",
+				"type": "String"
+			},
+			{
+				"name": "BIN TYPE",
+				"type": "String"
+			},
+			{
+				"name": "RATE",
+				"type": "String"
+			},
+			{
+				"name": "SVC TYPE",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

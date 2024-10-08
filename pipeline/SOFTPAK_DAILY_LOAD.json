@@ -1,0 +1,45 @@
+{
+	"name": "SOFTPAK_DAILY_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute SOFTPAK SALES pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SOFTPAK_SALES_DAILY_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute SOFTPAK DISPOSAL pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SOFTPAK_DISPOSAL_SITE_DAILY_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-02T14:38:41Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

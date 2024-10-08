@@ -1,0 +1,29 @@
+{
+	"name": "TOWER_INCREMENTAL_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Tower Incremental Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TOWER_INCREMENTAL_LOAD_FACT",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T18:18:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

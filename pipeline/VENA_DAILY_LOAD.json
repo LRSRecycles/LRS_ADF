@@ -1,0 +1,29 @@
+{
+	"name": "VENA_DAILY_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Vena Financialj Model Daily Load",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "VENA_FINANCIAL_MODEL DAILY_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-02T17:06:40Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

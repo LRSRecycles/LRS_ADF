@@ -1,0 +1,169 @@
+{
+	"name": "TRUX_LEGACY_test_RM05_DateWM_FirstRun",
+	"properties": {
+		"activities": [
+			{
+				"name": "RM05 Watermark Lookup",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"query": "select\r\n'TRUX_DC_COMP' as SQL_DB_Name,\r\n'TRUX_DC_COMP_RAW' as Snowflake_Schema,\r\n'RM05' as table_name,\r\ncast(max(RM05_DATE)as varchar) as latest_watermark\r\nfrom\r\n  lrs_raw.TRUX_DC_COMP_RAW.rm05\r\n\r\nunion all\r\n\r\nselect\r\n'TRUX_WA_COMP' as SQL_DB_Name,\r\n'TRUX_WA_COMP_RAW' as Snowflake_Schema,\r\n'RM05' as table_name,\r\ncast(max(RM05_DATE)as varchar) as latest_watermark\r\nfrom\r\n  lrs_raw.TRUX_WA_COMP_RAW.rm05;",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DATABASE_LKPWATERMARK_TRUX_LEGACY",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Loop over databases",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "RM05 Watermark Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('RM05 Watermark Lookup').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "RM05 Incremental Delta Load",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * from @{item().table_name}\nwhere RM05_DATE > cast('@{item().LATEST_WATERMARK}' as datetime)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TRUX_LEGACY01",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "dbo",
+										"table": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										},
+										"database": {
+											"value": "@item().Sql_db_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "@concat(item().table_name,'_1')",
+										"Snowflake_Schema": "@item().snowflake_schema"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Maximum_DIU": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"Degree_Copy_Parallelism": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"LastProcessedId": {
+				"type": "string"
+			},
+			"CurrentDate": {
+				"type": "string"
+			},
+			"SchemaName": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"tempArray": {
+				"type": "Array"
+			},
+			"TempResult": {
+				"type": "Array"
+			},
+			"ResultsArray": {
+				"type": "Array"
+			},
+			"OutputArray": {
+				"type": "Array"
+			},
+			"append": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

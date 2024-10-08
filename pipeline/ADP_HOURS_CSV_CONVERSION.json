@@ -1,0 +1,410 @@
+{
+	"name": "ADP_HOURS_CSV_CONVERSION",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get XLS Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ADP_Hours_XLS_ALL",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems",
+						"itemName"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					}
+				}
+			},
+			{
+				"name": "Convert each file to CSV and delete",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get XLS Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get XLS Files').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy XLS file to CSV",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "ExcelSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "Employee ID",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Employee ID",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Employee Name",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Employee Name",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Manager ID",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Manager ID",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Manager Name",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Manager Name",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Effective Date",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Effective Date",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Historical Date",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Historical Date",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home DEPARTMENT",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home DEPARTMENT",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home LOCATION",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home LOCATION",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home COMPANY",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home COMPANY",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home Reserved4",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home Reserved4",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home JOBTITLE",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home JOBTITLE",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home Reserved6",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home Reserved6",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Home MANAGER",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Home MANAGER",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Pay Code",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Pay Code",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Hours",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Hours",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Money",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Money",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Days",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Days",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Wages",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Wages",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Base Wage",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Base Wage",
+												"type": "String",
+												"physicalType": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "Comment(s)",
+												"type": "String",
+												"physicalType": "String"
+											},
+											"sink": {
+												"name": "Comment(s)",
+												"type": "String",
+												"physicalType": "String"
+											}
+										}
+									],
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ADP_Hours_XLS",
+									"type": "DatasetReference",
+									"parameters": {
+										"pFilename": {
+											"value": "@activity('Get XLS Files').output.itemName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ADP_Hours_CSV",
+									"type": "DatasetReference",
+									"parameters": {
+										"pFileName": {
+											"value": "@replace(activity('Get XLS Files').output.itemName,'.xls','.csv')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Delete XLS file",
+							"type": "Delete",
+							"dependsOn": [
+								{
+									"activity": "Copy XLS file to CSV",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "ADP_Hours_XLS",
+									"type": "DatasetReference",
+									"parameters": {
+										"pFilename": {
+											"value": "@activity('Get XLS Files').output.itemName",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-12-07T17:52:47Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
