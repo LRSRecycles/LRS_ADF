@@ -20,8 +20,6 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "empDirectory.csv",
-							"wildcardFileName": "empDirectory.csv*",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -52,7 +50,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ds_adp_employee_directory_raw",
+						"referenceName": "ADP_Employee_Directory_Raw",
 						"type": "DatasetReference"
 					}
 				],
