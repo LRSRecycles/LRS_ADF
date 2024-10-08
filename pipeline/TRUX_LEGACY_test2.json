@@ -1,0 +1,209 @@
+{
+	"name": "TRUX_LEGACY_test2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Loop over databases",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Set Variable Array Path",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('RM05 LastProcessedID Lookup').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "RM05",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SnowflakeV2Source",
+									"query": {
+										"value": "SELECT MAX(RM05_ROUT) AS LASTPROCESSEDID FROM @{item().SchemaName}.RM05;",
+										"type": "Expression"
+									},
+									"exportSettings": {
+										"type": "SnowflakeExportCopyCommand"
+									}
+								},
+								"dataset": {
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "RM05",
+										"Snowflake_Schema": "@item().SchemaName"
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "SetOutputArray",
+							"description": "",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "RM05",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "OutputArray",
+								"value": {
+									"value": "@union(array(concat('[{\"SchemaName\": \"', item().SchemaName, '\", \"TableName\":\"', item().TableName, '\", \"LastProcessedID\": \"', activity('RM05').output.value,'\"}]'))\n, array(concat('[{\"SchemaName\": \"', item().SchemaName, '\", \"TableName\":\"', item().TableName, '\", \"LastProcessedID\": \"', activity('RM05').output.value,'\"}]')))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AppendArray",
+							"description": "",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "SetOutputArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "append",
+								"value": {
+									"value": "@union(variables('OutputArray'), array(concat('[{\"SchemaName\": \"', item().SchemaName, '\", \"TableName\":\"', item().TableName, '\", \"LastProcessedID\": \"', activity('RM05').output.value,'\"}]')))",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "RM05 LastProcessedID Lookup",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"query": "SELECT  'LRS_RAW' AS DATABASENAME, TABLE_NAME as TableName,TABLE_SCHEMA as SchemaName\r\nFROM INFORMATION_SCHEMA.TABLES INS\r\nWHERE TABLE_SCHEMA in ('TRUX_CD_COMP_RAW','TRUX_DC_COMP_RAW','TRUX_ES_COMP_RAW','TRUX_HR_COMP_RAW','TRUX_LR_COMP_RAW','TRUX_MC_COMP_RAW','TRUX_MH_COMP_RAW',\r\n    'TRUX_MO_COMP_RAW','TRUX_MP_COMP_RAW','TRUX_MW_COMP_RAW','TRUX_NI_COMP_RAW','TRUX_PS_COMP_RAW','TRUX_RS_COMP_RAW','TRUX_RT_COMP_RAW',\r\n    'TRUX_RZ_COMP_RAW','TRUX_SH_COMP_RAW','TRUX_SW_COMP_RAW','TRUX_TP_COMP_RAW','TRUX_WA_COMP_RAW')\r\n    AND TABLENAME IN ('RM05','SM01','DM01','DM01p','DM05A','DM05B','DM05FT','DM05Z','LM02','MT02','RM03U')\r\norder by table_name;",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DATABASE_LKPWATERMARK_TRUX_LEGACY",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Set Variable Array Path",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "RM05 LastProcessedID Lookup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "ResultsArray",
+					"value": []
+				}
+			}
+		],
+		"parameters": {
+			"Maximum_DIU": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"Degree_Copy_Parallelism": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"LastProcessedId": {
+				"type": "string"
+			},
+			"CurrentDate": {
+				"type": "string"
+			},
+			"SchemaName": {
+				"type": "string"
+			},
+			"TableName": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"tempArray": {
+				"type": "Array"
+			},
+			"TempResult": {
+				"type": "Array"
+			},
+			"ResultsArray": {
+				"type": "Array"
+			},
+			"OutputArray": {
+				"type": "Array"
+			},
+			"append": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

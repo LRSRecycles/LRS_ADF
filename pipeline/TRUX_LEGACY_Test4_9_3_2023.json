@@ -1,0 +1,301 @@
+{
+	"name": "TRUX_LEGACY_Test4_9_3_2023",
+	"properties": {
+		"activities": [
+			{
+				"name": "Loop Over Tables",
+				"description": "activity to loop over array of results which are the tables",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Trux Legacy table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Trux Legacy table').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Trux Legacy Watermark Lookup",
+							"description": "look up schema, database and table names from sqlsever and snowflake",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SnowflakeV2Source",
+									"query": {
+										"value": "select latest_watermark \nfrom MASTER_DATA.VW_TRUX_LEGACY_WATERMARK\nwhere snowflake_schema =  '@{item().snowflake_schema}' \nand table_name =  '@{item().table_name}' ",
+										"type": "Expression"
+									},
+									"exportSettings": {
+										"type": "SnowflakeExportCopyCommand"
+									}
+								},
+								"dataset": {
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "VW_TRUX_LEGACY_WATERMARK",
+										"Snowflake_Schema": "MASTER_DATA"
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "RM05 Incremental Delta Load to Staging",
+							"description": "Copying delta rows from sql server to the staging tables created for each instance in snowflake (these tables will be dropped after all activities are completed)",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Snowflake Create Staging Tables",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "select * \nfrom RM05\nwhere RM05_DATE > cast('@{activity('Trux Legacy Watermark Lookup').output.firstRow.latest_watermark}' as datetime)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand"
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TRUX_LEGACY01",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "dbo",
+										"table": "rm05",
+										"database": {
+											"value": "@item().sql_db_name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": {
+											"value": "@concat(item().table_name,'_STAGING')",
+											"type": "Expression"
+										},
+										"Snowflake_Schema": {
+											"value": "@item().snowflake_schema",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Snowflake Create Staging Tables",
+							"description": "create staging table used to store the delta incremental load. In this staging table, we perform a merge to the main raw table.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Trux Legacy Watermark Lookup",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('Create or replace table ', item().Snowflake_schema,'.',item().table_name,'_staging\n    as \n    select * from ', item().Snowflake_schema,'.',item().table_name,\n    ' where 1=0')}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "RM05 Snowflake Merge Operation",
+							"description": "merge statement to the raw tables. this helps avoids any duplication and upsert the rows needed.",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "RM05 Incremental Delta Load to Staging",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('merge into ', item().Snowflake_schema,'.','RM05_1 t \nusing ', \n    item().Snowflake_schema,'.','RM05_STAGING s \non concat(t.rm05_rout, t.rm05_seq1,t.rm05_seq2,t.rm05_date) = concat(s.rm05_rout, s.rm05_seq1,s.rm05_seq2,s.rm05_date) \nwhen matched then update set \n    t.rm05_date = s.rm05_date,\n\tt.rm05_rout = s.rm05_rout,\n\tt.rm05_seq1 = s.rm05_seq1, \n\tt.rm05_seq2 = s.rm05_seq2, \n\tt.rm05_truk = s.rm05_truk,\n\tt.rm05_driv = s.rm05_driv,\n\tt.rm05_help = s.rm05_help,\n\tt.rm05_fuel = s.rm05_fuel,\n\tt.rm05_fuom = s.rm05_fuom,\n\tt.rm05_tim1 = s.rm05_tim1,\n\tt.rm05_tim2 = s.rm05_tim2,\n\tt.rm05_odm1 = s.rm05_odm1,\n\tt.rm05_odm2 = s.rm05_odm2,\n\tt.rm05_ouom = s.rm05_ouom,\n\tt.rm05_note = s.rm05_note,\n\tt.rm05_starthour = s.rm05_starthour,\n\tt.rm05_endhour = s.rm05_endhour,\n\tt.rm05_oil = s.rm05_oil,\n\tt.rm05_oil_uom = s.rm05_oil_uom,\n\tt.rm05_deptime = s.rm05_deptime,\n\tt.rm05_rettime = s.rm05_rettime,\n\tt.rm05_starttime= s.rm05_starttime \nwhen not matched then insert \n\t(\n\tt.rm05_date,\n\tt.rm05_rout,\n\tt.rm05_seq1,\n\tt.rm05_seq2,\n\tt.rm05_truk,\n\tt.rm05_driv,\n\tt.rm05_help,\n\tt.rm05_fuel,\n\tt.rm05_fuom,\n\tt.rm05_tim1,\n\tt.rm05_tim2,\n\tt.rm05_odm1,\n\tt.rm05_odm2,\n\tt.rm05_ouom,\n\tt.rm05_note,\n\tt.rm05_starthour,\n\tt.rm05_endhour,\n\tt.rm05_oil,\n\tt.rm05_oil_uom,\n\tt.rm05_deptime,\n\tt.rm05_rettime,\n\tt.rm05_starttime \n\t)\nvalues \n\t(\n\ts.rm05_date,\n\ts.rm05_rout,\n\ts.rm05_seq1, \n\ts.rm05_seq2, \n\ts.rm05_truk,\n\ts.rm05_driv,\n\ts.rm05_help,\n\ts.rm05_fuel,\n\ts.rm05_fuom,\n\ts.rm05_tim1,\n\ts.rm05_tim2,\n\ts.rm05_odm1,\n\ts.rm05_odm2,\n\ts.rm05_ouom,\n\ts.rm05_note,\n\ts.rm05_starthour,\n\ts.rm05_endhour,\n\ts.rm05_oil,\n\ts.rm05_oil_uom,\n\ts.rm05_deptime,\n\ts.rm05_rettime,\n\ts.rm05_starttime)'\n\t)}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Snowflake Drop Staging Tables",
+							"description": "after all activities are completed, we perform the drop operation to clean up the snowflake environment",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "RM05 Snowflake Merge Operation",
+									"dependencyConditions": [
+										"Succeeded",
+										"Skipped"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@{concat('drop table if exists ', item().Snowflake_schema,'.',item().table_name,'_STAGING')}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Trux Legacy table",
+				"description": "look up schema, database and table names from sqlsever and snowflake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"query": "select distinct snowflake_schema, sql_db_name, table_name\r\nfrom MASTER_DATA.VW_TRUX_LEGACY_WATERMARK",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VW_TRUX_LEGACY_WATERMARK",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"Maximum_DIU": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"Degree_Copy_Parallelism": {
+				"type": "int",
+				"defaultValue": 8
+			}
+		},
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-27T20:50:05Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,39 @@
+{
+	"name": "tr_process_sql_daily_full_load",
+	"properties": {
+		"description": "Daily pipeline run of Tower data to Snowflake.",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "TOWER_DAILY_LOAD",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "TRUX_DAILY_LOAD",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-09-12T18:53:00",
+				"timeZone": "Central Standard Time",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						0
+					]
+				}
+			}
+		}
+	}
+}

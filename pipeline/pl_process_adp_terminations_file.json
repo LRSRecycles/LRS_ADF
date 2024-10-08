@@ -1,0 +1,579 @@
+{
+	"name": "pl_process_adp_terminations_file",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy ADP Term to Snowflake",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Loop Through All Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "File Name",
+								"value": {
+									"value": "@variables('Var_File_Name')",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "Last Modified",
+								"value": {
+									"value": "@variables('Var_Last_Modified')",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.ADP_RAW.ADP_TERMINATION",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Position ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Position ID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Last Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Legal Last Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "First Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Legal First Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Position Status",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Position Status",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Home Department Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Home Department Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Home Department Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Home Department Description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Union Local Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Union Local Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Job Title Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Job Title Description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Location Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Location Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Location Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Location Description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Reports To Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Reports To Legal Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Hire Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Hire Date",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Termination Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Termination Date",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Termination Reason Description"
+								},
+								"sink": {
+									"name": "Termination Reason Description",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Worked in State Code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Worked in State Code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Personal Contact: Home Phone",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Personal Contact: Home Phone",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Personal Contact: Personal Email",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Personal Contact: Personal Email",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Personal Contact: Personal Mobile",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Personal Contact: Personal Mobile",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Tax Withholdings - Effective Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Tax Withholdings - Effective Date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Employment Profile - Effective Date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Employment Profile - Effective Date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "File Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "File Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Last Modified",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Last Modified",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ADP_Terminations_Raw_Each_File",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": {
+								"value": "@variables('Var_File_Name')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "ADP_TERMINATION",
+							"Snowflake_Schema": "ADP_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Get All ADP Files",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ADP_Terminations_Raw_All_Files",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Loop Through All Files",
+				"description": "Loop through all ADP Files in the blob storage",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get All ADP Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get All ADP Files').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Get Files Attributes",
+							"description": "Get File's name and last modified date",
+							"type": "GetMetadata",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "ADP_Terminations_Raw_Each_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": "@item().name"
+									}
+								},
+								"fieldList": [
+									"lastModified",
+									"itemName"
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "If Condition1",
+							"description": "find the newest file using last modified attribute",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get Files Attributes",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(activity('Get Files Attributes').output.lastModified, variables('Var_Last_Modified'))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "File Name",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Var_File_Name",
+											"value": {
+												"value": "@activity('Get Files Attributes').output.itemName",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Last Modified",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "File Name",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "Var_Last_Modified",
+											"value": {
+												"value": "@activity('Get Files Attributes').output.lastModified",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get Older FIles",
+				"description": "Get files older than 365 days",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Copy ADP Term to Snowflake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ADP_Terminations_Raw_All_Files",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"modifiedDatetimeEnd": {
+							"value": "@addDays(utcnow(),-365)",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Loop through older files",
+				"description": "loop through each files older than 365 days for deletion",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Older FIles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Older FIles').output.childItems",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Delete files older than 365 days",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "ADP_Terminations_Raw_Each_File",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"Var_File_Name": {
+				"type": "String",
+				"defaultValue": "terms.csv_2024-09-06T12:28:33Z"
+			},
+			"Var_Last_Modified": {
+				"type": "String",
+				"defaultValue": "1900-01-01 00:00:00"
+			}
+		},
+		"folder": {
+			"name": "Production/ADP"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-07T21:18:20Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,32 @@
+{
+	"name": "ADP_Hours_XLS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"pFilename": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().pFilename",
+					"type": "Expression"
+				},
+				"folderPath": "xls",
+				"container": "adphours"
+			},
+			"sheetIndex": 0,
+			"range": "A10:T50000",
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

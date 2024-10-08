@@ -1,0 +1,24 @@
+{
+	"name": "ds_adp_employee_directory_raw",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msaz01_dm01_Azure_Blob",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "empDirectory.csv",
+				"container": "adp"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

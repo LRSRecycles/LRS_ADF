@@ -1,0 +1,5214 @@
+{
+	"name": "TOWER FULL LOAD PIPELINE_2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Tower EquipmentType Table",
+				"description": "Copy activity for dbo.EQUIPEMNT TYPE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.EQUIPMENTTYPE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "EquipmentType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EQUIPMENTTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentTypeUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "EQUIPMENTTYPEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentCategory",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EQUIPMENTCATEGORY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "StandardCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "STANDARDCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Model",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MODEL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Serialized",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SERIALIZED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SoldToCustomer",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SOLDTOCUSTOMER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Reusable",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REUSABLE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MaterialCat",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MATERIALCAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PropertyListUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "PROPERTYLISTUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Active",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTIVE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AvailableInManifestEntry",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "AVAILABLEINMANIFESTENTRY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TareWeight",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TAREWEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MinimumWeight",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MINIMUMWEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MaximumWeight",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MAXIMUMWEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WeightUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WEIGHTUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MaximumReusableScanLimit",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "MAXIMUMREUSABLESCANLIMIT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MaximumReusableScanLimitExceededMessage",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MAXIMUMREUSABLESCANLIMITEXCEEDEDMESSAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MaximumInches",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MAXIMUMINCHES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "PoundsPerGallon",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "POUNDSPERGALLON",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "PoundsPerInch",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "POUNDSPERINCH",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "UpsRoadNetSyncOrderType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UPSROADNETSYNCORDERTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "InUse",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "INUSE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UnitDemand",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "UNITDEMAND",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "UnitUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UNITUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "IsChildEquipmentType",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "ISCHILDEQUIPMENTTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RentalDeliveryChargeSvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RENTALDELIVERYCHARGESVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RentalQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RENTALQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RentalQuantityUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RENTALQUANTITYUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "InterfaceCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INTERFACECODE",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "EQUIPMENTTYPE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "EQUIPMENTTYPE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower EQUIPMENTCATEGORY",
+				"description": "Copy activity for dbo.EQUIPMENTCATEGORY table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower EquipmentType Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.EQUIPMENTCATEGORY;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "EquipmentCategory",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EQUIPMENTCATEGORY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentCategoryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "EQUIPMENTCATEGORYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Volume",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "VOLUME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "VolumeUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VOLUMEUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PropertyListUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "PROPERTYLISTUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Active",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTIVE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DisplayInManifestProcessing",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DISPLAYINMANIFESTPROCESSING",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultEquipmentType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTEQUIPMENTTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DisplayInWorkOrderCompletion",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DISPLAYINWORKORDERCOMPLETION",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "BICSetoutType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BICSETOUTTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SupplyDemand",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SUPPLYDEMAND",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SupplyUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SUPPLYUOM",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "EQUIPMENTCATEGORY"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "EQUIPMENTCATEGORY",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower UOM",
+				"description": "Copy activity for dbo.UOMtable. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower EQUIPMENTCATEGORY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.UOM;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "UOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UOMUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "UOMUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Singular",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SINGULAR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Plural",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PLURAL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Abbrev",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ABBREV",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Category",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "CATEGORY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DecimalPlaces",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DECIMALPLACES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RelativeFactor",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RELATIVEFACTOR",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Active",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTIVE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EntryType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ENTRYTYPE",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "UOM"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "UOM",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower SERVICENOTE",
+				"description": "Copy activity for dbo.SERVICENOTE table.\nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower UOM",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.SERVICENOTE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ServiceNoteUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICENOTEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NoteStartDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "NOTESTARTDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "NoteEndDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "NOTEENDDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceNote",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERVICENOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "IsPriority",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ISPRIORITY",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "SERVICENOTE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "SERVICENOTE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower WORKFLOWCODE",
+				"description": "Copy activity for dbo.WORKFLOWCODE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower SERVICENOTE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.WORKFLOWCODE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "WorkflowCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WORKFLOWCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkflowCodeUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "WORKFLOWCODEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "IsWorkOrderItem",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ISWORKORDERITEM",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentMoveType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "EQUIPMENTMOVETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Active",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTIVE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkflowDetailedNotes",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WORKFLOWDETAILEDNOTES",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "HaulEquivalency",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "HAULEQUIVALENCY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AllowIneTower",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ALLOWINETOWER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultTripType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTTRIPTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RequireDisposalEntry",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REQUIREDISPOSALENTRY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "UpsRoadNetSyncNotifyAheadDays",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "UPSROADNETSYNCNOTIFYAHEADDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "IsActivity",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "ISACTIVITY",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "WORKFLOWCODE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "WORKFLOWCODE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower SETUP",
+				"description": "Copy activity for dbo.SETUP table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower WORKFLOWCODE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.SETUP;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SetupUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SETUPUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SplitIDsByServer",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SPLITIDSBYSERVER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "GLAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "GLACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CurrentPeriod",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CURRENTPERIOD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FinalBillingCycle",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FINALBILLINGCYCLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NSFFeeSvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NSFFEESVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultNSFFee",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DEFAULTNSFFEE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MinimumChargeSvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MINIMUMCHARGESVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SchedulingBaseDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SCHEDULINGBASEDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "ScheduledThroughDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SCHEDULEDTHROUGHDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "DisplayCanceledServiceDays",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DISPLAYCANCELEDSERVICEDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OverrideRequiredDaysPastDue",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "OVERRIDEREQUIREDDAYSPASTDUE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OverrideRequiredCreditLimit",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "OVERRIDEREQUIREDCREDITLIMIT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OverrideRequiredCreditHold",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "OVERRIDEREQUIREDCREDITHOLD",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCostPerHour",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DEFAULTCOSTPERHOUR",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCostPerOdometerUnit",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DEFAULTCOSTPERODOMETERUNIT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ErrorNotifyWorker",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ERRORNOTIFYWORKER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ErrorNotifyLevel",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ERRORNOTIFYLEVEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCustClass",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTCUSTCLASS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultRevenueAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTREVENUEACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultFinanceChargeAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTFINANCECHARGEACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultARAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTARACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultURAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTURACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultPaymentAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTPAYMENTACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCreditWriteOffAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTCREDITWRITEOFFACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultBalanceWriteOffAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTBALANCEWRITEOFFACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DepositLiabilityAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEPOSITLIABILITYACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RefundAcct",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REFUNDACCT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultLengthUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTLENGTHUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultVolumeUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTVOLUMEUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultWeightUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTWEIGHTUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultFuelUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTFUELUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultDensityWeightUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTDENSITYWEIGHTUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSiteNotifyByEmail",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITENOTIFYBYEMAIL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCustNotifyByEmail",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTCUSTNOTIFYBYEMAIL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultInvoiceByEmail",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTINVOICEBYEMAIL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCountry",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTCOUNTRY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EncryptedClientUID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ENCRYPTEDCLIENTUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AvgDaysToPayInterval",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "AVGDAYSTOPAYINTERVAL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AuthorizationMethod",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "AUTHORIZATIONMETHOD",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EnablePOAmounts",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ENABLEPOAMOUNTS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultRatePrecision",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTRATEPRECISION",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCreditLimit",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DEFAULTCREDITLIMIT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AllowAutoOnCall",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ALLOWAUTOONCALL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AllowAnniversaryBillingCycles",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ALLOWANNIVERSARYBILLINGCYCLES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "LimitBillingCyclesByCompany",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "LIMITBILLINGCYCLESBYCOMPANY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RateVarianceApprovalPct",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATEVARIANCEAPPROVALPCT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkOrderChargesUseRouteSvcAreaSegment",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "WORKORDERCHARGESUSEROUTESVCAREASEGMENT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultAutoApply",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTAUTOAPPLY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultAssessFinanceCharge",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTASSESSFINANCECHARGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultPrintDunningMsg",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTPRINTDUNNINGMSG",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultAssessSurcharge",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTASSESSSURCHARGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultAssessFranchiseFee",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTASSESSFRANCHISEFEE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultBillZeroRate",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTBILLZERORATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCompanyID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTCOMPANYID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EnforceDestinationRates",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ENFORCEDESTINATIONRATES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCODRequired",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTCODREQUIRED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultInvoiceBySite",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTINVOICEBYSITE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSitePORequired",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITEPOREQUIRED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSiteAssessSurcharge",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITEASSESSSURCHARGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSiteAssessFranchiseFee",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITEASSESSFRANCHISEFEE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSiteSignatureRequired",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITESIGNATUREREQUIRED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSiteInsuranceCertificateRequired",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSITEINSURANCECERTIFICATEREQUIRED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "GLExportType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "GLEXPORTTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RequireCustTypeMatchForNewService",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REQUIRECUSTTYPEMATCHFORNEWSERVICE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RequireLabelEntry",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REQUIRELABELENTRY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "LastInstallationDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LASTINSTALLATIONDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "AutoPayBankName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AUTOPAYBANKNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AutoPayBankABANumber",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AUTOPAYBANKABANUMBER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ApplyAutoCredits",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "APPLYAUTOCREDITS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AllowSiteLevelBillingCycle",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ALLOWSITELEVELBILLINGCYCLE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OakleafVendor",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OAKLEAFVENDOR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OakleafHauler",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OAKLEAFHAULER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ShowCollectionsOnARActivity",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SHOWCOLLECTIONSONARACTIVITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultPaymentToDueBalance",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTPAYMENTTODUEBALANCE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ScaleRequireVehicle",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SCALEREQUIREVEHICLE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ScaleDefaultTareWeights",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SCALEDEFAULTTAREWEIGHTS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ScaleAlwaysShowRates",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SCALEALWAYSSHOWRATES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AllowServicesAtVacantSites",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ALLOWSERVICESATVACANTSITES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EnablePCScale",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ENABLEPCSCALE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "PCScaleURL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PCSCALEURL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ScheduleAheadDays",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SCHEDULEAHEADDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "CreateIntercompanyOnPeriodClose",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "CREATEINTERCOMPANYONPERIODCLOSE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RequireRouteCustTypeMatchForTrip",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REQUIREROUTECUSTTYPEMATCHFORTRIP",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MaxwellMgmtJournalNbr",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MAXWELLMGMTJOURNALNBR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkOrderMinimumChargeSvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WORKORDERMINIMUMCHARGESVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultAutomatedCollectionsLetters",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTAUTOMATEDCOLLECTIONSLETTERS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OverrideRequiredPendingApprovalSite",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "OVERRIDEREQUIREDPENDINGAPPROVALSITE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ReportLogoFileName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REPORTLOGOFILENAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UseDefaultCompanyIDInGLExport",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "USEDEFAULTCOMPANYIDINGLEXPORT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ARAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ARACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultSuppressStatementPrinting",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "DEFAULTSUPPRESSSTATEMENTPRINTING",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FCAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FCACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ProductVersionUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "PRODUCTVERSIONUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RFAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RFACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TaxAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TAXACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "URAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "URACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WOAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WOACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BalanceTransferGLAccount",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BALANCETRANSFERGLACCOUNT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LastLicenseDate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LASTLICENSEDATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CRAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CRACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CreateARReconcileOnPeriodClose",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "CREATEARRECONCILEONPERIODCLOSE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DPAcctSegments",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DPACCTSEGMENTS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RateVarianceApprovalPctUnder",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATEVARIANCEAPPROVALPCTUNDER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RateVarianceApprovalPctWOOver",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATEVARIANCEAPPROVALPCTWOOVER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RateVarianceApprovalPctWOUnder",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATEVARIANCEAPPROVALPCTWOUNDER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ARPeriodBalanceLastUpdated",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ARPERIODBALANCELASTUPDATED",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionBuild",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VERSIONBUILD",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionMajor",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VERSIONMAJOR",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionMinor",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VERSIONMINOR",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "VersionRelease",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "VERSIONRELEASE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultCustomerDoNotProrateServices",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "DEFAULTCUSTOMERDONOTPRORATESERVICES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultEnableAutomaticPaymentNotificationEmails",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "DEFAULTENABLEAUTOMATICPAYMENTNOTIFICATIONEMAILS",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "SETUP"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "SETUP",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower SERVICEINFO Table",
+				"description": "Copy activity for dbo.EQUIPEMNT TYPE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower SETUP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.SERVICEINFO;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ServiceInfoUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICEINFOUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcSourceUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SVCSOURCEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcSourceIDNbr",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCSOURCEIDNBR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcChangeReason",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCCHANGEREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OrderUser",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORDERUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OrderDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ORDERDATETIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "StartDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "STARTDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EndDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ENDDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Status",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "STATUS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcDescription",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCDESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EQUIPMENTTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcFrequency",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCFREQUENCY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Quantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "QUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Rate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MinimumCharge",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MINIMUMCHARGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "InactivityAllowanceDays",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "INACTIVITYALLOWANCEDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "InactivityDailyRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "INACTIVITYDAILYRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "HoldBillingUntilServiceStart",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "HOLDBILLINGUNTILSERVICESTART",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EstimatedQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ESTIMATEDQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DiscountSchedule",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DISCOUNTSCHEDULE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DiscountStartDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DISCOUNTSTARTDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "PrimarySiteID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRIMARYSITEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UPSServiceID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UPSSERVICEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Competitor",
+									"type": "String"
+								},
+								"sink": {
+									"name": "COMPETITOR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultDestination",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTDESTINATION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EstimatedRoundTripTime",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ESTIMATEDROUNDTRIPTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcChangeNote",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCCHANGENOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcLossReason",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCLOSSREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TemporaryPermanent",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "TEMPORARYPERMANENT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "InchesPerDay",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "INCHESPERDAY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "YieldPercentage",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "YIELDPERCENTAGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RebateRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "REBATERATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RebateRateType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REBATERATETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultTransporter1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTTRANSPORTER1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultTransporter2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTTRANSPORTER2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DefaultTransporter3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DEFAULTTRANSPORTER3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EquipmentOwnership",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "EQUIPMENTOWNERSHIP",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyProviderCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "THIRDPARTYPROVIDERCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyServiceProvider",
+									"type": "String"
+								},
+								"sink": {
+									"name": "THIRDPARTYSERVICEPROVIDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BICRatePerUnit",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BICRATEPERUNIT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "BICRateType",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "BICRATETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EstimatedMonthlyRevenue",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ESTIMATEDMONTHLYREVENUE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RentalRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RENTALRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RentalSvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RENTALSVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DisableDiscount",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "DISABLEDISCOUNT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DoNotProrateEnd",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "DONOTPRORATEEND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DoNotProrateStart",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "DONOTPRORATESTART",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SiteWasteProfileID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SITEWASTEPROFILEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ProjectCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PROJECTCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyProviderRentalCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "THIRDPARTYPROVIDERRENTALCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyServiceProviderPONbr",
+									"type": "String"
+								},
+								"sink": {
+									"name": "THIRDPARTYSERVICEPROVIDERPONBR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BICBillingMethod",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BICBILLINGMETHOD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PickupCreditOverageRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "PICKUPCREDITOVERAGERATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "PickupCreditQuantity",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "PICKUPCREDITQUANTITY",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "SERVICEINFO"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "SERVICEINFO",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower DAILYROUTEENTRY",
+				"description": "Copy activity for dbo.DAILYROUTEENTRY table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower SERVICEINFO Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRY;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DailyRouteEntryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Status",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "STATUS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "WORKDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Route",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ROUTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ScheduledStartTime",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SCHEDULEDSTARTTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Driver",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DRIVER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Helper",
+									"type": "String"
+								},
+								"sink": {
+									"name": "HELPER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Vehicle",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VEHICLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Trailer",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TRAILER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OdometerUnits",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ODOMETERUNITS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelPumped",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "FUELPUMPED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RouteNote",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ROUTENOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SentToOnBoardComputer",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SENTTOONBOARDCOMPUTER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Helper2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "HELPER2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ActualStartTime",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTUALSTARTTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "BeginningQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BEGINNINGQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "BeginningStops",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BEGINNINGSTOPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ProductivityPosted",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "PRODUCTIVITYPOSTED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ProductivityPostedDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "PRODUCTIVITYPOSTEDDATETIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "ProductivityPostedUser",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRODUCTIVITYPOSTEDUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ActualEndTime",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "ACTUALENDTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Exported",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "EXPORTED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MobileDeviceID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MOBILEDEVICEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ProfitabilityComputed",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "PROFITABILITYCOMPUTED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Origin",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORIGIN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "syncRowVersion",
+									"type": "Byte[]"
+								},
+								"sink": {
+									"name": "SYNCROWVERSION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GpsMatchingEnabled",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "GPSMATCHINGENABLED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GpsMatchingMaxRange",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GPSMATCHINGMAXRANGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "GpsMatchingMinProximity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GPSMATCHINGMINPROXIMITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RouteVisitProximityRadius",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "ROUTEVISITPROXIMITYRADIUS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "UseSystemGpsMatchingSettings",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "USESYSTEMGPSMATCHINGSETTINGS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GPSUnits",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "GPSUNITS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "AutoCompleteVisits",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "AUTOCOMPLETEVISITS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "HelperRoute",
+									"type": "String"
+								},
+								"sink": {
+									"name": "HELPERROUTE",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "DAILYROUTEENTRY"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DAILYROUTEENTRY",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower DAILYROUTEENTRYVEHICLE",
+				"description": "Copy activity for dbo.DAILYROUTEENTRYVEHICLE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower DAILYROUTEENTRY",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRYVEHICLE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DailyRouteEntryVehicleUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYVEHICLEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DailyRouteEntryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Vehicle",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VEHICLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OperatingHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OPERATINGHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "StartOdometer",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "STARTODOMETER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EndOdometer",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ENDODOMETER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OdometerUnits",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ODOMETERUNITS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelPumped",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "FUELPUMPED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "EndEngineHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ENDENGINEHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "StartEngineHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "STARTENGINEHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OffSiteFuel",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OFFSITEFUEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OnSiteFuel",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ONSITEFUEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OffSiteFuelSource",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OFFSITEFUELSOURCE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OnSiteFuelSource",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ONSITEFUELSOURCE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EndEngineHoursMetered",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ENDENGINEHOURSMETERED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "StartEngineHoursMetered",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "STARTENGINEHOURSMETERED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FUELTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OdometerState",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ODOMETERSTATE",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "DAILYROUTEENTRYVEHICLE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DAILYROUTEENTRYVEHICLE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower DAILYROUTEENTRYDOWNTIME",
+				"description": "Copy activity for dbo.DAILYROUTEENTRYDOWNTIME table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower DAILYROUTEENTRYVEHICLE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRYDOWNTIME;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DailyRouteEntryDowntimeUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYDOWNTIMEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DailyRouteEntryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Vehicle",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VEHICLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DowntimeStartTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DOWNTIMESTARTTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "DowntimeEndTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "DOWNTIMEENDTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Reason",
+									"type": "String"
+								},
+								"sink": {
+									"name": "REASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DowntimeType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DOWNTIMETYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelPumped",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "FUELPUMPED",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelSource",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FUELSOURCE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "FUELTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Latitude",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "LATITUDE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Longitude",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "LONGITUDE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Odometer",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ODOMETER",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "DAILYROUTEENTRYDOWNTIME"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DAILYROUTEENTRYDOWNTIME",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower DAILYROUTEENTRYLABOR",
+				"description": "Copy activity for dbo.DAILYROUTEENTRYLABOR table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower DAILYROUTEENTRYDOWNTIME",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRYLABOR;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DailyRouteEntryLaborUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYLABORUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DailyRouteEntryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Destination",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESTINATION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Worker",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WORKER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkerRole",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "WORKERROLE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "StartTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "STARTTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EndTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ENDTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LunchStartTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LUNCHSTARTTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LunchEndTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LUNCHENDTIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Vehicle",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VEHICLE",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "DAILYROUTEENTRYLABOR"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DAILYROUTEENTRYLABOR",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower SERVICELOCATION",
+				"description": "Copy activity for dbo.SERVICELOCATION table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower DAILYROUTEENTRYLABOR",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRYLABOR;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ServiceLocation",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERVICELOCATION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceLocationUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICELOCATIONUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceLocationName",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERVICELOCATIONNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceAddressUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICEADDRESSUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LocationNote",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LOCATIONNOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcStartTimeWindow1Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCSTARTTIMEWINDOW1BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcStartTimeWindow1End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCSTARTTIMEWINDOW1END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcStartTimeWindow2Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCSTARTTIMEWINDOW2BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcStartTimeWindow2End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCSTARTTIMEWINDOW2END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcEndTimeWindow1Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCENDTIMEWINDOW1BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcEndTimeWindow1End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCENDTIMEWINDOW1END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcEndTimeWindow2Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCENDTIMEWINDOW2BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcEndTimeWindow2End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "SVCENDTIMEWINDOW2END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TimeWindow1Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "TIMEWINDOW1BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TimeWindow1End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "TIMEWINDOW1END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TimeWindow2Begin",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "TIMEWINDOW2BEGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TimeWindow2End",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "TIMEWINDOW2END",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MapImage",
+									"type": "Byte[]"
+								},
+								"sink": {
+									"name": "MAPIMAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CloseTime",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "CLOSETIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OpenTime",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "OPENTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ServiceLocationName2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERVICELOCATIONNAME2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UpsRoadNetLastSyncDateTime",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "UPSROADNETLASTSYNCDATETIME",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "MapImage2",
+									"type": "Byte[]"
+								},
+								"sink": {
+									"name": "MAPIMAGE2",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "SERVICELOCATION"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "SERVICELOCATION",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower TRIP_VW_TRIPMATERIALTOTAL",
+				"description": "Copy activity for dbo.TRIP_VW_TRIPMATERIALTOTAL table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower SERVICELOCATION",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.TRIP_VW_TRIPMATERIALTOTAL;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "TripUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "TRIPUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalWeight",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALWEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WeightUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WEIGHTUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalVolume",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALVOLUME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "VolumeUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VOLUMEUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MaterialFees",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MATERIALFEES",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "TRIP_VW_TRIPMATERIALTOTAL"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "TRIP_VW_TRIPMATERIALTOTAL",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower SERVICEINFO_VW_PRIMARYSITE",
+				"description": "Copy activity for dbo.SERVICEINFO_VW_PRIMARYSITE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower TRIP_VW_TRIPMATERIALTOTAL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.SERVICEINFO_VW_PRIMARYSITE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ServiceInfoUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "SERVICEINFOUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "StartDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "STARTDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "EndDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "ENDDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Status",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "STATUS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SiteID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SITEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CustID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUSTID",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "SERVICEINFO_VW_PRIMARYSITE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "SERVICEINFO_VW_PRIMARYSITE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS",
+				"description": "Copy activity for dbo.DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower SERVICEINFO_VW_PRIMARYSITE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "DailyRouteEntryUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "DAILYROUTEENTRYUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Route",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ROUTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "WORKDATE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "Status",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "STATUS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RouteNote",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ROUTENOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BeginningQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BEGINNINGQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "BeginningStops",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "BEGINNINGSTOPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DriverHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DRIVERHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DriverLunchHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DRIVERLUNCHHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "HelperHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "HELPERHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "HelperLunchHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "HELPERLUNCHHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalOdometerUnits",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALODOMETERUNITS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OnSiteFuel",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "ONSITEFUEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OffSiteFuel",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OFFSITEFUEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalFuel",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALFUEL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "FuelType",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FUELTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CountFuelTypes",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "COUNTFUELTYPES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalVehicleHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALVEHICLEHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "CountVehicles",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "COUNTVEHICLES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalDowntime",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALDOWNTIME",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DisposalHaulTrips",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "DISPOSALHAULTRIPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "LaborTrips",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "LABORTRIPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OutboundTrips",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OUTBOUNDTRIPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "HaulOnlyTrips",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "HAULONLYTRIPS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "DisposalCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DISPOSALCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "TotalWeight",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "TOTALWEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "WeightUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WEIGHTUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VolumeUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VOLUMEUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DestinationHours",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "DESTINATIONHOURS",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			},
+			{
+				"name": "Tower WORKORDERCHARGE",
+				"description": "Copy activity for dbo.WORKORDERCHARGE table. \nCopy activity requires physical mapping of schema in the mapping tab due to data type issues.",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Tower DAILYROUTEENTRY_VW_PRODUCTIVITYTOTALS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT * FROM WORKORDERCHARGE\r\nWHERE AMOUNT > 0",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.TOWER_RAW.WORKORDERCHARGE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand",
+							"additionalCopyOptions": {
+								"ON_ERROR": "CONTINUE"
+							}
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "msaz01_dm01_Azure_Blob",
+								"type": "LinkedServiceReference"
+							}
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "WorkOrderChargeUID",
+									"type": "Guid"
+								},
+								"sink": {
+									"name": "WORKORDERCHARGEUID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "WorkOrderID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "WORKORDERID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SiteID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SITEID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SvcCode",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVCCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Description",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "QuantityType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "QUANTITYTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "NoChargeQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "NOCHARGEQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Rate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "RATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Quantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "QUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "Amount",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "AMOUNT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MinimumCharge",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MINIMUMCHARGE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MaximumQuantity",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MAXIMUMQUANTITY",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OverMaximumQuantityRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "OVERMAXIMUMQUANTITYRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "MarketPrice",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "MARKETPRICE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "RebateRateType",
+									"type": "Int16"
+								},
+								"sink": {
+									"name": "REBATERATETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyCost",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "THIRDPARTYCOST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyRate",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "THIRDPARTYRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "ThirdPartyPONbr",
+									"type": "String"
+								},
+								"sink": {
+									"name": "THIRDPARTYPONBR",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01_TOWER",
+						"type": "DatasetReference",
+						"parameters": {
+							"db": "Tower7",
+							"schema": "dbo",
+							"table": "WORKORDERCHARGE"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "WORKORDERCHARGE",
+							"Snowflake_Schema": "TOWER_RAW"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Production/TOWER"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T18:18:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
