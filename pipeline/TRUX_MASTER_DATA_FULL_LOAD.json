@@ -1,0 +1,3767 @@
+{
+	"name": "TRUX_MASTER_DATA_FULL_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy LEGACY SY03 table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.LEGACY_SY03;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SY03_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADD1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADD1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADD2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADD2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_STAT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_STAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_COUN",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_COUN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PHON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PHON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FAX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_FAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WEBSITE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_WEBSITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DB",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFS",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRTNAME",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRTNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRTSTATCAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRTSTATCAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGINTEREST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CHGINTEREST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CURR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CURR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CREDITLIMIT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CREDITLIMIT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PARSED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PARSED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOSITE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOSITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVSEQ1",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVSEQ1",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVSEQ2",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVSEQ2",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_BALO",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_BALO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_BILLTO",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_BILLTO",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GTWCFGID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_GTWCFGID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MERCHID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_MERCHID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DBVERSION",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DBVERSION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ACCTAPP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ACCTAPP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ACCTFILE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ACCTFILE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_HWR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_HWR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOLOADFILE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOLOADFILE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REFN",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REFN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_VUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SITETYPE",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "SY03_SITETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WOCOPIES",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_WOCOPIES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ENCVER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_ENCVER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NAT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MOBID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_MOBID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REINSCHECKDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SY03_REINSCHECKDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOHMPAGE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOHMPAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SNDFLDR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_SNDFLDR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RECFLDR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RECFLDR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FMMASTER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_FMMASTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GPSFOLDER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_GPSFOLDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFPA",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFPA",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF5",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF5",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LOCK",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_LOCK",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WOSHOWMSG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_WOSHOWMSG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CASH",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CASH",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CASHT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CASHT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_OverdueLetter",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_OVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachOverdueLetter",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHOVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachFolderOverdueLetter",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ATTACHFOLDEROVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVOICEORDER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVOICEORDER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LEED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_LEED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_TUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WARRONTRUK",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_WARRONTRUK",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELPRINTER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_LABELPRINTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELHEIGHT",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LABELHEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELWIDTH",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LABELWIDTH",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ATTACHINDB",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHINDB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FILESIZE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_FILESIZE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_NOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGCODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CHGCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGRATE",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CHGRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GLNU",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_GLNU",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LANDFILL",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_LANDFILL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TRANSFER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TRANSFER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MRF",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_MRF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_COMPOST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_COMPOST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VEGAS",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_VEGAS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RSI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RSI",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CLASS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CLASS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SITE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_SITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REINSTATEREASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REINSTATEREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REPRINTREASON",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_REPRINTREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RRNMAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_RRNMAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VALC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_VALC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LANGUAGE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_LANGUAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF6",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF6",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "sy03_lmargin",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LMARGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DefaultAttachFolder",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEFAULTATTACHFOLDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRINTBILLPARAM",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRINTBILLPARAM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTYPE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_CONTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONAMT",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CONAMT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONUSE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CONUSE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DOWNTIMESTARTEND",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DOWNTIMESTARTEND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ROLABORTIMESPAN",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ROLABORTIMESPAN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USEGMAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_USEGMAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SHOWPARTSUBSYSTEM",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SHOWPARTSUBSYSTEM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QTDWARN",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_QTDWARN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QTDSTOP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_QTDSTOP",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CREDITMEMO",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CREDITMEMO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADJAPPV",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ADJAPPV",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOTIFYUSER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NOTIFYUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SHOWRATE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SHOWRATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ASSETTRANSFER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ASSETTRANSFER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TEST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TEST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SchedCallsToRouteFromSC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SCHEDCALLSTOROUTEFROMSC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EmailRSToDriver",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_EMAILRSTODRIVER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFCUSTYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEFCUSTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NO0MINIWARNINGFORINTERC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NO0MINIWARNINGFORINTERC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRINTPRICES",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRINTPRICES",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MAXODOMETER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_MAXODOMETER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MAXENGINEHOURS",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_MAXENGINEHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADDCALLTOEND",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ADDCALLTOEND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ALLOWCHGHELDTKT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ALLOWCHGHELDTKT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMADD1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMADD1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMADD2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMADD2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMCITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMCITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMSTAT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMSTAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMPZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMPZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMCOUN",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_REMCOUN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMPHON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMPHON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMFAX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMFAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMEMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMEMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADJTYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADJTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADVDAYS",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_ADVDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMINTERFACE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMINTERFACE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EXPORTPATH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_EXPORTPATH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_IMPORTPATH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_IMPORTPATH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMURL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMURL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USERNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_USERNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PASSWORD",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PASSWORD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMAPIKEY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMAPIKEY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MANINVSURCHG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_MANINVSURCHG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QUICKSEARCHAUTOFILL",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_QUICKSEARCHAUTOFILL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USDOT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_USDOT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TENDERAMNTREQUIRED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TENDERAMNTREQUIRED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_STORECVV2",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_STORECVV2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFAULTPAYTERMS",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_DEFAULTPAYTERMS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOJOBAFTER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_NOJOBAFTER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTDREADONLY",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CONTDREADONLY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTRATETYPE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_CONTRATETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FORCEFACILITYSELECTION",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_FORCEFACILITYSELECTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachImageToInvoiceDefault",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHIMAGETOINVOICEDEFAULT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEDEFAULTNEWCUST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEDEFAULTNEWCUST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEADJREASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEADJREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEGLACCOUNT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEGLACCOUNT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEERATE",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEERATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEDESC",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEDESC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFTAX",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFTAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SYNCINTERVAL",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_SYNCINTERVAL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GLINVFAC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_GLINVFAC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_APPLCUSTORIG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_APPLCUSTORIG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEMNONWORK",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEMNONWORK",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "sy03_tokenmerchant",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_TOKENMERCHANT",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TRUX_LEGACY01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "SY03",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "LEGACY_SY03",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy MIDWEST SY03 table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_SY03",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "SY03_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADD1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADD1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADD2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADD2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_STAT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_STAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_COUN",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_COUN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PHON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PHON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FAX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_FAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WEBSITE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_WEBSITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DB",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFS",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRTNAME",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRTNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRTSTATCAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRTSTATCAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGINTEREST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CHGINTEREST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CURR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CURR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CREDITLIMIT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CREDITLIMIT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PARSED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PARSED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOSITE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOSITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVSEQ1",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVSEQ1",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVSEQ2",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVSEQ2",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_BALO",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_BALO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_BILLTO",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_BILLTO",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GTWCFGID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_GTWCFGID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MERCHID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_MERCHID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DBVERSION",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DBVERSION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ACCTAPP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ACCTAPP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ACCTFILE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ACCTFILE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_HWR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_HWR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOLOADFILE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOLOADFILE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REFN",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REFN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_VUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SITETYPE",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "SY03_SITETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WOCOPIES",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_WOCOPIES",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ENCVER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_ENCVER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NAT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MOBID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_MOBID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REINSCHECKDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "SY03_REINSCHECKDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AUTOHMPAGE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_AUTOHMPAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SNDFLDR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_SNDFLDR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RECFLDR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RECFLDR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FMMASTER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_FMMASTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GPSFOLDER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_GPSFOLDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFPA",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFPA",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF5",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF5",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LOCK",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_LOCK",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WOSHOWMSG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_WOSHOWMSG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CASH",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CASH",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CASHT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CASHT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_OverdueLetter",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_OVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachOverdueLetter",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHOVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachFolderOverdueLetter",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ATTACHFOLDEROVERDUELETTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_INVOICEORDER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_INVOICEORDER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LEED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_LEED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TUOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_TUOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_WARRONTRUK",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_WARRONTRUK",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELPRINTER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_LABELPRINTER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELHEIGHT",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LABELHEIGHT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LABELWIDTH",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LABELWIDTH",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ATTACHINDB",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHINDB",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FILESIZE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_FILESIZE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_NOTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGCODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CHGCODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CHGRATE",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CHGRATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GLNU",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_GLNU",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LANDFILL",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_LANDFILL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TRANSFER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TRANSFER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MRF",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_MRF",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_COMPOST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_COMPOST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VEGAS",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_VEGAS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RSI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RSI",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CLASS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CLASS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SITE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_SITE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REINSTATEREASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REINSTATEREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REPRINTREASON",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_REPRINTREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RRNMAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_RRNMAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_VALC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_VALC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_LANGUAGE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_LANGUAGE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEF6",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEF6",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "sy03_lmargin",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_LMARGIN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DefaultAttachFolder",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEFAULTATTACHFOLDER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRINTBILLPARAM",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRINTBILLPARAM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTYPE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_CONTYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONAMT",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CONAMT",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONUSE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CONUSE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DOWNTIMESTARTEND",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DOWNTIMESTARTEND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ROLABORTIMESPAN",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ROLABORTIMESPAN",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USEGMAP",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_USEGMAP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SHOWPARTSUBSYSTEM",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SHOWPARTSUBSYSTEM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QTDWARN",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_QTDWARN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QTDSTOP",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_QTDSTOP",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CREDITMEMO",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CREDITMEMO",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADJAPPV",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ADJAPPV",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOTIFYUSER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NOTIFYUSER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SHOWRATE",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SHOWRATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ASSETTRANSFER",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ASSETTRANSFER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TEST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TEST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SchedCallsToRouteFromSC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_SCHEDCALLSTOROUTEFROMSC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EmailRSToDriver",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_EMAILRSTODRIVER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFCUSTYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_DEFCUSTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NO0MINIWARNINGFORINTERC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_NO0MINIWARNINGFORINTERC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PRINTPRICES",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_PRINTPRICES",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MAXODOMETER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_MAXODOMETER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MAXENGINEHOURS",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_MAXENGINEHOURS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADDCALLTOEND",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ADDCALLTOEND",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ALLOWCHGHELDTKT",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ALLOWCHGHELDTKT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMADD1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMADD1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMADD2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMADD2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMCITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMCITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMSTAT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMSTAT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMPZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMPZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMCOUN",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_REMCOUN",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMPHON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMPHON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMFAX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMFAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_REMEMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_REMEMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADJTYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_ADJTYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_ADVDAYS",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_ADVDAYS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMINTERFACE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMINTERFACE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_EXPORTPATH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_EXPORTPATH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_IMPORTPATH",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_IMPORTPATH",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMURL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMURL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USERNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_USERNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_PASSWORD",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_PASSWORD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_RMAPIKEY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_RMAPIKEY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_MANINVSURCHG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_MANINVSURCHG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_QUICKSEARCHAUTOFILL",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_QUICKSEARCHAUTOFILL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_USDOT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_USDOT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_TENDERAMNTREQUIRED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_TENDERAMNTREQUIRED",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_STORECVV2",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_STORECVV2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFAULTPAYTERMS",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_DEFAULTPAYTERMS",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_NOJOBAFTER",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_NOJOBAFTER",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTDREADONLY",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CONTDREADONLY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CONTRATETYPE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_CONTRATETYPE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_FORCEFACILITYSELECTION",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_FORCEFACILITYSELECTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_AttachImageToInvoiceDefault",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_ATTACHIMAGETOINVOICEDEFAULT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEDEFAULTNEWCUST",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEDEFAULTNEWCUST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEADJREASON",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEADJREASON",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEGLACCOUNT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEGLACCOUNT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEERATE",
+									"type": "Decimal"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEERATE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_CCPROCFEEDESC",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SY03_CCPROCFEEDESC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEFTAX",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEFTAX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_SYNCINTERVAL",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_SYNCINTERVAL",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_GLINVFAC",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_GLINVFAC",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_APPLCUSTORIG",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_APPLCUSTORIG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SY03_DEMNONWORK",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "SY03_DEMNONWORK",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "sy03_tokenmerchant",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "SY03_TOKENMERCHANT",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "SY03",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "MIDWEST_SY03",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy MIDWEST USER table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_USER;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "USER_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_FNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_FNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_LNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_LNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_DISABLED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "USER_DISABLED",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_EMPLOYEEID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_EMPLOYEEID",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "USER",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "MIDWEST_USER",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy LEGACY USER table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "truncate table LRS_RAW.MASTER_DATA.LEGACY_USER;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "USER_CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_FNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_FNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_LNAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_LNAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_DISABLED",
+									"type": "Boolean"
+								},
+								"sink": {
+									"name": "USER_DISABLED",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "USER_EMPLOYEEID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "USER_EMPLOYEEID",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TRUX_LEGACY01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "USER",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "LEGACY_USER",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy MIDWEST ONLINE ACCT table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, [OPACCESS_LINK]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT]\nINNER JOIN [OPACCESS]\nON [OPACCOUNT_ID] = [OPACCESS_LINK]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_ONLINE_ACCT;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "OPACCOUNT_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCOUNT_ID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCOUNT_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OPACCOUNT_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCOUNT_REGISDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCOUNT_REGISDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_LINK",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_LINK",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_COMP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OPACCESS_COMP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_CUST",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_CUST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_SITE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_SITE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_ACTIVEDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCESS_ACTIVEDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_DEACTIVEDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCESS_DEACTIVEDTE",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "OPACCOUNT",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "MIDWEST_ONLINE_ACCT",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy LEGACY ONLINE ACCT table",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, [OPACCESS_LINK]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT]\nINNER JOIN [OPACCESS]\nON [OPACCOUNT_ID] = [OPACCESS_LINK]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_ONLINE_ACCT;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "OPACCOUNT_ID",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCOUNT_ID",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCOUNT_EMAIL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OPACCOUNT_EMAIL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCOUNT_REGISDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCOUNT_REGISDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_LINK",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_LINK",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_COMP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "OPACCESS_COMP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_CUST",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_CUST",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_SITE",
+									"type": "Int32"
+								},
+								"sink": {
+									"name": "OPACCESS_SITE",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_ACTIVEDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCESS_ACTIVEDTE",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "OPACCESS_DEACTIVEDTE",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "OPACCESS_DEACTIVEDTE",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TRUX_LEGACY01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "OPACCOUNT",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "MIDWEST_ONLINE_ACCT",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Production/TRUX"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,841 @@
+{
+	"name": "SOFTPAK_SALES_DAILY_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Variable Sale Report",
+				"description": "Copy Variable Sale Report",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "File Name",
+								"value": "$$FILEPATH"
+							},
+							{
+								"name": "Last Modified",
+								"value": {
+									"value": "@utcnow()",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.SOFTPAK_RAW.VARIABLE_SALES_REPORT;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "ACCT YYMM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ACCT YYMM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "COMPANY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "COMPANY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TAXBODY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TAXBODY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CYCLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CYCLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "GL CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "GL CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DATE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SIZE CD",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SIZE CD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CHG CD",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CHG CD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DESCRIPTION",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "EQUIP CD",
+									"type": "String"
+								},
+								"sink": {
+									"name": "EQUIP CD",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VAR 3",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VAR 3",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VAR 4",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VAR 4",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "QTY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "QTY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILLED AMT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILLED AMT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MASTER AMT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MASTER AMT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VARIANCE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VARIANCE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VAR FLAG",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VAR FLAG",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "INV #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "INV #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "W/O ACT DATE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "W/O ACT DATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SUB COMP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SUB COMP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SUB CUST #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SUB CUST #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ORIG W/O#",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORIG W/O#",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ADJ USER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ADJ USER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST START",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST START",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CUST STOP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CUST STOP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL FIRST NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL FIRST NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL LAST NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL LAST NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ADDRESS #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ADDRESS #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ST DIR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ST DIR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ST NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ST NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ST SUFFIX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ST SUFFIX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ST DIR2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ST DIR2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL APT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL APT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ADDRESS-2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ADDRESS-2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL CITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL CITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL STATE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL STATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BILL ZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BILL ZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ADDRESS #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ADDRESS #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ST DIR",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ST DIR",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ST NAME",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ST NAME",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ST SUFFIX",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ST SUFFIX",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ST DIR2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ST DIR2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV APT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV APT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ADDRESS-2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ADDRESS-2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV CITY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV CITY",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV STATE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV STATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SERV ZIP",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SERV ZIP",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AREA CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AREA CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PHONE #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PHONE #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CR LIMIT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CR LIMIT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VARIABLE 1",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VARIABLE 1",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VARIABLE 2",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VARIABLE 2",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CONTACT",
+									"type": "String"
+								},
+								"sink": {
+									"name": "CONTACT",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RES CUSTOMER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RES CUSTOMER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PREV CYCLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PREV CYCLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "PRICE LIST",
+									"type": "String"
+								},
+								"sink": {
+									"name": "PRICE LIST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "MATERIAL",
+									"type": "String"
+								},
+								"sink": {
+									"name": "MATERIAL",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UOM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UOM",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "UNITS",
+									"type": "String"
+								},
+								"sink": {
+									"name": "UNITS",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SALES ID",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SALES ID",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "FEE CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "FEE CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "ROUTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ROUTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "VEHICLE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "VEHICLE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "DRIVER",
+									"type": "String"
+								},
+								"sink": {
+									"name": "DRIVER",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "LANDFILL CODE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "LANDFILL CODE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "TICKET #",
+									"type": "String"
+								},
+								"sink": {
+									"name": "TICKET #",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "COST",
+									"type": "String"
+								},
+								"sink": {
+									"name": "COST",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "BIN TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "BIN TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "RATE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "RATE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "SVC TYPE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "SVC TYPE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "File Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "File Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Last Modified",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ADF_TIMESTAMP",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SOFTPAK_SALES_RAW_ALL_FILES",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VARIABLE_SALES_REPORT",
+							"Snowflake_Schema": "SOFTPAK_RAW"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Production/SOFTPAK"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

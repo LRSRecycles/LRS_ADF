@@ -1,0 +1,44 @@
+{
+	"name": "SOFTPAK_DISPOSAL_SITE_SIMPLE",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Metadata1",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems",
+						"lastModified"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Sandbox/SOFTPAK"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-04T19:45:56Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

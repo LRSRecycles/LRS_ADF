@@ -1,0 +1,27 @@
+{
+	"name": "ADP_Terminations_Raw_All_Files",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msaz01_dm01_Azure_Blob",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "ADP"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "terms.csv",
+				"container": "adp"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

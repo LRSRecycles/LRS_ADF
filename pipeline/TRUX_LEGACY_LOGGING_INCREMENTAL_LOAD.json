@@ -1,0 +1,414 @@
+{
+	"name": "TRUX_LEGACY_LOGGING_INCREMENTAL_LOAD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Watermark Lookup for Legacy Logging",
+				"description": "Look up schema, database and table names from SQL Server and Snowflake",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SnowflakeV2Source",
+						"exportSettings": {
+							"type": "SnowflakeExportCopyCommand"
+						}
+					},
+					"dataset": {
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VW_TRUX_LEGACY_LOGGING_WATERMARK",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Incremental Loop Over Legacy Watermark Table",
+				"description": "Activity to loop over tables that have primary keys with incremental IDs. This loop looks at our Legacy Logging Watermark table in Snowflake and appends any IDs found in SQL Server that are greater than the latest watermark in Snowflake.",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Watermark Lookup for Legacy Logging",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Watermark Lookup for Legacy Logging').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Legacy Logging Incremental Delta Load",
+							"description": "",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"additionalColumns": [
+										{
+											"name": "SQL_TABLE_NAME",
+											"value": {
+												"value": "@item().sql_table_name",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "SOURCE",
+											"value": {
+												"value": "@item().source",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "ADF_TIMESTAMP",
+											"value": {
+												"value": "@utcnow()",
+												"type": "Expression"
+											}
+										}
+									],
+									"sqlReaderQuery": {
+										"value": "SELECT * \n  FROM @{item().sql_table_name}\n WHERE LOG_ID > @{item().latest_watermark}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SnowflakeV2Sink",
+									"importSettings": {
+										"type": "SnowflakeImportCopyCommand",
+										"additionalCopyOptions": {
+											"ON_ERROR": "SKIP_FILE"
+										}
+									}
+								},
+								"enableStaging": true,
+								"stagingSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									},
+									"path": "staging",
+									"enableCompression": true
+								},
+								"parallelCopies": {
+									"value": "@pipeline().parameters.Degree_Copy_Parallelism",
+									"type": "Expression"
+								},
+								"enableSkipIncompatibleRow": true,
+								"dataIntegrationUnits": {
+									"value": "@pipeline().parameters.Maximum_DIU",
+									"type": "Expression"
+								},
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"name": "LOG_ID",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_ID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_TYPE",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_TYPE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_DATE",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "LOG_DATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_USER",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_USER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_TERMID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_TERMID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_NOTES",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_NOTES",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_CUST",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_CUST",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_SITE",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_SITE",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_SERV",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_SERV",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_ROUT",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_ROUT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_SEQU",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "LOG_SEQU",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_FNUM",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_FNUM",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_REAS",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_REAS",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_AUTH",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_AUTH",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_AMNT",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "LOG_AMNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_TDTE",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "LOG_TDTE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_CALLID",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_CALLID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_BVAL",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_BVAL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_AVAL",
+												"type": "String"
+											},
+											"sink": {
+												"name": "LOG_AVAL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "LOG_TASKID",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "LOG_TASKID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "SQL_TABLE_NAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SQL_TABLE_NAME",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SOURCE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SOURCE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ADF_TIMESTAMP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADF_TIMESTAMP",
+												"type": "DateTime"
+											}
+										}
+									]
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TRUX_LEGACY01",
+									"type": "DatasetReference",
+									"parameters": {
+										"schema": "dbo",
+										"table": {
+											"value": "@item().sql_table_name",
+											"type": "Expression"
+										},
+										"database": "TRUX_LOGGING"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "LRS_Snowflake_Raw_V2",
+									"type": "DatasetReference",
+									"parameters": {
+										"Snowflake_Sink_Table": "LEGACY_LOG",
+										"Snowflake_Schema": "TRUX_LOGGING_RAW"
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Maximum_DIU": {
+				"type": "int",
+				"defaultValue": 2
+			},
+			"Degree_Copy_Parallelism": {
+				"type": "int",
+				"defaultValue": 8
+			},
+			"Incremental_Range": {
+				"type": "int",
+				"defaultValue": 14
+			}
+		},
+		"folder": {
+			"name": "Production/TRUX"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:58:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

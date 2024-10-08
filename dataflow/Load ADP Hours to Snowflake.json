@@ -1,0 +1,153 @@
+{
+	"name": "Load ADP Hours to Snowflake",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ADP_Hours_CSV_ALL",
+						"type": "DatasetReference"
+					},
+					"name": "ADPHours"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "LRS_Snowflake_V2",
+						"type": "LinkedServiceReference"
+					},
+					"name": "Snowflake",
+					"description": "ADP Sink dataset.",
+					"rejectedDataLinkedService": {
+						"referenceName": "AzureBlobLinkedService",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
+			"transformations": [
+				{
+					"name": "FlagLatestFileFoRow"
+				},
+				{
+					"name": "AlterRowUpsert"
+				},
+				{
+					"name": "FileTimestamp"
+				},
+				{
+					"name": "FlagColumn"
+				},
+				{
+					"name": "FilterLatest"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Employee ID} as string,",
+				"          {Employee Name} as string,",
+				"          {Manager ID} as string,",
+				"          {Manager Name} as string,",
+				"          {Effective Date} as date,",
+				"          {Historical Date} as string,",
+				"          {Home DEPARTMENT} as string,",
+				"          {Home LOCATION} as string,",
+				"          {Home COMPANY} as string,",
+				"          {Home Reserved4} as string,",
+				"          {Home JOBTITLE} as string,",
+				"          {Home Reserved6} as string,",
+				"          {Home MANAGER} as string,",
+				"          {Pay Code} as string,",
+				"          Hours as double,",
+				"          Money as boolean,",
+				"          Days as boolean,",
+				"          Wages as double,",
+				"          {Base Wage} as double,",
+				"          {Comment(s)} as string,",
+				"          {_c20} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     enableCdc: true,",
+				"     mode: 'read',",
+				"     skipInitialLoad: false,",
+				"     rowUrlColumn: 'adf_filename',",
+				"     skipLines: 10) ~> ADPHours",
+				"FileTimestamp window(over({Employee ID},",
+				"          {Effective Date},",
+				"          {Pay Code}),",
+				"     {Latest File} = max(file_timestamp)) ~> FlagLatestFileFoRow",
+				"FilterLatest alterRow(upsertIf(Flag==true())) ~> AlterRowUpsert",
+				"ADPHours derive(file_timestamp = replace(replace(replace(replace(concat(substring(adf_filename,20,10),' ',substring(adf_filename,31,11)),'-',''),':',''),'.',''),' ',''),",
+				"          adf_timestamp = fromUTC(currentTimestamp(),'CST')) ~> FileTimestamp",
+				"FlagLatestFileFoRow derive(Flag = file_timestamp == {Latest File}) ~> FlagColumn",
+				"FlagColumn filter(Flag == true()) ~> FilterLatest",
+				"AlterRowUpsert sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          EMPLOYEE_ID as string,",
+				"          EMPLOYEE_NAME as string,",
+				"          MANAGER_ID as string,",
+				"          MANAGER_NAME as string,",
+				"          EFFECTIVE_DATE as timestamp,",
+				"          HISTORICAL_DATE as string,",
+				"          HOME_DEPARTMENT as string,",
+				"          HOME_LOCATION as string,",
+				"          HOME_COMPANY as string,",
+				"          HOME_RESERVED4 as string,",
+				"          HOME_JOBTITLE as string,",
+				"          HOME_RESERVED6 as string,",
+				"          HOME_MANAGER as string,",
+				"          PAY_CODE as string,",
+				"          HOURS as string,",
+				"          MONEY as string,",
+				"          DAYS as string,",
+				"          WAGES as string,",
+				"          BASE_WAGE as string,",
+				"          COMMENTS as string,",
+				"          ADF_FILENAME as string,",
+				"          ADF_TIMESTAMP as timestamp",
+				"     ),",
+				"     format: 'table',",
+				"     tableName: 'ADP_HOURS',",
+				"     schemaName: 'ADP_RAW',",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: true,",
+				"     keys:['EMPLOYEE_ID','EFFECTIVE_DATE','PAY_CODE'],",
+				"     store: 'snowflake',",
+				"     store: 'snowflakeV2',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true,",
+				"     mapColumn(",
+				"          EMPLOYEE_ID = {Employee ID},",
+				"          EMPLOYEE_NAME = {Employee Name},",
+				"          MANAGER_ID = {Manager ID},",
+				"          MANAGER_NAME = {Manager Name},",
+				"          EFFECTIVE_DATE = {Effective Date},",
+				"          HISTORICAL_DATE = {Historical Date},",
+				"          HOME_DEPARTMENT = {Home DEPARTMENT},",
+				"          HOME_LOCATION = {Home LOCATION},",
+				"          HOME_COMPANY = {Home COMPANY},",
+				"          HOME_RESERVED4 = {Home Reserved4},",
+				"          HOME_JOBTITLE = {Home JOBTITLE},",
+				"          HOME_RESERVED6 = {Home Reserved6},",
+				"          HOME_MANAGER = {Home MANAGER},",
+				"          PAY_CODE = {Pay Code},",
+				"          HOURS = Hours,",
+				"          MONEY = Money,",
+				"          DAYS = Days,",
+				"          WAGES = Wages,",
+				"          BASE_WAGE = {Base Wage},",
+				"          COMMENTS = {Comment(s)},",
+				"          ADF_FILENAME = adf_filename,",
+				"          ADF_TIMESTAMP = adf_timestamp",
+				"     )) ~> Snowflake"
+			]
+		}
+	}
+}

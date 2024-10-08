@@ -1,0 +1,218 @@
+{
+	"name": "pipeline2_Tested_By_Yvette",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "File Name",
+								"value": "$$FILENAME"
+							},
+							{
+								"name": "Timestamp",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFileName": "finance*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "Truncate Table LRS_Sandbox.VENA_RAW.VENA_FINANCE_MODEL",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "_Account",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Account",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Location",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Location",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Line/Dept",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Line/Dept",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Material Type/Customer",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Material Type/Customer",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Data Source",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Data Source",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Year",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Year",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Period",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Period",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Scenario",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Scenario",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_Measure",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_Measure",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_value",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_value",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "_etl_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_etl_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "File Name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "_File Name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ADF_TIMESTAMP",
+									"type": "DateTime"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "VENA_Raw_All_Files",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Sandbox_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+							"Snowflake_Schema": "VENA_RAW"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "Sandbox/Vena"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-08-30T17:57:59Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

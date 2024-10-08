@@ -1,0 +1,43 @@
+{
+	"name": "MSAZ01_TOWER",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "msaz01_dm01_SQL_Server",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"server": "10.170.2.4",
+				"db": {
+					"value": "@dataset().db",
+					"type": "Expression"
+				},
+				"username": "lrsquery",
+				"pw": "T0werQu3ry?"
+			}
+		},
+		"parameters": {
+			"db": {
+				"type": "string"
+			},
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().table",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

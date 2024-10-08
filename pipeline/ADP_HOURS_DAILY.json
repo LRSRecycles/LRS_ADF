@@ -1,0 +1,29 @@
+{
+	"name": "ADP_HOURS_DAILY",
+	"properties": {
+		"activities": [
+			{
+				"name": "Load ADP Hours",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "pl_process_adp_hours_file",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Production/Orchestration"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-10-07T21:18:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

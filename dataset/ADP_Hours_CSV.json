@@ -1,0 +1,38 @@
+{
+	"name": "ADP_Hours_CSV",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"pFileName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().pFileName",
+					"type": "Expression"
+				},
+				"folderPath": "csv",
+				"container": "adphours"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "��\u0011ࡱ\u001a�\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000>\u0000\u0003\u0000��\t\u0000\u0006\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000Y\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u0002\u0000\u0000\u0000\u0001\u0000\u0000\u0000����\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000v\u0000\u0000\u0000�\u0000\u0000\u0000t\u0001\u0000\u0000�\u0001\u0000\u0000r\u0002\u0000\u0000�\u0002\u0000\u0000p\u0003\u0000\u0000�\u0003\u0000\u0000�\u0004\u0000\u0000�\u0004\u0000\u0000~\u0005\u0000\u0000�\u0005\u0000\u0000|\u0006\u0000\u0000�\u0006\u0000\u0000z\u0007\u0000\u0000�\u0007\u0000\u0000x\b\u0000\u0000�\b\u0000\u0000v\t\u0000\u0000�\t\u0000\u0000t",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

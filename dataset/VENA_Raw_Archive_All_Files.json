@@ -1,0 +1,27 @@
+{
+	"name": "VENA_Raw_Archive_All_Files",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Vena"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "processed",
+				"container": "vena"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
