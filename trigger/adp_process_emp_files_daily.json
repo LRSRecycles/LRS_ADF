@@ -1,0 +1,26 @@
+{
+	"name": "adp_process_emp_files_daily",
+	"properties": {
+		"description": "Triggers \"pl_process_adp_employee_directory_file\" pipeline every time there is a storage event in this location on blob storage.\nContainer: adp\nFolder: empDirectory.csv",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2024-10-09T07:50:00",
+				"timeZone": "Central Standard Time",
+				"schedule": {
+					"minutes": [
+						50
+					],
+					"hours": [
+						7
+					]
+				}
+			}
+		}
+	}
+}
