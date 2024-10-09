@@ -4,7 +4,17 @@
 		"description": "Triggers \"pl_process_adp_employee_directory_file\" pipeline every time there is a storage event in this location on blob storage.\nContainer: adp\nFolder: empDirectory.csv",
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [],
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "pl_process_adp_employee_directory_file",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"FileName": "@trigger().outputs.body.fileName\n"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
