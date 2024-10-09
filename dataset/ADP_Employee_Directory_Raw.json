@@ -2,12 +2,13 @@
 	"name": "ADP_Employee_Directory_Raw",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "msaz01_dm01_Azure_Blob",
+			"referenceName": "AzureBlobLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
 			"FileName": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "@dataset().FileName"
 			}
 		},
 		"annotations": [],

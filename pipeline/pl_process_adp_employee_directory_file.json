@@ -51,7 +51,13 @@
 				"inputs": [
 					{
 						"referenceName": "ADP_Employee_Directory_Raw",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": {
+								"value": "@pipeline().parameters.FileName",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"outputs": [
