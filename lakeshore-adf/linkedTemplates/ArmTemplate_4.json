@@ -1,0 +1,6749 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "lakeshore-adf"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_MIDWEST_LOGGING_FULL_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Look up Logging Tables",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"query": "SELECT * \r\n  FROM LRS_RAW.MASTER_DATA.LOGGING_LOOKUP_TRUX_COMBINED\r\n WHERE SQL_SERVER_NAME = 'MIDWEST';",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "LOGGING_LOOKUP_TRUX_COMBINED",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop over MIDWEST logging tables",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Look up Logging Tables",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Look up Logging Tables').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy MIDWEST logs",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"additionalColumns": [
+												{
+													"name": "SQL_TABLE_NAME",
+													"value": {
+														"value": "@item().sql_table_name",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "SOURCE",
+													"value": {
+														"value": "@item().snowflake_name",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "ADF_TIMESTAMP",
+													"value": {
+														"value": "@utcnow()",
+														"type": "Expression"
+													}
+												}
+											],
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "SnowflakeV2Sink",
+											"importSettings": {
+												"type": "SnowflakeImportCopyCommand",
+												"additionalCopyOptions": {
+													"ON_ERROR": "CONTINUE"
+												}
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "msaz01_dm01_Azure_Blob",
+												"type": "LinkedServiceReference"
+											},
+											"path": "staging",
+											"enableCompression": true
+										},
+										"parallelCopies": {
+											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
+											"type": "Expression"
+										},
+										"enableSkipIncompatibleRow": true,
+										"logSettings": {
+											"enableCopyActivityLog": true,
+											"copyActivityLogSettings": {
+												"logLevel": "Warning",
+												"enableReliableLogging": false
+											},
+											"logLocationSettings": {
+												"linkedServiceName": {
+													"referenceName": "msaz01_dm01_Azure_Blob",
+													"type": "LinkedServiceReference"
+												}
+											}
+										},
+										"dataIntegrationUnits": {
+											"value": "@pipeline().parameters.Maximum_DIU",
+											"type": "Expression"
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "LOG_ID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_ID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TYPE",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_TYPE",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_DATE",
+														"type": "DateTime"
+													},
+													"sink": {
+														"name": "LOG_DATE",
+														"type": "DateTime"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_USER",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_USER",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TERMID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_TERMID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_NOTES",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_NOTES",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_CUST",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_CUST",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SITE",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_SITE",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SERV",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_SERV",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_ROUT",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_ROUT",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SEQU",
+														"type": "Decimal"
+													},
+													"sink": {
+														"name": "LOG_SEQU",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_FNUM",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_FNUM",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_REAS",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_REAS",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AUTH",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_AUTH",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AMNT",
+														"type": "Decimal"
+													},
+													"sink": {
+														"name": "LOG_AMNT",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TDTE",
+														"type": "DateTime"
+													},
+													"sink": {
+														"name": "LOG_TDTE",
+														"type": "DateTime"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_CALLID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_CALLID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_BVAL",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_BVAL",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AVAL",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_AVAL",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TASKID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_TASKID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "SQL_TABLE_NAME",
+														"type": "String"
+													},
+													"sink": {
+														"name": "SQL_TABLE_NAME",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "SOURCE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "SOURCE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
+													}
+												}
+											]
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MSAZ01",
+											"type": "DatasetReference",
+											"parameters": {
+												"schema": "dbo",
+												"table": {
+													"value": "@item().sql_table_name",
+													"type": "Expression"
+												},
+												"database": "TRUX_LOGGING"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LRS_Snowflake_Raw_V2",
+											"type": "DatasetReference",
+											"parameters": {
+												"Snowflake_Sink_Table": "MIDWEST_LOG",
+												"Snowflake_Schema": "TRUX_LOGGING_RAW"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Maximum_DIU": {
+						"type": "int",
+						"defaultValue": 2
+					},
+					"Degree_Copy_Parallelism": {
+						"type": "int",
+						"defaultValue": 8
+					}
+				},
+				"folder": {
+					"name": "Production/TRUX"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Watermark Lookup for Midwest Logging",
+						"description": "Look up schema, database and table names from SQL Server and Snowflake",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VW_TRUX_MIDWEST_LOGGING_WATERMARK",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Incremental Loop Over Midwest Watermark Table",
+						"description": "Activity to loop over tables that have primary keys with incremental IDs. This loop looks at our Midwest Logging Watermark table in Snowflake and appends any IDs found in SQL Server that are greater than the latest watermark in Snowflake.",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Watermark Lookup for Midwest Logging",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Watermark Lookup for Midwest Logging').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Midwest Logging Incremental Delta Load",
+									"description": "",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"additionalColumns": [
+												{
+													"name": "SQL_TABLE_NAME",
+													"value": {
+														"value": "@item().sql_table_name",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "SOURCE",
+													"value": {
+														"value": "@item().source",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "ADF_TIMESTAMP",
+													"value": {
+														"value": "@utcnow()",
+														"type": "Expression"
+													}
+												}
+											],
+											"sqlReaderQuery": {
+												"value": "SELECT * \n  FROM @{item().sql_table_name}\n WHERE LOG_ID > @{item().latest_watermark}",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "SnowflakeV2Sink",
+											"importSettings": {
+												"type": "SnowflakeImportCopyCommand",
+												"additionalCopyOptions": {
+													"ON_ERROR": "SKIP_FILE"
+												}
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "msaz01_dm01_Azure_Blob",
+												"type": "LinkedServiceReference"
+											},
+											"path": "staging",
+											"enableCompression": true
+										},
+										"parallelCopies": {
+											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
+											"type": "Expression"
+										},
+										"enableSkipIncompatibleRow": true,
+										"dataIntegrationUnits": {
+											"value": "@pipeline().parameters.Maximum_DIU",
+											"type": "Expression"
+										},
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "LOG_ID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_ID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TYPE",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_TYPE",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_DATE",
+														"type": "DateTime"
+													},
+													"sink": {
+														"name": "LOG_DATE",
+														"type": "DateTime"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_USER",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_USER",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TERMID",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_TERMID",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_NOTES",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_NOTES",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_CUST",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_CUST",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SITE",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_SITE",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SERV",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_SERV",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_ROUT",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_ROUT",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_SEQU",
+														"type": "Decimal"
+													},
+													"sink": {
+														"name": "LOG_SEQU",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_FNUM",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_FNUM",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_REAS",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_REAS",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AUTH",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_AUTH",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AMNT",
+														"type": "Decimal"
+													},
+													"sink": {
+														"name": "LOG_AMNT",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TDTE",
+														"type": "DateTime"
+													},
+													"sink": {
+														"name": "LOG_TDTE",
+														"type": "DateTime"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_CALLID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_CALLID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_BVAL",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_BVAL",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_AVAL",
+														"type": "String"
+													},
+													"sink": {
+														"name": "LOG_AVAL",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "LOG_TASKID",
+														"type": "Int32"
+													},
+													"sink": {
+														"name": "LOG_TASKID",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"name": "SQL_TABLE_NAME",
+														"type": "String"
+													},
+													"sink": {
+														"name": "SQL_TABLE_NAME",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "SOURCE",
+														"type": "String"
+													},
+													"sink": {
+														"name": "SOURCE",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
+													}
+												}
+											]
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MSAZ01",
+											"type": "DatasetReference",
+											"parameters": {
+												"schema": "dbo",
+												"table": {
+													"value": "@item().sql_table_name",
+													"type": "Expression"
+												},
+												"database": "TRUX_LOGGING"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LRS_Snowflake_Raw_V2",
+											"type": "DatasetReference",
+											"parameters": {
+												"Snowflake_Sink_Table": "MIDWEST_LOG",
+												"Snowflake_Schema": "TRUX_LOGGING_RAW"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Maximum_DIU": {
+						"type": "int",
+						"defaultValue": 2
+					},
+					"Degree_Copy_Parallelism": {
+						"type": "int",
+						"defaultValue": 8
+					},
+					"Incremental_Range": {
+						"type": "int",
+						"defaultValue": 14
+					}
+				},
+				"folder": {
+					"name": "Production/TRUX"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Tower Full Load')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Tower Table Names",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"query": "select *\nfrom lrs_raw.master_data.tower_Table_names\nwhere Load_type = 'Full'",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "TOWER_TABLE_NAMES",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Tower Table Names",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Tower Table Names').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Copy tables",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "SnowflakeV2Sink",
+											"preCopyScript": {
+												"value": "@{concat('truncate table ',item().Schema_name,'.',item().Table_name)}",
+												"type": "Expression"
+											},
+											"importSettings": {
+												"type": "SnowflakeImportCopyCommand"
+											}
+										},
+										"enableStaging": true,
+										"stagingSettings": {
+											"linkedServiceName": {
+												"referenceName": "msaz01_dm01_Azure_Blob",
+												"type": "LinkedServiceReference"
+											},
+											"path": "staging"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "MSAZ01_TOWER",
+											"type": "DatasetReference",
+											"parameters": {
+												"db": "Tower7",
+												"schema": "dbo",
+												"table": {
+													"value": "@item().table_name",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "LRS_Snowflake_Raw_IR_V2",
+											"type": "DatasetReference",
+											"parameters": {
+												"Snowflake_Sink_Table": "Destination",
+												"Snowflake_Schema": "Tower_Raw"
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Test"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-29T04:22:38Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Tower_Test')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Tower Table Names",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VW_TOWER_WATERMARK_PVT",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Ardetail Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Tower Table Names",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "Select * from ARdetail \nwhere replace(ARDETAILUID, '-', '') >  '@{activity('Tower Table Names').output.value}.ARDETAIL'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "ARDETAILUID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ARDETAILUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SOURCEUID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SOURCEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "STATUS",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "STATUS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CUSTID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CUSTID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SITEID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SITEID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "MATERIAL",
+											"type": "String"
+										},
+										"sink": {
+											"name": "MATERIAL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "DETAILTYPE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DETAILTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TAX",
+											"type": "String"
+										},
+										"sink": {
+											"name": "TAX",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "DEBITACCT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DEBITACCT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CREDITACCT",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREDITACCT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PERIOD",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PERIOD",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "INVOICEUID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INVOICEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "TRANSACTIONDATE",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "TRANSACTIONDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "DUEDATE",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "DUEDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "GLEXPORTBATCHUID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "GLEXPORTBATCHUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "QUANTITY",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "QUANTITY",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "UNITRATE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "UNITRATE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "ORIGINALAMOUNT",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "ORIGINALAMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BALANCE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BALANCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BILLEDAPPLIEDAMOUNT",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "BILLEDAPPLIEDAMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "DISPLAYONINVOICE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DISPLAYONINVOICE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "DETAILSOURCE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DETAILSOURCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "COMPANYID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CREATEDDATETIME",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "CREATEDDATETIME",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "CREDITACCTSEGTYPE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "CREDITACCTSEGTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "DEBITACCTSEGTYPE",
+											"type": "Int64"
+										},
+										"sink": {
+											"name": "DEBITACCTSEGTYPE",
+											"type": "Int64"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "Ardetail"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "ARDETAIL",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "WorkOrder ID Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Payment Delta Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "select * from Workorder \nwhere workorderid>  '@{activity('Tower Table Names').output.value}.WORKORDER'\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "truncate table LRS_RAW.TOWER_RAW.WORKORDER_1",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "WorkOrderID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "WORKORDERID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "WorkOrderUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "WORKORDERUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "WorkPONbr",
+											"type": "String"
+										},
+										"sink": {
+											"name": "WORKPONBR",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "DestCertificate",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DESTCERTIFICATE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CODRequired",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "CODREQUIRED",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerDataFileUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "CUSTOMERDATAFILEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceMessage",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INVOICEMESSAGE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Printed",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "PRINTED",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PrintDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "PRINTDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "PrintUser",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PRINTUSER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Destination",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DESTINATION",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ServiceQuantity",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "SERVICEQUANTITY",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "ServiceUOM",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SERVICEUOM",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ReferenceNumber",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REFERENCENUMBER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "TagNumber",
+											"type": "String"
+										},
+										"sink": {
+											"name": "TAGNUMBER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "FinalManifestDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "FINALMANIFESTDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "IsNoChargePickup",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "ISNOCHARGEPICKUP",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "WORKORDER"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "WORKORDER",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Invoice Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "GLExportBatch Delta Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "select * from INVOICE \nwhere replace(INVOICEUID, '-', '') >  '@{activity('Tower Table Names').output.value}.INVOICE'\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "InvoiceUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "INVOICEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INVOICEID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "STATUS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceContent",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "INVOICECONTENT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PrintInvoice",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "PRINTINVOICE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceOrderKey",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INVOICEORDERKEY",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillBatchUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "BILLBATCHUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillCustID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLCUSTID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BillSiteID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLSITEID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BillName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLNAME",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillContact",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLCONTACT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillAddressUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "BILLADDRESSUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillPhone",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLPHONE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillFax",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLFAX",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BillEmail",
+											"type": "String"
+										},
+										"sink": {
+											"name": "BILLEMAIL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SiteAddressUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "SITEADDRESSUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "INVOICEDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "LastInvoiceDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "LASTINVOICEDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "DueDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "DUEDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "FinanceChargeThruDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "FINANCECHARGETHRUDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "CustClass",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CUSTCLASS",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BalForward",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "BALFORWARD",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AgingBal00",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AGINGBAL00",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AgingBal01",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AGINGBAL01",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AgingBal02",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AGINGBAL02",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AgingBal03",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AGINGBAL03",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AgingBal04",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AGINGBAL04",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "NewBalance",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "NEWBALANCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotSvcOneTime",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTSVCONETIME",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotSvcRecurring",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTSVCRECURRING",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotSvcOnCall",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTSVCONCALL",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotSvcTaxes",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTSVCTAXES",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotFinCharges",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTFINCHARGES",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotCharges",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTCHARGES",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotChargeTaxes",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTCHARGETAXES",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotCredits",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTCREDITS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotCreditTaxes",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTCREDITTAXES",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TotPayments",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TOTPAYMENTS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AutomaticPaymentType",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "AUTOMATICPAYMENTTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CompanyID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceMailingOption",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "INVOICEMAILINGOPTION",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceInsert",
+											"type": "String"
+										},
+										"sink": {
+											"name": "INVOICEINSERT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ExternalInvoiceNbr",
+											"type": "String"
+										},
+										"sink": {
+											"name": "EXTERNALINVOICENBR",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceDetailFormat",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "INVOICEDETAILFORMAT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LineOfBusiness",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINEOFBUSINESS",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "INVOICE"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "INVOICE",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "GLExportBatch Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Ardetail Delta Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "select * from GLEXPORTBATCH \nwhere replace(GLEXPORTBATCHUID, '-', '') >  '@{activity('Tower Table Names').output.value}.GLEXPORTBATCH'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "GLExportBatchUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "GLEXPORTBATCHUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "GLExportBatchID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "GLEXPORTBATCHID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "ExportDateTime",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "EXPORTDATETIME",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "STATUS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CreditTotal",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "CREDITTOTAL",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "DebitTotal",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "DEBITTOTAL",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DESCRIPTION",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "FileCount",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "FILECOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BatchType",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "BATCHTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CompanyID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "Period",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PERIOD",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CompanyList",
+											"type": "String"
+										},
+										"sink": {
+											"name": "COMPANYLIST",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PeriodList",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PERIODLIST",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "GLEXPORTBATCH"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "GLEXPORTBATCH",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Payment Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Invoice Detail Delta Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "select * from payment \nwhere replace(paymentuid, '-', '') >  '@{activity('Tower Table Names').output.value}.PAYMENT'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "PaymentUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "PAYMENTUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentBatchUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "PAYMENTBATCHUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "BatchSequence",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "BATCHSEQUENCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "SourceUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "SOURCEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "PAYMENTDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Status",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "STATUS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "ClearOrNSFDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "CLEARORNSFDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "CustID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CUSTID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentMethod",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "PAYMENTMETHOD",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CreditCardType",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "CREDITCARDTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentBankAcct",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PAYMENTBANKACCT",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentIDNbr",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PAYMENTIDNBR",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Amount",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "ApplicationMethod",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "APPLICATIONMETHOD",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "RemoveCreditHold",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "REMOVECREDITHOLD",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CreditAmount",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "CREDITAMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CreditReason",
+											"type": "String"
+										},
+										"sink": {
+											"name": "CREDITREASON",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PaymentNote",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PAYMENTNOTE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerBalance",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "CUSTOMERBALANCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "BankAccountXRefUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "BANKACCOUNTXREFUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CollectionsNotified",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "COLLECTIONSNOTIFIED",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "CustomerPaymentAccountUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "CUSTOMERPAYMENTACCOUNTUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ReversedByDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "REVERSEDBYDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "ReversedByUserID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REVERSEDBYUSERID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ReversalReasonNote",
+											"type": "String"
+										},
+										"sink": {
+											"name": "REVERSALREASONNOTE",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "PAYMENT"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "PAYMENT",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Invoice Detail Delta Load",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Invoice Delta Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "select * from INVOICEDETAIL \nwhere replace(INVOICEDETAILUID, '-', '') > '@{activity('Tower Table Names').output.value}.INVOICEDETAIL'\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "SKIP_FILE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "InvoiceDetailUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "INVOICEDETAILUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "InvoiceUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "INVOICEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SiteID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SITEID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ServiceUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "SERVICEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SourceUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "SOURCEUID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SourceIDNbr",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SOURCEIDNBR",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LineType",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "LINETYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "LineSubType",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "LINESUBTYPE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "SvcCode",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SVCCODE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "DESCRIPTION",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Salesperson",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SALESPERSON",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "SvcFrequency",
+											"type": "String"
+										},
+										"sink": {
+											"name": "SVCFREQUENCY",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Quantity",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "QUANTITY",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "Amount",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "AMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "UnitPrice",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "UNITPRICE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "TaxAmount",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "TAXAMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "StartDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "STARTDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "EndDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "ENDDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "PrintRecord",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "PRINTRECORD",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "LineOrderKey1",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINEORDERKEY1",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LineOrderKey2",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINEORDERKEY2",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LineOrderKey3",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINEORDERKEY3",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LineOrderKey4",
+											"type": "String"
+										},
+										"sink": {
+											"name": "LINEORDERKEY4",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PONbr",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PONBR",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "POSource",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "POSOURCE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AssignedToCollections",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "ASSIGNEDTOCOLLECTIONS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "AssignedToCollectionsDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "ASSIGNEDTOCOLLECTIONSDATE",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "DiscountAmount",
+											"type": "Decimal"
+										},
+										"sink": {
+											"name": "DISCOUNTAMOUNT",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PriorARDStatus",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "PRIORARDSTATUS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "LineLevel",
+											"type": "Int16"
+										},
+										"sink": {
+											"name": "LINELEVEL",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "SiteAddressUID",
+											"type": "Guid"
+										},
+										"sink": {
+											"name": "SITEADDRESSUID",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "MSAZ01_TOWER",
+								"type": "DatasetReference",
+								"parameters": {
+									"db": "Tower7",
+									"schema": "dbo",
+									"table": "INVOICEDETAIL"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_IR_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "INVOICEDETAIL",
+									"Snowflake_Schema": "TOWER_RAW"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Test"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-29T04:22:38Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_DAILY_LOAD_TEST')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get All Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Find The Latest File",
+						"description": "Loop through files sequentially and set FileName and LastModified variables to the values of the latest file dropped in a folder.",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get All Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get All Files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get File Attributes",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "VENA_Raw_Each_Files",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"fieldList": [
+											"itemName",
+											"lastModified"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition",
+									"description": "if condition to find the newest file for copy",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get File Attributes",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(activity('Get File Attributes').output.lastModified,variables('vLastModified'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Set vLastModified",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Set vFileName",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "vLastModified",
+													"value": {
+														"value": "@activity('Get File Attributes').output.lastModified",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Set vFileName",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "vFileName",
+													"value": {
+														"value": "@activity('Get File Attributes').output.itemName",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Load Latest File To Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Find The Latest File",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "FileName",
+										"value": {
+											"value": "@variables('vFileName')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "LastModified",
+										"value": {
+											"value": "@variables('vLastModified')",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_SANDBOX.VENA_RAW.VENA_FINANCE_MODEL;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_Each_Files",
+								"type": "DatasetReference",
+								"parameters": {
+									"pFileName": {
+										"value": "@variables('vFileName')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+									"Snowflake_Schema": "VENA_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Flag Old Files For Deletion",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Delete1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@adddays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Delete Old Files",
+						"description": "For Loop to loop through files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Flag Old Files For Deletion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Flag Old Files For Deletion').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete Each File",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "VENA_Raw_Each_Files",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Archive the File in Processed Folder",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Load Latest File To Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "VENA_Raw_Archive_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Delete1",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Archive the File in Processed Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": false,
+								"wildcardFileName": "*",
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"vFileName": {
+						"type": "String",
+						"defaultValue": "finance_model_2023-08-28T21:29:51.1420557Z"
+					},
+					"vLastModified": {
+						"type": "String",
+						"defaultValue": "1900-01-01 00:00;00"
+					}
+				},
+				"folder": {
+					"name": "Sandbox/Vena"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_DAILY_LOAD_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load Latest File To Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Get File Name and Last Modified Date",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "FileName",
+										"value": {
+											"value": "@variables('vFileName')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "LastModified",
+										"value": {
+											"value": "@variables('vLastModified')",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance_model*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_SANDBOX.VENA_RAW.VENA_FINANCE_MODEL;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "_Account",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Account",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Location",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Location",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Line/Dept",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Line/Dept",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Data Source",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Data Source",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Year",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Year",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Period",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Period",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Scenario",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Scenario",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Measure",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Measure",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_value",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_etl_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_etl_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "FileName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LastModified",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADF_TIMESTAMP",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+									"Snowflake_Schema": "VENA_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Archive the File in Processed Folder",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Load Latest File To Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance_model*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "VENA_Raw_Archive_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Delete Archived File",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Archive the File in Processed Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": false,
+								"wildcardFileName": "finance_model*",
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Get File Name and Last Modified Date",
+						"description": "Get File Name and Last Modified Date",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"itemName",
+								"lastModified"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Flag Old Files For Deletion",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Delete Archived File",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_Archive_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@adddays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Delete Old Files",
+						"description": "For Loop to loop through files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Flag Old Files For Deletion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Flag Old Files For Deletion').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete Each File",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "VENA_Raw_Each_Files",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"vFileName": {
+						"type": "String",
+						"defaultValue": "finance_model_2023-09-21T11:00:12.9206307Z"
+					},
+					"vLastModified": {
+						"type": "String",
+						"defaultValue": "9/21/2023"
+					}
+				},
+				"folder": {
+					"name": "Sandbox/Vena"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_FINANCIAL_MODEL DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load Latest File To Snowflake",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "FileName",
+										"value": "$$FILEPATH"
+									},
+									{
+										"name": "LastModified",
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance_model*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE VENA_RAW.VENA_FINANCE_MODEL;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging"
+							},
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "msaz01_dm01_Azure_Blob",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "_Account",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Account",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Location",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Location",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Line/Dept",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Line/Dept",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Data Source",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Data Source",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Year",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Year",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Period",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Period",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Scenario",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Scenario",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Measure",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Measure",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_value",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_etl_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_etl_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "FileName",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "LastModified",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADF_TIMESTAMP",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+									"Snowflake_Schema": "VENA_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Archive the File in Processed Folder",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Load Latest File To Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance_model*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ""
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "VENA_Raw_Archive_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Delete Archived File",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Archive the File in Processed Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"wildcardFileName": "finance_model*",
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Flag Old Files For Deletion",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Delete Archived File",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "VENA_Raw_Archive_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@adddays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Delete Old Files",
+						"description": "For Loop to loop through files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Flag Old Files For Deletion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Flag Old Files For Deletion').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete Each File",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "VENA_Raw_Each_Files",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/VENA"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:58:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "File Name",
+										"value": "$$FILENAME"
+									},
+									{
+										"name": "Timestamp",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "Truncate Table LRS_Sandbox.VENA_RAW.VENA_FINANCE_MODEL;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "_Account",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Account",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Location",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Location",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Line/Dept",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Line/Dept",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Data Source",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Data Source",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Year",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Year",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Period",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Period",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Scenario",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Scenario",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Measure",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Measure",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_value",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_etl_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_etl_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "File Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Timestamp",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADF_TIMESTAMP",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+									"Snowflake_Schema": "VENA_RAW"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Sandbox/Vena"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2_Tested_By_Yvette')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "File Name",
+										"value": "$$FILENAME"
+									},
+									{
+										"name": "Timestamp",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "finance*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "Truncate Table LRS_Sandbox.VENA_RAW.VENA_FINANCE_MODEL",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "_Account",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Account",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Location",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Location",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Line/Dept",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Line/Dept",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Material Type/Customer",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Data Source",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Data Source",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Year",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Year",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Period",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Period",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Scenario",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Scenario",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_Measure",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_Measure",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_value",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_value",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "_etl_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_etl_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "File Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "_File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Timestamp",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADF_TIMESTAMP",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VENA_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VENA_FINANCE_MODEL",
+									"Snowflake_Schema": "VENA_RAW"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Sandbox/Vena"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_process_adp_employee_directory_file')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy Employee Directory Files",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "empDirectory.csv",
+									"wildcardFileName": "empDirectory.csv*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ds_adp_employee_directory_raw",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADP_Hours_CSV_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Get all files in empDirectory folder",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Copy Employee Directory Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Hours_XLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/ADP"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-07T21:44:44Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_process_adp_hours_file')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy XLS files into",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "xls",
+									"wildcardFileName": "adp_all_hours_*",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings",
+									"copyBehavior": "PreserveHierarchy"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 1
+										},
+										"sink": {
+											"name": "Column1",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 2
+										},
+										"sink": {
+											"name": "Column2",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 3
+										},
+										"sink": {
+											"name": "Column3",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 4
+										},
+										"sink": {
+											"name": "Column4",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 5
+										},
+										"sink": {
+											"name": "Column5",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 6
+										},
+										"sink": {
+											"name": "Column6",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 7
+										},
+										"sink": {
+											"name": "Column7",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 8
+										},
+										"sink": {
+											"name": "Column8",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 9
+										},
+										"sink": {
+											"name": "Column9",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 10
+										},
+										"sink": {
+											"name": "Column10",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 11
+										},
+										"sink": {
+											"name": "Column11",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 12
+										},
+										"sink": {
+											"name": "Column12",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 13
+										},
+										"sink": {
+											"name": "Column13",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 14
+										},
+										"sink": {
+											"name": "Column14",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 15
+										},
+										"sink": {
+											"name": "Column15",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 16
+										},
+										"sink": {
+											"name": "Column16",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 17
+										},
+										"sink": {
+											"name": "Column17",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 18
+										},
+										"sink": {
+											"name": "Column18",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 19
+										},
+										"sink": {
+											"name": "Column19",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 20
+										},
+										"sink": {
+											"name": "Column20",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 21
+										},
+										"sink": {
+											"name": "Column21",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ADP_Hours_XLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ADP_Hours_CSV_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Get all Files in XLS folder",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Copy XLS files into",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Hours_XLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Delete each file",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get all Files in XLS folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get all Files in XLS folder').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Check for anchor file",
+									"type": "IfCondition",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(item().name,'test')",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Delete XLS File",
+												"type": "Delete",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"dataset": {
+														"referenceName": "ADP_Hours_XLS",
+														"type": "DatasetReference",
+														"parameters": {
+															"pFilename": {
+																"value": "@item().name",
+																"type": "Expression"
+															}
+														}
+													},
+													"enableLogging": false,
+													"storeSettings": {
+														"type": "AzureBlobStorageReadSettings",
+														"recursive": true,
+														"enablePartitionDiscovery": false
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Load ADP Hours to Snowflake",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "Delete each file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Load ADP Hours to Snowflake",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ADPHours": {},
+									"Snowflake": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine",
+							"continuationSettings": {
+								"customizedCheckpointKey": "1b79b239-a2bc-4d02-b5fb-bc97c83f1c36"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/ADP"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-07T21:44:44Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_process_adp_terminations_file')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy ADP Term to Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Loop Through All Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "File Name",
+										"value": {
+											"value": "@variables('Var_File_Name')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Last Modified",
+										"value": {
+											"value": "@variables('Var_Last_Modified')",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_RAW.ADP_RAW.ADP_TERMINATION",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Position ID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position ID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal Last Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "First Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal First Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Position Status",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position Status",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Home Department Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Home Department Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Home Department Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Home Department Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Union Local Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Union Local Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Job Title Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Job Title Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Reports To Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Reports To Legal Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Hire Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Hire Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Reason Description"
+										},
+										"sink": {
+											"name": "Termination Reason Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Worked in State Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Worked in State Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "File Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last Modified",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Last Modified",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ADP_Terminations_Raw_Each_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": {
+										"value": "@variables('Var_File_Name')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "ADP_TERMINATION",
+									"Snowflake_Schema": "ADP_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Get All ADP Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop Through All Files",
+						"description": "Loop through all ADP Files in the blob storage",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get All ADP Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get All ADP Files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Files Attributes",
+									"description": "Get File's name and last modified date",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": "@item().name"
+											}
+										},
+										"fieldList": [
+											"lastModified",
+											"itemName"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition1",
+									"description": "find the newest file using last modified attribute",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Files Attributes",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(activity('Get Files Attributes').output.lastModified, variables('Var_Last_Modified'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "File Name",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_File_Name",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.itemName",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Last Modified",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_Last_Modified",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.lastModified",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Older FIles",
+						"description": "Get files older than 365 days",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Copy ADP Term to Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@addDays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop through older files",
+						"description": "loop through each files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Older FIles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Older FIles').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete files older than 365 days",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"Var_File_Name": {
+						"type": "String",
+						"defaultValue": "terms.csv_2024-09-06T12:28:33Z"
+					},
+					"Var_Last_Modified": {
+						"type": "String",
+						"defaultValue": "1900-01-01 00:00:00"
+					}
+				},
+				"folder": {
+					"name": "Production/ADP"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-07T21:18:20Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_HOURS_DAILY')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Load ADP Hours",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "pl_process_adp_hours_file",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-10-07T21:18:21Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/pl_process_adp_hours_file')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute SOFTPAK SALES pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SOFTPAK_SALES_DAILY_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute SOFTPAK DISPOSAL pipeline",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "SOFTPAK_DISPOSAL_SITE_DAILY_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-02T14:38:41Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TOWER_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Tower Fact table Full Load",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TOWER_FULL_LOAD_FACT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Tower Dim table Full Load",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Tower Fact table Full Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TOWER_FULL_LOAD_DIM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline Full Load 2",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Tower Dim table Full Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TOWER FULL LOAD PIPELINE_2",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-12T14:18:18Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TOWER_INCREMENTAL_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Tower Incremental Load",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TOWER_INCREMENTAL_LOAD_FACT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T18:18:11Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Legacy Full Load Fact",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Master Data Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_FULL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Midwest Full Load Fact",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Master Data Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_FULL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Master Data Load",
+						"description": "Reloading TRUX master metadata.",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MASTER_DATA_FULL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline Legacy Full Load Dim",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Legacy Full Load Fact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_DATA_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline Midwest Full Load Dim",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Midwest Full Load Fact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_DATA_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-14T15:28:56Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_DAILY_LOAD_OLD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run TRUX LEGACY DIM",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Run TRUX LEGACY Fact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_FULL_LOAD_DIM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST DIM",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Run TRUX MIDWEST Fact",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_FULL_LOAD_DIM",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Run TRUX LEGACY Fact",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Master Data Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_FULL_LOAD_FACT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST Fact",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Master Data Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_FULL_LOAD_FACT",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32
+							}
+						}
+					},
+					{
+						"name": "Master Data Load",
+						"description": "Reloading TRUX master metadata.",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MASTER_DATA_FULL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/TRUX_OLD"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-16T19:01:36Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_INCREMENTAL_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run TRUX LEGACY Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_INCREMENTAL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": "14"
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": "14"
+							}
+						}
+					},
+					{
+						"name": "Run TRUX LEGACY LOGGING Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_LOGGING_INCREMENTAL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": 14
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST LOGGING Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": 14
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-13T23:45:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Vena Financialj Model Daily Load",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "VENA_FINANCIAL_MODEL DAILY_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-02T17:06:40Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/VENA_FINANCIAL_MODEL DAILY_LOAD')]"
+			]
+		}
+	]
+}

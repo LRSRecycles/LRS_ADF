@@ -1,0 +1,2501 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "lakeshore-adf"
+		},
+		"msaz01_dm01_SQL_Server_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'msaz01_dm01_SQL_Server'",
+			"defaultValue": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'msaz01_dm01_Snowflake_Raw_V2'"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().database}"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/msaz01_dm01_SQL_Server')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "SQL server linked service for MSAZ01.",
+				"parameters": {
+					"server": {
+						"type": "string"
+					},
+					"db": {
+						"type": "string"
+					},
+					"username": {
+						"type": "String"
+					},
+					"pw": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('msaz01_dm01_SQL_Server_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "msaz01-dm01",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/msaz01_dm01_Snowflake_Raw_V2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"database": {
+						"type": "string",
+						"defaultValue": "LRS_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2",
+				"typeProperties": {
+					"authenticationType": "Basic",
+					"accountIdentifier": "bk40410.central-us.azure",
+					"user": "SVC_ELT",
+					"database": "[parameters('msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database')]",
+					"warehouse": "LRS_RAW_ADF_COMPUTE",
+					"role": "ACCOUNTADMIN",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "msaz01-dm01",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_HOURS_CSV_CONVERSION')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get XLS Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Hours_XLS_ALL",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems",
+								"itemName"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "Convert each file to CSV and delete",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get XLS Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get XLS Files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Copy XLS file to CSV",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "ExcelSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"name": "Employee ID",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Employee ID",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Employee Name",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Employee Name",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Manager ID",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Manager ID",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Manager Name",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Manager Name",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Effective Date",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Effective Date",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Historical Date",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Historical Date",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home DEPARTMENT",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home DEPARTMENT",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home LOCATION",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home LOCATION",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home COMPANY",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home COMPANY",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home Reserved4",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home Reserved4",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home JOBTITLE",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home JOBTITLE",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home Reserved6",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home Reserved6",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Home MANAGER",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Home MANAGER",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Pay Code",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Pay Code",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Hours",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Hours",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Money",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Money",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Days",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Days",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Wages",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Wages",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Base Wage",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Base Wage",
+														"type": "String",
+														"physicalType": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "Comment(s)",
+														"type": "String",
+														"physicalType": "String"
+													},
+													"sink": {
+														"name": "Comment(s)",
+														"type": "String",
+														"physicalType": "String"
+													}
+												}
+											],
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ADP_Hours_XLS",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFilename": {
+													"value": "@activity('Get XLS Files').output.itemName",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ADP_Hours_CSV",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFileName": {
+													"value": "@replace(activity('Get XLS Files').output.itemName,'.xls','.csv')",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Delete XLS file",
+									"type": "Delete",
+									"dependsOn": [
+										{
+											"activity": "Copy XLS file to CSV",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Hours_XLS",
+											"type": "DatasetReference",
+											"parameters": {
+												"pFilename": {
+													"value": "@activity('Get XLS Files').output.itemName",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Test"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-07T17:52:47Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Terminations_Raw_All_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "ADP"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "terms.csv",
+						"container": "adp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Terminations_Raw_Each_File')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "ADP"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
+						"folderPath": "terms.csv",
+						"container": "adp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ILDC93')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ildc93_dm01_SQL_Server",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"server": "10.170.2.4  ",
+						"db": {
+							"value": "@dataset().db",
+							"type": "Expression"
+						},
+						"username": "lrsquery",
+						"pw": "T0werQu3ry?"
+					}
+				},
+				"parameters": {
+					"db": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_Raw_V2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Snowflake_Raw_V2",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"database": "LRS_RAW"
+					}
+				},
+				"parameters": {
+					"Snowflake_Sink_Table": {
+						"type": "string",
+						"defaultValue": "DESTINATION"
+					},
+					"Snowflake_Schema": {
+						"type": "string",
+						"defaultValue": "TOWER_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2Table",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Snowflake_Schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Snowflake_Sink_Table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Snowflake_Raw_V2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_Sandbox_V2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Snowflake_Raw_V2",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"database": "LRS_SANDBOX"
+					}
+				},
+				"parameters": {
+					"Snowflake_Sink_Table": {
+						"type": "string",
+						"defaultValue": "VENA_FINANCE_MODEL"
+					},
+					"Snowflake_Schema": {
+						"type": "string",
+						"defaultValue": "VENA_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2Table",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Snowflake_Schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Snowflake_Sink_Table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Snowflake_Raw_V2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MSAZ01')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_SQL_Server",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"server": "msaz01-sql01",
+						"db": {
+							"value": "@dataset().database",
+							"type": "Expression"
+						},
+						"username": "AzureSQLReadOnlyMW",
+						"pw": "4QcH9zAzure01"
+					}
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					},
+					"database": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "AC01_PART",
+						"type": "nvarchar"
+					},
+					{
+						"name": "AC01_DATE",
+						"type": "smalldatetime",
+						"precision": 16,
+						"scale": 0
+					},
+					{
+						"name": "AC01_QTY",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "AC01_AVGCOST",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_SQL_Server')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MSAZ01_TOWER')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_SQL_Server",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"server": "10.170.2.4",
+						"db": {
+							"value": "@dataset().db",
+							"type": "Expression"
+						},
+						"username": "lrsquery",
+						"pw": "T0werQu3ry?"
+					}
+				},
+				"parameters": {
+					"db": {
+						"type": "string"
+					},
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_SQL_Server')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "Variable_disposal_site_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CO",
+						"type": "String"
+					},
+					{
+						"name": "DISPOSAL",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "TAX BODY",
+						"type": "String"
+					},
+					{
+						"name": "TICKET",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIL$",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SoftPak_Disposal_site_Raw_EachFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "Variable_disposal_site_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CO",
+						"type": "String"
+					},
+					{
+						"name": "DISPOSAL",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "TAX BODY",
+						"type": "String"
+					},
+					{
+						"name": "TICKET",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIL$",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY01')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_SQL_Server",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"server": "msaz01-sql01\\TRUX_LEGACY01",
+						"db": {
+							"value": "@dataset().database",
+							"type": "Expression"
+						},
+						"username": "AzureSQLReadOnly",
+						"pw": "4QcH9zAzure01"
+					}
+				},
+				"parameters": {
+					"schema": {
+						"type": "string"
+					},
+					"table": {
+						"type": "string"
+					},
+					"database": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "AC01_PART",
+						"type": "nvarchar"
+					},
+					{
+						"name": "AC01_DATE",
+						"type": "smalldatetime",
+						"precision": 16,
+						"scale": 0
+					},
+					{
+						"name": "AC01_QTY",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "AC01_AVGCOST",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_SQL_Server')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_All_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "finance_model",
+						"container": "vena"
+					},
+					"columnDelimiter": "|",
+					"escapeChar": "",
+					"firstRowAsHeader": true,
+					"quoteChar": ""
+				},
+				"schema": [
+					{
+						"name": "_Account",
+						"type": "String"
+					},
+					{
+						"name": "_Location",
+						"type": "String"
+					},
+					{
+						"name": "_Line/Dept",
+						"type": "String"
+					},
+					{
+						"name": "_Material Type/Customer",
+						"type": "String"
+					},
+					{
+						"name": "_Data Source",
+						"type": "String"
+					},
+					{
+						"name": "_Year",
+						"type": "String"
+					},
+					{
+						"name": "_Period",
+						"type": "String"
+					},
+					{
+						"name": "_Scenario",
+						"type": "String"
+					},
+					{
+						"name": "_Measure",
+						"type": "String"
+					},
+					{
+						"name": "_value",
+						"type": "String"
+					},
+					{
+						"name": "_etl_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adp_employee_directory_raw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "empDirectory.csv",
+						"container": "adp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Load ADP Hours to Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADP_Hours_CSV_ALL",
+								"type": "DatasetReference"
+							},
+							"name": "ADPHours"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "Snowflake",
+							"description": "ADP Sink dataset.",
+							"rejectedDataLinkedService": {
+								"referenceName": "AzureBlobLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "FlagLatestFileFoRow"
+						},
+						{
+							"name": "AlterRowUpsert"
+						},
+						{
+							"name": "FileTimestamp"
+						},
+						{
+							"name": "FlagColumn"
+						},
+						{
+							"name": "FilterLatest"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {Employee ID} as string,",
+						"          {Employee Name} as string,",
+						"          {Manager ID} as string,",
+						"          {Manager Name} as string,",
+						"          {Effective Date} as date,",
+						"          {Historical Date} as string,",
+						"          {Home DEPARTMENT} as string,",
+						"          {Home LOCATION} as string,",
+						"          {Home COMPANY} as string,",
+						"          {Home Reserved4} as string,",
+						"          {Home JOBTITLE} as string,",
+						"          {Home Reserved6} as string,",
+						"          {Home MANAGER} as string,",
+						"          {Pay Code} as string,",
+						"          Hours as double,",
+						"          Money as boolean,",
+						"          Days as boolean,",
+						"          Wages as double,",
+						"          {Base Wage} as double,",
+						"          {Comment(s)} as string,",
+						"          {_c20} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     rowUrlColumn: 'adf_filename',",
+						"     skipLines: 10) ~> ADPHours",
+						"FileTimestamp window(over({Employee ID},",
+						"          {Effective Date},",
+						"          {Pay Code}),",
+						"     {Latest File} = max(file_timestamp)) ~> FlagLatestFileFoRow",
+						"FilterLatest alterRow(upsertIf(Flag==true())) ~> AlterRowUpsert",
+						"ADPHours derive(file_timestamp = replace(replace(replace(replace(concat(substring(adf_filename,20,10),' ',substring(adf_filename,31,11)),'-',''),':',''),'.',''),' ',''),",
+						"          adf_timestamp = fromUTC(currentTimestamp(),'CST')) ~> FileTimestamp",
+						"FlagLatestFileFoRow derive(Flag = file_timestamp == {Latest File}) ~> FlagColumn",
+						"FlagColumn filter(Flag == true()) ~> FilterLatest",
+						"AlterRowUpsert sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          EMPLOYEE_ID as string,",
+						"          EMPLOYEE_NAME as string,",
+						"          MANAGER_ID as string,",
+						"          MANAGER_NAME as string,",
+						"          EFFECTIVE_DATE as timestamp,",
+						"          HISTORICAL_DATE as string,",
+						"          HOME_DEPARTMENT as string,",
+						"          HOME_LOCATION as string,",
+						"          HOME_COMPANY as string,",
+						"          HOME_RESERVED4 as string,",
+						"          HOME_JOBTITLE as string,",
+						"          HOME_RESERVED6 as string,",
+						"          HOME_MANAGER as string,",
+						"          PAY_CODE as string,",
+						"          HOURS as string,",
+						"          MONEY as string,",
+						"          DAYS as string,",
+						"          WAGES as string,",
+						"          BASE_WAGE as string,",
+						"          COMMENTS as string,",
+						"          ADF_FILENAME as string,",
+						"          ADF_TIMESTAMP as timestamp",
+						"     ),",
+						"     format: 'table',",
+						"     tableName: 'ADP_HOURS',",
+						"     schemaName: 'ADP_RAW',",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['EMPLOYEE_ID','EFFECTIVE_DATE','PAY_CODE'],",
+						"     store: 'snowflake',",
+						"     store: 'snowflakeV2',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     stageInsert: true,",
+						"     mapColumn(",
+						"          EMPLOYEE_ID = {Employee ID},",
+						"          EMPLOYEE_NAME = {Employee Name},",
+						"          MANAGER_ID = {Manager ID},",
+						"          MANAGER_NAME = {Manager Name},",
+						"          EFFECTIVE_DATE = {Effective Date},",
+						"          HISTORICAL_DATE = {Historical Date},",
+						"          HOME_DEPARTMENT = {Home DEPARTMENT},",
+						"          HOME_LOCATION = {Home LOCATION},",
+						"          HOME_COMPANY = {Home COMPANY},",
+						"          HOME_RESERVED4 = {Home Reserved4},",
+						"          HOME_JOBTITLE = {Home JOBTITLE},",
+						"          HOME_RESERVED6 = {Home Reserved6},",
+						"          HOME_MANAGER = {Home MANAGER},",
+						"          PAY_CODE = {Pay Code},",
+						"          HOURS = Hours,",
+						"          MONEY = Money,",
+						"          DAYS = Days,",
+						"          WAGES = Wages,",
+						"          BASE_WAGE = {Base Wage},",
+						"          COMMENTS = {Comment(s)},",
+						"          ADF_FILENAME = adf_filename,",
+						"          ADF_TIMESTAMP = adf_timestamp",
+						"     )) ~> Snowflake"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_WEEKLY_LOAD_Test')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy ADP Term to Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Loop Through All Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "File Name",
+										"value": {
+											"value": "@variables('Var_File_Name')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Last Modified",
+										"value": {
+											"value": "@variables('Var_Last_Modified')",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "truncate table LRS_SANDBOX.ADP_RAW.ADP_TERMINATION",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Position ID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position ID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Legal Last Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal Last Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Legal First Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal First Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Position Status",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position Status",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Home Department Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Home Department Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Union Local Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Union Local Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Job Title Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Job Title Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Reports To Legal Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Reports To Legal Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Hire Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Hire Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Reason Description12",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Reason Description12",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Reason Description13",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Reason Description13",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Worked in State Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Worked in State Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "File Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last Modified",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Last Modified",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ADP_Terminations_Raw_Each_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": {
+										"value": "@variables('Var_File_Name')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "ADP_TERMINATION",
+									"Snowflake_Schema": "ADP_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Get All ADP Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop Through All Files",
+						"description": "Loop through all ADP Files in the blob storage",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get All ADP Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get All ADP Files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Files Attributes",
+									"description": "Get File's name and last modified date",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": "@item().name"
+											}
+										},
+										"fieldList": [
+											"lastModified",
+											"itemName"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition1",
+									"description": "find the newest file using last modified attribute",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Files Attributes",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(activity('Get Files Attributes').output.lastModified, variables('Var_Last_Modified'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "File Name",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_File_Name",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.itemName",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Last Modified",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_Last_Modified",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.lastModified",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Older FIles",
+						"description": "Get files older than 365 days",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Copy ADP Term to Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@addDays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop through older files",
+						"description": "loop through each files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Older FIles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Older FIles').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete files older than 365 days",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"Var_File_Name": {
+						"type": "String",
+						"defaultValue": "terms.csv_2023-09-01T12:48:46Z"
+					},
+					"Var_Last_Modified": {
+						"type": "String",
+						"defaultValue": "1900-01-01 00:00:00"
+					}
+				},
+				"folder": {
+					"name": "Sandbox/ADP"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ADP_Terminations_Raw_Each_File')]",
+				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Sandbox_V2')]",
+				"[concat(variables('factoryId'), '/datasets/ADP_Terminations_Raw_All_Files')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DELETE ALL OLD TRUX SNOWFLAKE SCHEMAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Database Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_COMBINED",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop over databases",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Database Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Database Lookup').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Delete all Schemas",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LRS_Snowflake_V2",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@{concat(\n'DROP SCHEMA LRS_RAW.', item().Snowflake_Name_OLD\n\t)}",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Maximum_DIU": {
+						"type": "int",
+						"defaultValue": 2
+					},
+					"Degree_Copy_Parallelism": {
+						"type": "int",
+						"defaultValue": 8
+					}
+				},
+				"folder": {
+					"name": "Production/TRUX"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-27T20:53:45Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Raw_V2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SoftPak Disposal Site",
+						"description": "SoftPak Disposal Site Copy Activity",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "filename",
+										"value": "$$FILEPATH"
+									},
+									{
+										"name": "ADF_TIMESTAMP",
+										"value": {
+											"value": "@utcnow()",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "variable_disposal_site_report_*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_RAW.SOFTPAK_RAW.VARIABLE_DISPOSAL_SITE_REPORT;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand",
+									"additionalCopyOptions": {
+										"ON_ERROR": "CONTINUE"
+									}
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging",
+								"enableCompression": true
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 1
+										},
+										"sink": {
+											"name": "CO",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 2
+										},
+										"sink": {
+											"name": "DISPOSAL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 3
+										},
+										"sink": {
+											"name": "MATERIAL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 4
+										},
+										"sink": {
+											"name": "DATE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 5
+										},
+										"sink": {
+											"name": "ROUTE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 6
+										},
+										"sink": {
+											"name": "DRIVER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 7
+										},
+										"sink": {
+											"name": "VEHICLE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 8
+										},
+										"sink": {
+											"name": "TAX BODY",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 9
+										},
+										"sink": {
+											"name": "TICKET",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 10
+										},
+										"sink": {
+											"name": "UNITS",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 11
+										},
+										"sink": {
+											"name": "COST",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 12
+										},
+										"sink": {
+											"name": "BIL$",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 13
+										},
+										"sink": {
+											"name": "ROUTE TYPE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 14
+										},
+										"sink": {
+											"name": "PROP_13",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "filename",
+											"type": "String"
+										},
+										"sink": {
+											"name": "FILE NAME",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "ADF_TIMESTAMP",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ADF_TIMESTAMP",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VARIABLE_DISPOSAL_SITE_REPORT",
+									"Snowflake_Schema": "SOFTPAK_RAW"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/SOFTPAK"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:58:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES')]",
+				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Raw_V2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_LOAD_SIMPLE')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy All Files",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_SANDBOX.SOFTPAK_RAW.VARIABLE_DISPOSAL_SITE_REPORT_SIMPLE",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 1
+										},
+										"sink": {
+											"name": "CO",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 2
+										},
+										"sink": {
+											"name": "DISPOSAL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 3
+										},
+										"sink": {
+											"name": "MATERIAL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 4
+										},
+										"sink": {
+											"name": "DATE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 5
+										},
+										"sink": {
+											"name": "ROUTE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 6
+										},
+										"sink": {
+											"name": "DRIVER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 7
+										},
+										"sink": {
+											"name": "VEHICLE",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 8
+										},
+										"sink": {
+											"name": "TAX BODY",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 9
+										},
+										"sink": {
+											"name": "TICKET",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 10
+										},
+										"sink": {
+											"name": "UNITS",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 11
+										},
+										"sink": {
+											"name": "COST",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 12
+										},
+										"sink": {
+											"name": "BIL$",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"type": "String",
+											"ordinal": 13
+										},
+										"sink": {
+											"name": "ROUTE TYPE",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "VARIABLE_DISPOSAL_SITE_REPORT_SIMPLE",
+									"Snowflake_Schema": "SOFTPAK_RAW"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"File Name": {
+						"type": "String"
+					},
+					"Last Modified": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Sandbox/SOFTPAK"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES')]",
+				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Sandbox_V2')]"
+			]
+		}
+	]
+}

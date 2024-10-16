@@ -1,0 +1,39 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "lakeshore-adf"
+		},
+		"AzureBlobLinkedService_connectionString": {
+			"value": ""
+		},
+		"LRS_Snowflake_V2_password": {
+			"value": ""
+		},
+		"ildc93_dm01_SQL_Server_connectionString": {
+			"value": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"msaz01_dm01_SQL_Server_connectionString": {
+			"value": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_password": {
+			"value": ""
+		},
+		"LRS_Snowflake_V2_properties_typeProperties_database": {
+			"value": "LRS_RAW"
+		},
+		"msaz01_dm01_Azure_Blob_sasUri": {
+			"value": ""
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
+			"value": "@{linkedService().database}"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

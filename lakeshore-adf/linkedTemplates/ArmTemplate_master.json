@@ -1,0 +1,200 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "lakeshore-adf"
+		},
+		"AzureBlobLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobLinkedService'"
+		},
+		"LRS_Snowflake_V2_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LRS_Snowflake_V2'"
+		},
+		"ildc93_dm01_SQL_Server_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ildc93_dm01_SQL_Server'",
+			"defaultValue": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"msaz01_dm01_SQL_Server_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'msaz01_dm01_SQL_Server'",
+			"defaultValue": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'msaz01_dm01_Snowflake_Raw_V2'"
+		},
+		"LRS_Snowflake_V2_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LRS_RAW"
+		},
+		"msaz01_dm01_Azure_Blob_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'msaz01_dm01_Azure_Blob'"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().database}"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "lakeshore-adf_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobLinkedService_connectionString": {
+						"value": "[parameters('AzureBlobLinkedService_connectionString')]"
+					},
+					"LRS_Snowflake_V2_password": {
+						"value": "[parameters('LRS_Snowflake_V2_password')]"
+					},
+					"ildc93_dm01_SQL_Server_connectionString": {
+						"value": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
+					},
+					"LRS_Snowflake_V2_properties_typeProperties_database": {
+						"value": "[parameters('LRS_Snowflake_V2_properties_typeProperties_database')]"
+					},
+					"msaz01_dm01_Azure_Blob_sasUri": {
+						"value": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "lakeshore-adf_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"msaz01_dm01_SQL_Server_connectionString": {
+						"value": "[parameters('msaz01_dm01_SQL_Server_connectionString')]"
+					},
+					"msaz01_dm01_Snowflake_Raw_V2_password": {
+						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_password')]"
+					},
+					"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
+						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'lakeshore-adf_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "lakeshore-adf_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'lakeshore-adf_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "lakeshore-adf_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'lakeshore-adf_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "lakeshore-adf_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'lakeshore-adf_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "lakeshore-adf_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'lakeshore-adf_ArmTemplate_4')]"
+			]
+		}
+	]
+}

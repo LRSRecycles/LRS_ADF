@@ -1,0 +1,1419 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "lakeshore-adf"
+		},
+		"AzureBlobLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobLinkedService'"
+		},
+		"LRS_Snowflake_V2_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LRS_Snowflake_V2'"
+		},
+		"ildc93_dm01_SQL_Server_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ildc93_dm01_SQL_Server'",
+			"defaultValue": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		},
+		"LRS_Snowflake_V2_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "LRS_RAW"
+		},
+		"msaz01_dm01_Azure_Blob_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'msaz01_dm01_Azure_Blob'"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobLinkedService')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobLinkedService_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_V2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Snowflake linked service for Lakeshore Recycling Services Version 2.",
+				"annotations": [],
+				"type": "SnowflakeV2",
+				"typeProperties": {
+					"authenticationType": "Basic",
+					"accountIdentifier": "bk40410.central-us.azure",
+					"user": "SVC_ELT",
+					"database": "[parameters('LRS_Snowflake_V2_properties_typeProperties_database')]",
+					"warehouse": "LRS_RAW_ADF_COMPUTE",
+					"role": "ACCOUNTADMIN",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LRS_Snowflake_V2_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ildc93-dm01')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Virtual machine running in the LRS data center, primarily for access to Tower data.",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 10,
+							"cleanup": false,
+							"customProperties": []
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/msaz01-dm01')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Runtime for the VM running inside LRS Azure network.",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Hours_CSV')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "csv",
+						"container": "adphours"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "��\u0011ࡱ\u001a�\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000>\u0000\u0003\u0000��\t\u0000\u0006\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000Y\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u0002\u0000\u0000\u0000\u0001\u0000\u0000\u0000����\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000v\u0000\u0000\u0000�\u0000\u0000\u0000t\u0001\u0000\u0000�\u0001\u0000\u0000r\u0002\u0000\u0000�\u0002\u0000\u0000p\u0003\u0000\u0000�\u0003\u0000\u0000�\u0004\u0000\u0000�\u0004\u0000\u0000~\u0005\u0000\u0000�\u0005\u0000\u0000|\u0006\u0000\u0000�\u0006\u0000\u0000z\u0007\u0000\u0000�\u0007\u0000\u0000x\b\u0000\u0000�\b\u0000\u0000v\t\u0000\u0000�\t\u0000\u0000t",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Hours_CSV_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "csv",
+						"container": "adphours"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "��\u0011ࡱ\u001a�\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000>\u0000\u0003\u0000��\t\u0000\u0006\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000Y\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000\u0000\u0002\u0000\u0000\u0000\u0001\u0000\u0000\u0000����\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000v\u0000\u0000\u0000�\u0000\u0000\u0000t\u0001\u0000\u0000�\u0001\u0000\u0000r\u0002\u0000\u0000�\u0002\u0000\u0000p\u0003\u0000\u0000�\u0003\u0000\u0000�\u0004\u0000\u0000�\u0004\u0000\u0000~\u0005\u0000\u0000�\u0005\u0000\u0000|\u0006\u0000\u0000�\u0006\u0000\u0000z\u0007\u0000\u0000�\u0007\u0000\u0000x\b\u0000\u0000�\b\u0000\u0000v\t\u0000\u0000�\t\u0000\u0000t",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Hours_XLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFilename": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFilename",
+							"type": "Expression"
+						},
+						"folderPath": "xls",
+						"container": "adphours"
+					},
+					"sheetIndex": 0,
+					"range": "A10:T50000",
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_Hours_XLS_ALL')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "xls",
+						"container": "adphours"
+					},
+					"sheetIndex": 0,
+					"range": "",
+					"firstRowAsHeader": false
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_Raw_IR_V2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LRS_Snowflake_V2",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Snowflake_Sink_Table": {
+						"type": "string",
+						"defaultValue": "DESTINATION"
+					},
+					"Snowflake_Schema": {
+						"type": "string",
+						"defaultValue": "TOWER_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2Table",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Snowflake_Schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Snowflake_Sink_Table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LRS_Snowflake_V2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_DATA_FLOW_SINK')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "Variable_disposal_site_sink",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CO",
+						"type": "String"
+					},
+					{
+						"name": "DISPOSAL",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "TAX BODY",
+						"type": "String"
+					},
+					{
+						"name": "TICKET",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIL$",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_DATA_FLOW_SOURCE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "Variable_disposal_site_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "CO",
+						"type": "String"
+					},
+					{
+						"name": "DISPOSAL",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "TAX BODY",
+						"type": "String"
+					},
+					{
+						"name": "TICKET",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIL$",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_SINK')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "Variable_disposal_site_sink",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_SALES_RAW_ALL_FILES')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "Variable_sales_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ACCT YYMM",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY",
+						"type": "String"
+					},
+					{
+						"name": "CUST #",
+						"type": "String"
+					},
+					{
+						"name": "CUST NAME",
+						"type": "String"
+					},
+					{
+						"name": "TAXBODY",
+						"type": "String"
+					},
+					{
+						"name": "CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "GL CODE",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "SIZE CD",
+						"type": "String"
+					},
+					{
+						"name": "CHG CD",
+						"type": "String"
+					},
+					{
+						"name": "DESCRIPTION",
+						"type": "String"
+					},
+					{
+						"name": "EQUIP CD",
+						"type": "String"
+					},
+					{
+						"name": "VAR 3",
+						"type": "String"
+					},
+					{
+						"name": "VAR 4",
+						"type": "String"
+					},
+					{
+						"name": "QTY",
+						"type": "String"
+					},
+					{
+						"name": "BILLED AMT",
+						"type": "String"
+					},
+					{
+						"name": "MASTER AMT",
+						"type": "String"
+					},
+					{
+						"name": "VARIANCE",
+						"type": "String"
+					},
+					{
+						"name": "VAR FLAG",
+						"type": "String"
+					},
+					{
+						"name": "INV #",
+						"type": "String"
+					},
+					{
+						"name": "W/O ACT DATE",
+						"type": "String"
+					},
+					{
+						"name": "SUB COMP",
+						"type": "String"
+					},
+					{
+						"name": "SUB CUST #",
+						"type": "String"
+					},
+					{
+						"name": "ORIG W/O#",
+						"type": "String"
+					},
+					{
+						"name": "ADJ USER",
+						"type": "String"
+					},
+					{
+						"name": "CUST START",
+						"type": "String"
+					},
+					{
+						"name": "CUST STOP",
+						"type": "String"
+					},
+					{
+						"name": "BILL FIRST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL LAST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "BILL APT",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "BILL CITY",
+						"type": "String"
+					},
+					{
+						"name": "BILL STATE",
+						"type": "String"
+					},
+					{
+						"name": "BILL ZIP",
+						"type": "String"
+					},
+					{
+						"name": "SERV NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "SERV APT",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "SERV CITY",
+						"type": "String"
+					},
+					{
+						"name": "SERV STATE",
+						"type": "String"
+					},
+					{
+						"name": "SERV ZIP",
+						"type": "String"
+					},
+					{
+						"name": "AREA CODE",
+						"type": "String"
+					},
+					{
+						"name": "PHONE #",
+						"type": "String"
+					},
+					{
+						"name": "CR LIMIT",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 1",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 2",
+						"type": "String"
+					},
+					{
+						"name": "CONTACT",
+						"type": "String"
+					},
+					{
+						"name": "RES CUSTOMER",
+						"type": "String"
+					},
+					{
+						"name": "PREV CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "PRICE LIST",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "UOM",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "SALES ID",
+						"type": "String"
+					},
+					{
+						"name": "FEE CODE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "LANDFILL CODE",
+						"type": "String"
+					},
+					{
+						"name": "TICKET #",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIN TYPE",
+						"type": "String"
+					},
+					{
+						"name": "RATE",
+						"type": "String"
+					},
+					{
+						"name": "SVC TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_SALES_RAW_EACH_FILE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFilename": {
+						"type": "string",
+						"defaultValue": "variable_sales_report_2021.csv"
+					}
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFilename",
+							"type": "Expression"
+						},
+						"folderPath": "Variable_sales_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ACCT YYMM",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY",
+						"type": "String"
+					},
+					{
+						"name": "CUST #",
+						"type": "String"
+					},
+					{
+						"name": "CUST NAME",
+						"type": "String"
+					},
+					{
+						"name": "TAXBODY",
+						"type": "String"
+					},
+					{
+						"name": "CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "GL CODE",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "SIZE CD",
+						"type": "String"
+					},
+					{
+						"name": "CHG CD",
+						"type": "String"
+					},
+					{
+						"name": "DESCRIPTION",
+						"type": "String"
+					},
+					{
+						"name": "EQUIP CD",
+						"type": "String"
+					},
+					{
+						"name": "VAR 3",
+						"type": "String"
+					},
+					{
+						"name": "VAR 4",
+						"type": "String"
+					},
+					{
+						"name": "QTY",
+						"type": "String"
+					},
+					{
+						"name": "BILLED AMT",
+						"type": "String"
+					},
+					{
+						"name": "MASTER AMT",
+						"type": "String"
+					},
+					{
+						"name": "VARIANCE",
+						"type": "String"
+					},
+					{
+						"name": "VAR FLAG",
+						"type": "String"
+					},
+					{
+						"name": "INV #",
+						"type": "String"
+					},
+					{
+						"name": "W/O ACT DATE",
+						"type": "String"
+					},
+					{
+						"name": "SUB COMP",
+						"type": "String"
+					},
+					{
+						"name": "SUB CUST #",
+						"type": "String"
+					},
+					{
+						"name": "ORIG W/O#",
+						"type": "String"
+					},
+					{
+						"name": "ADJ USER",
+						"type": "String"
+					},
+					{
+						"name": "CUST START",
+						"type": "String"
+					},
+					{
+						"name": "CUST STOP",
+						"type": "String"
+					},
+					{
+						"name": "BILL FIRST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL LAST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "BILL APT",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "BILL CITY",
+						"type": "String"
+					},
+					{
+						"name": "BILL STATE",
+						"type": "String"
+					},
+					{
+						"name": "BILL ZIP",
+						"type": "String"
+					},
+					{
+						"name": "SERV NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "SERV APT",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "SERV CITY",
+						"type": "String"
+					},
+					{
+						"name": "SERV STATE",
+						"type": "String"
+					},
+					{
+						"name": "SERV ZIP",
+						"type": "String"
+					},
+					{
+						"name": "AREA CODE",
+						"type": "String"
+					},
+					{
+						"name": "PHONE #",
+						"type": "String"
+					},
+					{
+						"name": "CR LIMIT",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 1",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 2",
+						"type": "String"
+					},
+					{
+						"name": "CONTACT",
+						"type": "String"
+					},
+					{
+						"name": "RES CUSTOMER",
+						"type": "String"
+					},
+					{
+						"name": "PREV CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "PRICE LIST",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "UOM",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "SALES ID",
+						"type": "String"
+					},
+					{
+						"name": "FEE CODE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "LANDFILL CODE",
+						"type": "String"
+					},
+					{
+						"name": "TICKET #",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIN TYPE",
+						"type": "String"
+					},
+					{
+						"name": "RATE",
+						"type": "String"
+					},
+					{
+						"name": "SVC TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Archive_All_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "processed",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Archive_Each')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "processed",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "_Account",
+						"type": "String"
+					},
+					{
+						"name": "_Location",
+						"type": "String"
+					},
+					{
+						"name": "_Line/Dept",
+						"type": "String"
+					},
+					{
+						"name": "_Material Type/Customer",
+						"type": "String"
+					},
+					{
+						"name": "_Data Source",
+						"type": "String"
+					},
+					{
+						"name": "_Year",
+						"type": "String"
+					},
+					{
+						"name": "_Period",
+						"type": "String"
+					},
+					{
+						"name": "_Scenario",
+						"type": "String"
+					},
+					{
+						"name": "_Measure",
+						"type": "String"
+					},
+					{
+						"name": "_value",
+						"type": "String"
+					},
+					{
+						"name": "_etl_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Each_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "finance_model",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "_Account",
+						"type": "String"
+					},
+					{
+						"name": "_Location",
+						"type": "String"
+					},
+					{
+						"name": "_Line/Dept",
+						"type": "String"
+					},
+					{
+						"name": "_Material Type/Customer",
+						"type": "String"
+					},
+					{
+						"name": "_Data Source",
+						"type": "String"
+					},
+					{
+						"name": "_Year",
+						"type": "String"
+					},
+					{
+						"name": "_Period",
+						"type": "String"
+					},
+					{
+						"name": "_Scenario",
+						"type": "String"
+					},
+					{
+						"name": "_Measure",
+						"type": "String"
+					},
+					{
+						"name": "_value",
+						"type": "String"
+					},
+					{
+						"name": "_etl_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ildc93_dm01_SQL_Server')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"server": {
+						"type": "string"
+					},
+					"db": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"pw": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "ildc93-dm01",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/ildc93-dm01')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/msaz01_dm01_Azure_Blob')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"
+				},
+				"connectVia": {
+					"referenceName": "msaz01-dm01",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/msaz01-dm01')]"
+			]
+		}
+	]
+}
