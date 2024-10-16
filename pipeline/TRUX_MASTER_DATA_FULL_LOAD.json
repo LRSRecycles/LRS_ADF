@@ -3465,7 +3465,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, [OPACCESS_LINK]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT]\nINNER JOIN [OPACCESS]\nON [OPACCOUNT_ID] = [OPACCESS_LINK]",
+						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, os.[OPACCESS_ID]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT] ot\nINNER JOIN [OPACCESS] os\nON [OPACCOUNT_ID] = [OPACCESS_LINK]\nINNER JOIN (SELECT MAX([OPACCESS_ID]) AS [OPACCESS_ID]\n\t\t      FROM [OPACCESS]\n\t\t\t GROUP BY OPACCESS_LINK) AS latest\nON os.[OPACCESS_ID] = latest.[OPACCESS_ID];",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -3520,11 +3520,11 @@
 							},
 							{
 								"source": {
-									"name": "OPACCESS_LINK",
+									"name": "OPACCESS_ID",
 									"type": "Int32"
 								},
 								"sink": {
-									"name": "OPACCESS_LINK",
+									"name": "OPACCESS_ID",
 									"type": "Int64"
 								}
 							},
@@ -3618,7 +3618,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, [OPACCESS_LINK]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT]\nINNER JOIN [OPACCESS]\nON [OPACCOUNT_ID] = [OPACCESS_LINK]",
+						"sqlReaderQuery": "SELECT [OPACCOUNT_ID]\n, [OPACCOUNT_EMAIL]\n, [OPACCOUNT_REGISDTE]\n, os.[OPACCESS_ID]\n, [OPACCESS_COMP]\n, [OPACCESS_CUST]\n, [OPACCESS_SITE]\n, [OPACCESS_ACTIVEDTE]\n, [OPACCESS_DEACTIVEDTE]\nFROM [OPACCOUNT] ot\nINNER JOIN [OPACCESS] os\nON [OPACCOUNT_ID] = [OPACCESS_LINK]\nINNER JOIN (SELECT MAX([OPACCESS_ID]) AS [OPACCESS_ID]\n\t\t      FROM [OPACCESS]\n\t\t\t GROUP BY OPACCESS_LINK) AS latest\nON os.[OPACCESS_ID] = latest.[OPACCESS_ID];",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -3673,11 +3673,11 @@
 							},
 							{
 								"source": {
-									"name": "OPACCESS_LINK",
+									"name": "OPACCESS_ID",
 									"type": "Int32"
 								},
 								"sink": {
-									"name": "OPACCESS_LINK",
+									"name": "OPACCESS_ID",
 									"type": "Int64"
 								}
 							},
