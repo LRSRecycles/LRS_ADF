@@ -22,7 +22,6 @@
 							"type": "LinkedServiceReference"
 						}
 					],
-					"url": "https://lakeshorers-nosso.prd.mykronos.com/api/v1/commons/persons/apply_read",
 					"body": {
 						"where": {
 							"missingExternalIdType": "aoid"
