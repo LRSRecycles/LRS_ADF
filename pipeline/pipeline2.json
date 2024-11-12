@@ -17,10 +17,10 @@
 				"typeProperties": {
 					"method": "POST",
 					"headers": {
-						"Content-Type": "x-www-form-urlencoded"
+						"Content-Type": "application/x-www-form-urlencoded"
 					},
 					"url": "https://lakeshorers-nosso.prd.mykronos.com/api/authentication/access_token",
-					"body": "username:APIUSER\npassword:Lrsapiprduser2024!\nclient_id:eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF\nclient_secret:cGFb8UjY8ocRIFOd\ngrant_type:password\nauth_chain:OAuthLdapService\n"
+					"body": "username=APIUSER&password=Lrsapiprduser2024!&client_id=eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF&client_secret=cGFb8UjY8ocRIFOd&grant_type=password&auth_chain=OAuthLdapService"
 				}
 			}
 		],
