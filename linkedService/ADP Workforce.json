@@ -1,0 +1,7 @@
+{
+	"name": "ADP Workforce",
+	"properties": {
+		"type": "RestService",
+		"annotations": []
+	}
+}
