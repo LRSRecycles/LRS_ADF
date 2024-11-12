@@ -16,17 +16,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"method": "POST",
-					"linkedServices": [
-						{
-							"referenceName": "ADP Workforce",
-							"type": "LinkedServiceReference"
-						}
-					],
-					"body": {
-						"where": {
-							"missingExternalIdType": "aoid"
-						}
-					}
+					"headers": {
+						"Content-Type": "x-www-form-urlencoded"
+					},
+					"url": "https://lakeshorers-nosso.prd.mykronos.com/api/authentication/access_token",
+					"body": "username:APIUSER\npassword:Lrsapiprduser2024!\nclient_id:eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF\nclient_secret:cGFb8UjY8ocRIFOd\ngrant_type:password\nauth_chain:OAuthLdapService\n"
 				}
 			}
 		],
