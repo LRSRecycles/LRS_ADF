@@ -1,0 +1,39 @@
+{
+	"name": "pipeline2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"linkedServices": [
+						{
+							"referenceName": "ADP Workforce",
+							"type": "LinkedServiceReference"
+						}
+					],
+					"url": "https://lakeshorers-nosso.prd.mykronos.com/api/v1/commons/persons/apply_read",
+					"body": {
+						"where": {
+							"missingExternalIdType": "aoid"
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "Test"
+		},
+		"annotations": []
+	}
+}
