@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "lakeshore-adf"
 		},
+		"ADP Workforce_clientSecret": {
+			"type": "secureString",
+			"metadata": "Secure string for 'clientSecret' of 'ADP Workforce'"
+		},
 		"AzureBlobLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobLinkedService'"
@@ -28,6 +32,14 @@
 		"msaz01_dm01_Snowflake_Raw_V2_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'msaz01_dm01_Snowflake_Raw_V2'"
+		},
+		"ADP Workforce_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://lakeshorers-nosso.prd.mykronos.com"
+		},
+		"ADP Workforce_properties_typeProperties_clientId": {
+			"type": "string",
+			"defaultValue": "eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF"
 		},
 		"LRS_Snowflake_V2_properties_typeProperties_database": {
 			"type": "string",
@@ -68,20 +80,23 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"ADP Workforce_clientSecret": {
+						"value": "[parameters('ADP Workforce_clientSecret')]"
+					},
 					"AzureBlobLinkedService_connectionString": {
 						"value": "[parameters('AzureBlobLinkedService_connectionString')]"
 					},
 					"LRS_Snowflake_V2_password": {
 						"value": "[parameters('LRS_Snowflake_V2_password')]"
 					},
-					"ildc93_dm01_SQL_Server_connectionString": {
-						"value": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
+					"ADP Workforce_properties_typeProperties_url": {
+						"value": "[parameters('ADP Workforce_properties_typeProperties_url')]"
+					},
+					"ADP Workforce_properties_typeProperties_clientId": {
+						"value": "[parameters('ADP Workforce_properties_typeProperties_clientId')]"
 					},
 					"LRS_Snowflake_V2_properties_typeProperties_database": {
 						"value": "[parameters('LRS_Snowflake_V2_properties_typeProperties_database')]"
-					},
-					"msaz01_dm01_Azure_Blob_sasUri": {
-						"value": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"
 					}
 				}
 			},
@@ -101,11 +116,17 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"ildc93_dm01_SQL_Server_connectionString": {
+						"value": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
+					},
 					"msaz01_dm01_SQL_Server_connectionString": {
 						"value": "[parameters('msaz01_dm01_SQL_Server_connectionString')]"
 					},
 					"msaz01_dm01_Snowflake_Raw_V2_password": {
 						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_password')]"
+					},
+					"msaz01_dm01_Azure_Blob_sasUri": {
+						"value": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"
 					},
 					"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
 						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database')]"

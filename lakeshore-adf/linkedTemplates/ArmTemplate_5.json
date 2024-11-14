@@ -13,6 +13,143 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/TRUX_INCREMENTAL_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Run TRUX LEGACY Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_INCREMENTAL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": "14"
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": "14"
+							}
+						}
+					},
+					{
+						"name": "Run TRUX LEGACY LOGGING Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_LEGACY_LOGGING_INCREMENTAL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": 14
+							}
+						}
+					},
+					{
+						"name": "Run TRUX MIDWEST LOGGING Incremental",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Maximum_DIU": 16,
+								"Degree_Copy_Parallelism": 32,
+								"Incremental_Range": 14
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-05-13T23:45:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_DAILY_LOAD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Vena Financialj Model Daily Load",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "VENA_FINANCIAL_MODEL DAILY_LOAD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Production/Orchestration"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-02T17:06:40Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/tr_process_files_weekly')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -99,7 +236,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/VENA_DAILY_LOAD')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/tr_process_sql_daily_full_load')]",
@@ -190,7 +329,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/TRUX_INCREMENTAL_LOAD')]"
+			]
 		}
 	]
 }

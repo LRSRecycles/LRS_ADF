@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "lakeshore-adf"
 		},
+		"ADP Workforce_clientSecret": {
+			"value": ""
+		},
 		"AzureBlobLinkedService_connectionString": {
 			"value": ""
 		},
@@ -19,6 +22,12 @@
 		},
 		"msaz01_dm01_Snowflake_Raw_V2_password": {
 			"value": ""
+		},
+		"ADP Workforce_properties_typeProperties_url": {
+			"value": "https://lakeshorers-nosso.prd.mykronos.com"
+		},
+		"ADP Workforce_properties_typeProperties_clientId": {
+			"value": "eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF"
 		},
 		"LRS_Snowflake_V2_properties_typeProperties_database": {
 			"value": "LRS_RAW"

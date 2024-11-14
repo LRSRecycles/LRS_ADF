@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "lakeshore-adf"
 		},
+		"ADP Workforce_clientSecret": {
+			"type": "secureString",
+			"metadata": "Secure string for 'clientSecret' of 'ADP Workforce'"
+		},
 		"AzureBlobLinkedService_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobLinkedService'"
@@ -15,24 +19,90 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LRS_Snowflake_V2'"
 		},
-		"ildc93_dm01_SQL_Server_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'ildc93_dm01_SQL_Server'",
-			"defaultValue": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
+		"ADP Workforce_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://lakeshorers-nosso.prd.mykronos.com"
+		},
+		"ADP Workforce_properties_typeProperties_clientId": {
+			"type": "string",
+			"defaultValue": "eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF"
 		},
 		"LRS_Snowflake_V2_properties_typeProperties_database": {
 			"type": "string",
 			"defaultValue": "LRS_RAW"
-		},
-		"msaz01_dm01_Azure_Blob_sasUri": {
-			"type": "secureString",
-			"metadata": "Secure string for 'sasUri' of 'msaz01_dm01_Azure_Blob'"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							"url": "https://lakeshorers-nosso.prd.mykronos.com/api/authentication/access_token",
+							"body": "username=APIUSER&password=Lrsapiprduser2024!&client_id=eKyVVdOuXU3tXBFsK4TMNeFKgK87DXRF&client_secret=cGFb8UjY8ocRIFOd&grant_type=password&auth_chain=OAuthLdapService"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "Test"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP Workforce')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('ADP Workforce_properties_typeProperties_url')]",
+					"authenticationType": "OAuth2ClientCredential",
+					"clientId": "[parameters('ADP Workforce_properties_typeProperties_clientId')]",
+					"clientSecret": {
+						"type": "SecureString",
+						"value": "[parameters('ADP Workforce_clientSecret')]"
+					},
+					"tokenEndpoint": "https://lakeshorers-nosso.prd.mykronos.com/api/authentication/access_token",
+					"body": {
+						"username": "APIUSER",
+						"password": {
+							"type": "SecureString",
+							"value": "**********"
+						},
+						"grant_type": "password",
+						"auth_chain": "OAuthLdapService"
+					}
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/AzureBlobLinkedService')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
@@ -1361,58 +1431,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobLinkedService')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ildc93_dm01_SQL_Server')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"parameters": {
-					"server": {
-						"type": "string"
-					},
-					"db": {
-						"type": "string"
-					},
-					"username": {
-						"type": "string"
-					},
-					"pw": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "ildc93-dm01",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/ildc93-dm01')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/msaz01_dm01_Azure_Blob')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"sasUri": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"
-				},
-				"connectVia": {
-					"referenceName": "msaz01-dm01",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/msaz01-dm01')]"
 			]
 		}
 	]
