@@ -1879,72 +1879,162 @@
 									"mappings": [
 										{
 											"source": {
-												"name": "EA01_ID",
+												"name": "CCLOG_ID",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "EA01_ID",
+												"name": "CCLOG_ID",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "EA01_DM01ID",
+												"name": "CCLOG_CUST",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "EA01_DM01ID",
+												"name": "CCLOG_CUST",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "EA01_EMAILTO",
-												"type": "String"
+												"name": "CCLOG_SITE",
+												"type": "Int32"
 											},
 											"sink": {
-												"name": "EA01_EMAILTO",
-												"type": "String"
+												"name": "CCLOG_SITE",
+												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "EA01_USER",
-												"type": "String"
-											},
-											"sink": {
-												"name": "EA01_USER",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "EA01_SDTE ",
+												"name": "CCLOG_TDATE",
 												"type": "DateTime"
 											},
 											"sink": {
-												"name": "EA01_SDTE",
+												"name": "CCLOG_TDATE",
 												"type": "DateTime"
 											}
 										},
 										{
 											"source": {
-												"name": "EA01_STATUS",
+												"name": "CCLOG_PDATE",
+												"type": "DateTime"
+											},
+											"sink": {
+												"name": "CCLOG_PDATE",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_USER",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_USER",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_INVC",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_INVC",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_AMNT",
+												"type": "Decimal"
+											},
+											"sink": {
+												"name": "CCLOG_AMNT",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_APPV",
 												"type": "Boolean"
 											},
 											"sink": {
-												"name": "EA01_STATUS",
+												"name": "CCLOG_APPV",
 												"type": "Boolean"
 											}
 										},
 										{
 											"source": {
-												"name": "EA01_MESSAGE",
+												"name": "CCLOG_TRANID",
 												"type": "String"
 											},
 											"sink": {
-												"name": "EA01_MESSAGE",
+												"name": "CCLOG_TRANID",
 												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_ACODE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_ACODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_RCODE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_RCODE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_RTEXT",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_RTEXT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_RTRANID",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CCLOG_RTRANID",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CCLOG_CC02ID",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "CCLOG_CC02ID",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"name": "ADF_TIMESTAMP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADF_TIMESTAMP",
+												"type": "DateTime"
 											}
 										}
 									]
