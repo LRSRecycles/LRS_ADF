@@ -1498,6 +1498,16 @@
 												"name": "DM05L_NOTEID",
 												"type": "Int64"
 											}
+										},
+										{
+											"source": {
+												"name": "ADF_TIMESTAMP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADF_TIMESTAMP",
+												"type": "DateTime"
+											}
 										}
 									]
 								}
@@ -1946,6 +1956,16 @@
 											"sink": {
 												"name": "EA01_MESSAGE",
 												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "ADF_TIMESTAMP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "ADF_TIMESTAMP",
+												"type": "DateTime"
 											}
 										}
 									]
