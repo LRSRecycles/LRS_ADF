@@ -32297,6 +32297,16 @@
 														"name": "DM05L_NOTEID",
 														"type": "Int64"
 													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
+													}
 												}
 											]
 										}
@@ -32626,13 +32636,14 @@
 													}
 												}
 											],
+											"sqlReaderQuery": "-- SELECT [EA01_ID]\n--      , [EA01_DM01ID]\n--      , [EA01_EMAILTO]\n--      , [EA01_USER]\n--      , CAST ([EA01_SDTE ] AS DATE) AS [EA01_SDTE]\n--      , [EA01_STATUS]\n--      , [EA01_MESSAGE]\n--   FROM [dbo].[EA01]\n\nSELECT [EA01_ID]\n     , [EA01_DM01ID]\n     , [EA01_EMAILTO]\n     , [EA01_USER]\n     , CAST ([EA01_SDTE ] AS smalldatetime) AS [EA01_SDTE]\n     , [EA01_STATUS]\n     , [EA01_MESSAGE]\n  FROM [dbo].[EA01]",
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "SnowflakeV2Sink",
 											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CCLOG')}",
+												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.EA01')}",
 												"type": "Expression"
 											},
 											"importSettings": {
@@ -32678,152 +32689,72 @@
 											"mappings": [
 												{
 													"source": {
-														"name": "CCLOG_ID",
+														"name": "EA01_ID",
 														"type": "Int32"
 													},
 													"sink": {
-														"name": "CCLOG_ID",
+														"name": "EA01_ID",
 														"type": "Int64"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_CUST",
+														"name": "EA01_DM01ID",
 														"type": "Int32"
 													},
 													"sink": {
-														"name": "CCLOG_CUST",
+														"name": "EA01_DM01ID",
 														"type": "Int64"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_SITE",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_SITE",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_TDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "CCLOG_TDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_PDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "CCLOG_PDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_USER",
+														"name": "EA01_EMAILTO",
 														"type": "String"
 													},
 													"sink": {
-														"name": "CCLOG_USER",
+														"name": "EA01_EMAILTO",
 														"type": "String"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_INVC",
+														"name": "EA01_USER",
 														"type": "String"
 													},
 													"sink": {
-														"name": "CCLOG_INVC",
+														"name": "EA01_USER",
 														"type": "String"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_AMNT",
-														"type": "Decimal"
+														"name": "EA01_SDTE",
+														"type": "DateTime"
 													},
 													"sink": {
-														"name": "CCLOG_AMNT",
-														"type": "Int64"
+														"name": "EA01_SDTE",
+														"type": "DateTime"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_APPV",
+														"name": "EA01_STATUS",
 														"type": "Boolean"
 													},
 													"sink": {
-														"name": "CCLOG_APPV",
+														"name": "EA01_STATUS",
 														"type": "Boolean"
 													}
 												},
 												{
 													"source": {
-														"name": "CCLOG_TRANID",
+														"name": "EA01_MESSAGE",
 														"type": "String"
 													},
 													"sink": {
-														"name": "CCLOG_TRANID",
+														"name": "EA01_MESSAGE",
 														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_ACODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_ACODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RCODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RCODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RTEXT",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RTEXT",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RTRANID",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RTRANID",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_CC02ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_CC02ID",
-														"type": "Int64"
 													}
 												},
 												{
@@ -52676,6 +52607,16 @@
 														"name": "DM05L_NOTEID",
 														"type": "Int64"
 													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
+													}
 												}
 											]
 										}
@@ -53005,13 +52946,14 @@
 													}
 												}
 											],
+											"sqlReaderQuery": "SELECT [EA01_ID]\r\n     , [EA01_DM01ID]\r\n     , [EA01_EMAILTO]\r\n     , [EA01_USER]\r\n     , CAST ([EA01_SDTE ] AS smalldatetime) AS [EA01_SDTE]\r\n     , [EA01_STATUS]\r\n     , [EA01_MESSAGE]\r\n  FROM [dbo].[EA01]",
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "SnowflakeV2Sink",
 											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CCLOG')}",
+												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.EA01')}",
 												"type": "Expression"
 											},
 											"importSettings": {
@@ -53097,7 +53039,7 @@
 												},
 												{
 													"source": {
-														"name": "EA01_SDTE ",
+														"name": "EA01_SDTE",
 														"type": "DateTime"
 													},
 													"sink": {
@@ -53123,6 +53065,16 @@
 													"sink": {
 														"name": "EA01_MESSAGE",
 														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
 													}
 												}
 											]

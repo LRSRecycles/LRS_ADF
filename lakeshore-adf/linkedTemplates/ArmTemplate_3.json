@@ -19693,6 +19693,16 @@
 														"name": "DM05L_NOTEID",
 														"type": "Int64"
 													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
+													}
 												}
 											]
 										}
@@ -20022,13 +20032,14 @@
 													}
 												}
 											],
+											"sqlReaderQuery": "SELECT [EA01_ID]\r\n     , [EA01_DM01ID]\r\n     , [EA01_EMAILTO]\r\n     , [EA01_USER]\r\n     , CAST ([EA01_SDTE ] AS smalldatetime) AS [EA01_SDTE]\r\n     , [EA01_STATUS]\r\n     , [EA01_MESSAGE]\r\n  FROM [dbo].[EA01]",
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
 										"sink": {
 											"type": "SnowflakeV2Sink",
 											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CCLOG')}",
+												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.EA01')}",
 												"type": "Expression"
 											},
 											"importSettings": {
@@ -20114,7 +20125,7 @@
 												},
 												{
 													"source": {
-														"name": "EA01_SDTE ",
+														"name": "EA01_SDTE",
 														"type": "DateTime"
 													},
 													"sink": {
@@ -20140,6 +20151,16 @@
 													"sink": {
 														"name": "EA01_MESSAGE",
 														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"name": "ADF_TIMESTAMP",
+														"type": "String"
+													},
+													"sink": {
+														"name": "ADF_TIMESTAMP",
+														"type": "DateTime"
 													}
 												}
 											]
