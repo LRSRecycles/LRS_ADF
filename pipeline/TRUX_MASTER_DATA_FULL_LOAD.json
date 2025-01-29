@@ -1624,7 +1624,7 @@
 					},
 					"sink": {
 						"type": "SnowflakeV2Sink",
-						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_SY03",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_SY03;",
 						"importSettings": {
 							"type": "SnowflakeImportCopyCommand"
 						}
@@ -3348,7 +3348,7 @@
 					},
 					"sink": {
 						"type": "SnowflakeV2Sink",
-						"preCopyScript": "truncate table LRS_RAW.MASTER_DATA.LEGACY_USER;",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.LEGACY_USER;",
 						"importSettings": {
 							"type": "SnowflakeImportCopyCommand"
 						}
@@ -3624,7 +3624,7 @@
 					},
 					"sink": {
 						"type": "SnowflakeV2Sink",
-						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_ONLINE_ACCT;",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.LEGACY_ONLINE_ACCT;",
 						"importSettings": {
 							"type": "SnowflakeImportCopyCommand"
 						}
@@ -3750,7 +3750,171 @@
 						"referenceName": "LRS_Snowflake_Raw_V2",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "MIDWEST_ONLINE_ACCT",
+							"Snowflake_Sink_Table": "LEGACY_ONLINE_ACCT",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy LEGACY AN_ROUTE",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.LEGACY_AN_ROUTE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "AN_ROUTE_ROUTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AN_ROUTE_ROUTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AN_ROUTE_COMPANY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AN_ROUTE_COMPANY",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TRUX_LEGACY01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "AN_ROUTE",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "LEGACY_AN_ROUTE",
+							"Snowflake_Schema": "MASTER_DATA"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy MIDWEST AN_ROUTE",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.MIDWEST_AN_ROUTE;",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "msaz01_dm01_Azure_Blob",
+							"type": "LinkedServiceReference"
+						},
+						"path": "staging",
+						"enableCompression": true
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "AN_ROUTE_ROUTE",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AN_ROUTE_ROUTE",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "AN_ROUTE_COMPANY",
+									"type": "String"
+								},
+								"sink": {
+									"name": "AN_ROUTE_COMPANY",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MSAZ01",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "dbo",
+							"table": "AN_ROUTE",
+							"database": "TRUX_DATA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "LRS_Snowflake_Raw_V2",
+						"type": "DatasetReference",
+						"parameters": {
+							"Snowflake_Sink_Table": "MIDWEST_AN_ROUTE",
 							"Snowflake_Schema": "MASTER_DATA"
 						}
 					}
