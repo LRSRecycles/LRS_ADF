@@ -45,6 +45,10 @@
 			"type": "string",
 			"defaultValue": "LRS_RAW"
 		},
+		"LRS_Snowflake_V2_properties_typeProperties_role": {
+			"type": "string",
+			"defaultValue": "ACCOUNTADMIN"
+		},
 		"msaz01_dm01_Azure_Blob_sasUri": {
 			"type": "secureString",
 			"metadata": "Secure string for 'sasUri' of 'msaz01_dm01_Azure_Blob'"
@@ -52,6 +56,10 @@
 		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
 			"type": "string",
 			"defaultValue": "@{linkedService().database}"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_role": {
+			"type": "string",
+			"defaultValue": "ACCOUNTADMIN"
 		},
 		"containerUri": {
 			"type": "string",
@@ -97,6 +105,9 @@
 					},
 					"LRS_Snowflake_V2_properties_typeProperties_database": {
 						"value": "[parameters('LRS_Snowflake_V2_properties_typeProperties_database')]"
+					},
+					"LRS_Snowflake_V2_properties_typeProperties_role": {
+						"value": "[parameters('LRS_Snowflake_V2_properties_typeProperties_role')]"
 					}
 				}
 			},
@@ -130,6 +141,9 @@
 					},
 					"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
 						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database')]"
+					},
+					"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_role": {
+						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_role')]"
 					}
 				}
 			},

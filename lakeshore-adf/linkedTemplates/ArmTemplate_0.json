@@ -30,6 +30,10 @@
 		"LRS_Snowflake_V2_properties_typeProperties_database": {
 			"type": "string",
 			"defaultValue": "LRS_RAW"
+		},
+		"LRS_Snowflake_V2_properties_typeProperties_role": {
+			"type": "string",
+			"defaultValue": "ACCOUNTADMIN"
 		}
 	},
 	"variables": {
@@ -130,7 +134,7 @@
 					"user": "SVC_ELT",
 					"database": "[parameters('LRS_Snowflake_V2_properties_typeProperties_database')]",
 					"warehouse": "LRS_RAW_ADF_COMPUTE",
-					"role": "ACCOUNTADMIN",
+					"role": "[parameters('LRS_Snowflake_V2_properties_typeProperties_role')]",
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('LRS_Snowflake_V2_password')]"

@@ -32,11 +32,17 @@
 		"LRS_Snowflake_V2_properties_typeProperties_database": {
 			"value": "LRS_RAW"
 		},
+		"LRS_Snowflake_V2_properties_typeProperties_role": {
+			"value": "ACCOUNTADMIN"
+		},
 		"msaz01_dm01_Azure_Blob_sasUri": {
 			"value": ""
 		},
 		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_database": {
 			"value": "@{linkedService().database}"
+		},
+		"msaz01_dm01_Snowflake_Raw_V2_properties_typeProperties_role": {
+			"value": "ACCOUNTADMIN"
 		}
 	}
 }
