@@ -23,7 +23,7 @@
 			"connectionString": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
 		},
 		"connectVia": {
-			"referenceName": "IR-MSAZ01-SQL-P12",
+			"referenceName": "msaz01-dm01",
 			"type": "IntegrationRuntimeReference"
 		}
 	}
