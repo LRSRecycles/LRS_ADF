@@ -1,0 +1,7 @@
+{
+	"name": "IR-MSAZ01-SQL-P12",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Runtime for SQL Server hosted on Azure VM"
+	}
+}
