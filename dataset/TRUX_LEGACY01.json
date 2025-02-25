@@ -5,13 +5,13 @@
 			"referenceName": "msaz01_dm01_SQL_Server",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"server": "msaz01-sql01\\TRUX_LEGACY01",
+				"server": "MSAZ01-SQL-P12",
 				"db": {
 					"value": "@dataset().database",
 					"type": "Expression"
 				},
-				"username": "AzureSQLReadOnly",
-				"pw": "4QcH9zAzure01"
+				"username": "svc_az_sql_fivetran_readonly_prod",
+				"pw": "3QxK/VLbBWM6DIH0nhHJqAPQW+HJpAdX29XuFAXEi84="
 			}
 		},
 		"parameters": {
