@@ -15,6 +15,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobLinkedService'"
 		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStorage2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage2'"
+		},
 		"LRS_Snowflake_V2_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LRS_Snowflake_V2'"
@@ -93,6 +101,12 @@
 					},
 					"AzureBlobLinkedService_connectionString": {
 						"value": "[parameters('AzureBlobLinkedService_connectionString')]"
+					},
+					"AzureBlobStorage1_connectionString": {
+						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureBlobStorage2_connectionString": {
+						"value": "[parameters('AzureBlobStorage2_connectionString')]"
 					},
 					"LRS_Snowflake_V2_password": {
 						"value": "[parameters('LRS_Snowflake_V2_password')]"

@@ -39,6 +39,533 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/SOFTPAK_SALES_RAW_EACH_FILE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFilename": {
+						"type": "string",
+						"defaultValue": "variable_sales_report_2021.csv"
+					}
+				},
+				"folder": {
+					"name": "SOFTPAK"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFilename",
+							"type": "Expression"
+						},
+						"folderPath": "Variable_sales_report",
+						"container": "softpak"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ACCT YYMM",
+						"type": "String"
+					},
+					{
+						"name": "COMPANY",
+						"type": "String"
+					},
+					{
+						"name": "CUST #",
+						"type": "String"
+					},
+					{
+						"name": "CUST NAME",
+						"type": "String"
+					},
+					{
+						"name": "TAXBODY",
+						"type": "String"
+					},
+					{
+						"name": "CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "GL CODE",
+						"type": "String"
+					},
+					{
+						"name": "DATE",
+						"type": "String"
+					},
+					{
+						"name": "SIZE CD",
+						"type": "String"
+					},
+					{
+						"name": "CHG CD",
+						"type": "String"
+					},
+					{
+						"name": "DESCRIPTION",
+						"type": "String"
+					},
+					{
+						"name": "EQUIP CD",
+						"type": "String"
+					},
+					{
+						"name": "VAR 3",
+						"type": "String"
+					},
+					{
+						"name": "VAR 4",
+						"type": "String"
+					},
+					{
+						"name": "QTY",
+						"type": "String"
+					},
+					{
+						"name": "BILLED AMT",
+						"type": "String"
+					},
+					{
+						"name": "MASTER AMT",
+						"type": "String"
+					},
+					{
+						"name": "VARIANCE",
+						"type": "String"
+					},
+					{
+						"name": "VAR FLAG",
+						"type": "String"
+					},
+					{
+						"name": "INV #",
+						"type": "String"
+					},
+					{
+						"name": "W/O ACT DATE",
+						"type": "String"
+					},
+					{
+						"name": "SUB COMP",
+						"type": "String"
+					},
+					{
+						"name": "SUB CUST #",
+						"type": "String"
+					},
+					{
+						"name": "ORIG W/O#",
+						"type": "String"
+					},
+					{
+						"name": "ADJ USER",
+						"type": "String"
+					},
+					{
+						"name": "CUST START",
+						"type": "String"
+					},
+					{
+						"name": "CUST STOP",
+						"type": "String"
+					},
+					{
+						"name": "BILL FIRST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL LAST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "BILL ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "BILL APT",
+						"type": "String"
+					},
+					{
+						"name": "BILL ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "BILL CITY",
+						"type": "String"
+					},
+					{
+						"name": "BILL STATE",
+						"type": "String"
+					},
+					{
+						"name": "BILL ZIP",
+						"type": "String"
+					},
+					{
+						"name": "SERV NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS #",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST NAME",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST SUFFIX",
+						"type": "String"
+					},
+					{
+						"name": "SERV ST DIR2",
+						"type": "String"
+					},
+					{
+						"name": "SERV APT",
+						"type": "String"
+					},
+					{
+						"name": "SERV ADDRESS-2",
+						"type": "String"
+					},
+					{
+						"name": "SERV CITY",
+						"type": "String"
+					},
+					{
+						"name": "SERV STATE",
+						"type": "String"
+					},
+					{
+						"name": "SERV ZIP",
+						"type": "String"
+					},
+					{
+						"name": "AREA CODE",
+						"type": "String"
+					},
+					{
+						"name": "PHONE #",
+						"type": "String"
+					},
+					{
+						"name": "CR LIMIT",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 1",
+						"type": "String"
+					},
+					{
+						"name": "VARIABLE 2",
+						"type": "String"
+					},
+					{
+						"name": "CONTACT",
+						"type": "String"
+					},
+					{
+						"name": "RES CUSTOMER",
+						"type": "String"
+					},
+					{
+						"name": "PREV CYCLE",
+						"type": "String"
+					},
+					{
+						"name": "PRICE LIST",
+						"type": "String"
+					},
+					{
+						"name": "MATERIAL",
+						"type": "String"
+					},
+					{
+						"name": "UOM",
+						"type": "String"
+					},
+					{
+						"name": "UNITS",
+						"type": "String"
+					},
+					{
+						"name": "SALES ID",
+						"type": "String"
+					},
+					{
+						"name": "FEE CODE",
+						"type": "String"
+					},
+					{
+						"name": "ROUTE",
+						"type": "String"
+					},
+					{
+						"name": "VEHICLE",
+						"type": "String"
+					},
+					{
+						"name": "DRIVER",
+						"type": "String"
+					},
+					{
+						"name": "LANDFILL CODE",
+						"type": "String"
+					},
+					{
+						"name": "TICKET #",
+						"type": "String"
+					},
+					{
+						"name": "COST",
+						"type": "String"
+					},
+					{
+						"name": "BIN TYPE",
+						"type": "String"
+					},
+					{
+						"name": "RATE",
+						"type": "String"
+					},
+					{
+						"name": "SVC TYPE",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Archive_All_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "processed",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Archive_Each')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "processed",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "_Account",
+						"type": "String"
+					},
+					{
+						"name": "_Location",
+						"type": "String"
+					},
+					{
+						"name": "_Line/Dept",
+						"type": "String"
+					},
+					{
+						"name": "_Material Type/Customer",
+						"type": "String"
+					},
+					{
+						"name": "_Data Source",
+						"type": "String"
+					},
+					{
+						"name": "_Year",
+						"type": "String"
+					},
+					{
+						"name": "_Period",
+						"type": "String"
+					},
+					{
+						"name": "_Scenario",
+						"type": "String"
+					},
+					{
+						"name": "_Measure",
+						"type": "String"
+					},
+					{
+						"name": "_value",
+						"type": "String"
+					},
+					{
+						"name": "_etl_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VENA_Raw_Each_Files')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"pFileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Vena"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().pFileName",
+							"type": "Expression"
+						},
+						"folderPath": "finance_model",
+						"container": "vena"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "_Account",
+						"type": "String"
+					},
+					{
+						"name": "_Location",
+						"type": "String"
+					},
+					{
+						"name": "_Line/Dept",
+						"type": "String"
+					},
+					{
+						"name": "_Material Type/Customer",
+						"type": "String"
+					},
+					{
+						"name": "_Data Source",
+						"type": "String"
+					},
+					{
+						"name": "_Year",
+						"type": "String"
+					},
+					{
+						"name": "_Period",
+						"type": "String"
+					},
+					{
+						"name": "_Scenario",
+						"type": "String"
+					},
+					{
+						"name": "_Measure",
+						"type": "String"
+					},
+					{
+						"name": "_value",
+						"type": "String"
+					},
+					{
+						"name": "_etl_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ildc93_dm01_SQL_Server')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -1200,892 +1727,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_adp_employee_directory_raw')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "msaz01_dm01_Azure_Blob",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "empDirectory.csv",
-						"container": "adp"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Load ADP Hours to Snowflake')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "ADP_Hours_CSV_ALL",
-								"type": "DatasetReference"
-							},
-							"name": "ADPHours"
-						}
-					],
-					"sinks": [
-						{
-							"linkedService": {
-								"referenceName": "LRS_Snowflake_V2",
-								"type": "LinkedServiceReference"
-							},
-							"name": "Snowflake",
-							"description": "ADP Sink dataset.",
-							"rejectedDataLinkedService": {
-								"referenceName": "AzureBlobLinkedService",
-								"type": "LinkedServiceReference"
-							}
-						}
-					],
-					"transformations": [
-						{
-							"name": "FlagLatestFileFoRow"
-						},
-						{
-							"name": "AlterRowUpsert"
-						},
-						{
-							"name": "FileTimestamp"
-						},
-						{
-							"name": "FlagColumn"
-						},
-						{
-							"name": "FilterLatest"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          {Employee ID} as string,",
-						"          {Employee Name} as string,",
-						"          {Manager ID} as string,",
-						"          {Manager Name} as string,",
-						"          {Effective Date} as date,",
-						"          {Historical Date} as string,",
-						"          {Home DEPARTMENT} as string,",
-						"          {Home LOCATION} as string,",
-						"          {Home COMPANY} as string,",
-						"          {Home Reserved4} as string,",
-						"          {Home JOBTITLE} as string,",
-						"          {Home Reserved6} as string,",
-						"          {Home MANAGER} as string,",
-						"          {Pay Code} as string,",
-						"          Hours as double,",
-						"          Money as boolean,",
-						"          Days as boolean,",
-						"          Wages as double,",
-						"          {Base Wage} as double,",
-						"          {Comment(s)} as string,",
-						"          {_c20} as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     enableCdc: true,",
-						"     mode: 'read',",
-						"     skipInitialLoad: false,",
-						"     rowUrlColumn: 'adf_filename',",
-						"     skipLines: 10) ~> ADPHours",
-						"FileTimestamp window(over({Employee ID},",
-						"          {Effective Date},",
-						"          {Pay Code}),",
-						"     {Latest File} = max(file_timestamp)) ~> FlagLatestFileFoRow",
-						"FilterLatest alterRow(upsertIf(Flag==true())) ~> AlterRowUpsert",
-						"ADPHours derive(file_timestamp = replace(replace(replace(replace(concat(substring(adf_filename,20,10),' ',substring(adf_filename,31,11)),'-',''),':',''),'.',''),' ',''),",
-						"          adf_timestamp = fromUTC(currentTimestamp(),'CST')) ~> FileTimestamp",
-						"FlagLatestFileFoRow derive(Flag = file_timestamp == {Latest File}) ~> FlagColumn",
-						"FlagColumn filter(Flag == true()) ~> FilterLatest",
-						"AlterRowUpsert sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          EMPLOYEE_ID as string,",
-						"          EMPLOYEE_NAME as string,",
-						"          MANAGER_ID as string,",
-						"          MANAGER_NAME as string,",
-						"          EFFECTIVE_DATE as timestamp,",
-						"          HISTORICAL_DATE as string,",
-						"          HOME_DEPARTMENT as string,",
-						"          HOME_LOCATION as string,",
-						"          HOME_COMPANY as string,",
-						"          HOME_RESERVED4 as string,",
-						"          HOME_JOBTITLE as string,",
-						"          HOME_RESERVED6 as string,",
-						"          HOME_MANAGER as string,",
-						"          PAY_CODE as string,",
-						"          HOURS as string,",
-						"          MONEY as string,",
-						"          DAYS as string,",
-						"          WAGES as string,",
-						"          BASE_WAGE as string,",
-						"          COMMENTS as string,",
-						"          ADF_FILENAME as string,",
-						"          ADF_TIMESTAMP as timestamp",
-						"     ),",
-						"     format: 'table',",
-						"     tableName: 'ADP_HOURS',",
-						"     schemaName: 'ADP_RAW',",
-						"     deletable: false,",
-						"     insertable: true,",
-						"     updateable: false,",
-						"     upsertable: true,",
-						"     keys:['EMPLOYEE_ID','EFFECTIVE_DATE','PAY_CODE'],",
-						"     store: 'snowflake',",
-						"     store: 'snowflakeV2',",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     stageInsert: true,",
-						"     mapColumn(",
-						"          EMPLOYEE_ID = {Employee ID},",
-						"          EMPLOYEE_NAME = {Employee Name},",
-						"          MANAGER_ID = {Manager ID},",
-						"          MANAGER_NAME = {Manager Name},",
-						"          EFFECTIVE_DATE = {Effective Date},",
-						"          HISTORICAL_DATE = {Historical Date},",
-						"          HOME_DEPARTMENT = {Home DEPARTMENT},",
-						"          HOME_LOCATION = {Home LOCATION},",
-						"          HOME_COMPANY = {Home COMPANY},",
-						"          HOME_RESERVED4 = {Home Reserved4},",
-						"          HOME_JOBTITLE = {Home JOBTITLE},",
-						"          HOME_RESERVED6 = {Home Reserved6},",
-						"          HOME_MANAGER = {Home MANAGER},",
-						"          PAY_CODE = {Pay Code},",
-						"          HOURS = Hours,",
-						"          MONEY = Money,",
-						"          DAYS = Days,",
-						"          WAGES = Wages,",
-						"          BASE_WAGE = {Base Wage},",
-						"          COMMENTS = {Comment(s)},",
-						"          ADF_FILENAME = adf_filename,",
-						"          ADF_TIMESTAMP = adf_timestamp",
-						"     )) ~> Snowflake"
-					]
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ADP_WEEKLY_LOAD_Test')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy ADP Term to Snowflake",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Loop Through All Files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"additionalColumns": [
-									{
-										"name": "File Name",
-										"value": {
-											"value": "@variables('Var_File_Name')",
-											"type": "Expression"
-										}
-									},
-									{
-										"name": "Last Modified",
-										"value": {
-											"value": "@variables('Var_Last_Modified')",
-											"type": "Expression"
-										}
-									}
-								],
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "SnowflakeV2Sink",
-								"preCopyScript": "truncate table LRS_SANDBOX.ADP_RAW.ADP_TERMINATION",
-								"importSettings": {
-									"type": "SnowflakeImportCopyCommand"
-								}
-							},
-							"enableStaging": true,
-							"stagingSettings": {
-								"linkedServiceName": {
-									"referenceName": "msaz01_dm01_Azure_Blob",
-									"type": "LinkedServiceReference"
-								}
-							},
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "Position ID",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Position ID",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Legal Last Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Legal Last Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Legal First Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Legal First Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Position Status",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Position Status",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Home Department Description",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Home Department Description",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Union Local Code",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Union Local Code",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Job Title Description",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Job Title Description",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Location Code",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Location Code",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Location Description",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Location Description",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Reports To Legal Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Reports To Legal Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Hire Date",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Hire Date",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "Termination Date",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Termination Date",
-											"type": "DateTime"
-										}
-									},
-									{
-										"source": {
-											"name": "Termination Reason Description12",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Termination Reason Description12",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Termination Reason Description13",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Termination Reason Description13",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Worked in State Code",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Worked in State Code",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Personal Contact: Home Phone",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Personal Contact: Home Phone",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Personal Contact: Personal Email",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Personal Contact: Personal Email",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Personal Contact: Personal Mobile",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Personal Contact: Personal Mobile",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Tax Withholdings - Effective Date",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Tax Withholdings - Effective Date",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Employment Profile - Effective Date",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Employment Profile - Effective Date",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "File Name",
-											"type": "String"
-										},
-										"sink": {
-											"name": "File Name",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "Last Modified",
-											"type": "String"
-										},
-										"sink": {
-											"name": "Last Modified",
-											"type": "DateTime"
-										}
-									}
-								]
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "ADP_Terminations_Raw_Each_File",
-								"type": "DatasetReference",
-								"parameters": {
-									"FileName": {
-										"value": "@variables('Var_File_Name')",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "LRS_Snowflake_Sandbox_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "ADP_TERMINATION",
-									"Snowflake_Schema": "ADP_RAW"
-								}
-							}
-						]
-					},
-					{
-						"name": "Get All ADP Files",
-						"type": "GetMetadata",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "ADP_Terminations_Raw_All_Files",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"fieldList": [
-								"childItems"
-							],
-							"storeSettings": {
-								"type": "AzureBlobStorageReadSettings",
-								"recursive": true,
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "Loop Through All Files",
-						"description": "Loop through all ADP Files in the blob storage",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Get All ADP Files",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get All ADP Files').output.childItems",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Get Files Attributes",
-									"description": "Get File's name and last modified date",
-									"type": "GetMetadata",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "ADP_Terminations_Raw_Each_File",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileName": "@item().name"
-											}
-										},
-										"fieldList": [
-											"lastModified",
-											"itemName"
-										],
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										},
-										"formatSettings": {
-											"type": "DelimitedTextReadSettings"
-										}
-									}
-								},
-								{
-									"name": "If Condition1",
-									"description": "find the newest file using last modified attribute",
-									"type": "IfCondition",
-									"dependsOn": [
-										{
-											"activity": "Get Files Attributes",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@greater(activity('Get Files Attributes').output.lastModified, variables('Var_Last_Modified'))",
-											"type": "Expression"
-										},
-										"ifTrueActivities": [
-											{
-												"name": "File Name",
-												"type": "SetVariable",
-												"dependsOn": [],
-												"policy": {
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "Var_File_Name",
-													"value": {
-														"value": "@activity('Get Files Attributes').output.itemName",
-														"type": "Expression"
-													}
-												}
-											},
-											{
-												"name": "Last Modified",
-												"type": "SetVariable",
-												"dependsOn": [
-													{
-														"activity": "File Name",
-														"dependencyConditions": [
-															"Succeeded"
-														]
-													}
-												],
-												"policy": {
-													"secureOutput": false,
-													"secureInput": false
-												},
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "Var_Last_Modified",
-													"value": {
-														"value": "@activity('Get Files Attributes').output.lastModified",
-														"type": "Expression"
-													}
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Get Older FIles",
-						"description": "Get files older than 365 days",
-						"type": "GetMetadata",
-						"dependsOn": [
-							{
-								"activity": "Copy ADP Term to Snowflake",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "ADP_Terminations_Raw_All_Files",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"fieldList": [
-								"childItems"
-							],
-							"storeSettings": {
-								"type": "AzureBlobStorageReadSettings",
-								"recursive": true,
-								"modifiedDatetimeEnd": {
-									"value": "@addDays(utcnow(),-365)",
-									"type": "Expression"
-								},
-								"enablePartitionDiscovery": false
-							},
-							"formatSettings": {
-								"type": "DelimitedTextReadSettings"
-							}
-						}
-					},
-					{
-						"name": "Loop through older files",
-						"description": "loop through each files older than 365 days for deletion",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Get Older FIles",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Get Older FIles').output.childItems",
-								"type": "Expression"
-							},
-							"isSequential": true,
-							"activities": [
-								{
-									"name": "Delete files older than 365 days",
-									"type": "Delete",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"dataset": {
-											"referenceName": "ADP_Terminations_Raw_Each_File",
-											"type": "DatasetReference",
-											"parameters": {
-												"FileName": {
-													"value": "@item().name",
-													"type": "Expression"
-												}
-											}
-										},
-										"enableLogging": false,
-										"storeSettings": {
-											"type": "AzureBlobStorageReadSettings",
-											"recursive": true,
-											"enablePartitionDiscovery": false
-										}
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"Var_File_Name": {
-						"type": "String",
-						"defaultValue": "terms.csv_2023-09-01T12:48:46Z"
-					},
-					"Var_Last_Modified": {
-						"type": "String",
-						"defaultValue": "1900-01-01 00:00:00"
-					}
-				},
-				"folder": {
-					"name": "Sandbox/ADP"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-08-30T17:57:59Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ADP_Terminations_Raw_Each_File')]",
-				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Sandbox_V2')]",
-				"[concat(variables('factoryId'), '/datasets/ADP_Terminations_Raw_All_Files')]",
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DELETE ALL OLD TRUX SNOWFLAKE SCHEMAS')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Database Lookup",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SnowflakeV2Source",
-								"exportSettings": {
-									"type": "SnowflakeExportCopyCommand"
-								}
-							},
-							"dataset": {
-								"referenceName": "LRS_Snowflake_Raw_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_COMBINED",
-									"Snowflake_Schema": "MASTER_DATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Loop over databases",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Database Lookup",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Database Lookup').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Delete all Schemas",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "LRS_Snowflake_V2",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@{concat(\n'DROP SCHEMA LRS_RAW.', item().Snowflake_Name_OLD\n\t)}",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Maximum_DIU": {
-						"type": "int",
-						"defaultValue": 2
-					},
-					"Degree_Copy_Parallelism": {
-						"type": "int",
-						"defaultValue": 8
-					}
-				},
-				"folder": {
-					"name": "Production/TRUX"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-08-27T20:53:45Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/LRS_Snowflake_Raw_V2')]"
 			]
 		}
 	]

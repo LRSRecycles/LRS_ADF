@@ -13,6 +13,883 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ds_adp_employee_directory_raw')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "msaz01_dm01_Azure_Blob",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "empDirectory.csv",
+						"container": "adp"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Load ADP Hours to Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ADP_Hours_CSV_ALL",
+								"type": "DatasetReference"
+							},
+							"name": "ADPHours"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "LRS_Snowflake_V2",
+								"type": "LinkedServiceReference"
+							},
+							"name": "Snowflake",
+							"description": "ADP Sink dataset.",
+							"rejectedDataLinkedService": {
+								"referenceName": "AzureBlobLinkedService",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"transformations": [
+						{
+							"name": "FlagLatestFileFoRow"
+						},
+						{
+							"name": "AlterRowUpsert"
+						},
+						{
+							"name": "FileTimestamp"
+						},
+						{
+							"name": "FlagColumn"
+						},
+						{
+							"name": "FilterLatest"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          {Employee ID} as string,",
+						"          {Employee Name} as string,",
+						"          {Manager ID} as string,",
+						"          {Manager Name} as string,",
+						"          {Effective Date} as date,",
+						"          {Historical Date} as string,",
+						"          {Home DEPARTMENT} as string,",
+						"          {Home LOCATION} as string,",
+						"          {Home COMPANY} as string,",
+						"          {Home Reserved4} as string,",
+						"          {Home JOBTITLE} as string,",
+						"          {Home Reserved6} as string,",
+						"          {Home MANAGER} as string,",
+						"          {Pay Code} as string,",
+						"          Hours as double,",
+						"          Money as boolean,",
+						"          Days as boolean,",
+						"          Wages as double,",
+						"          {Base Wage} as double,",
+						"          {Comment(s)} as string,",
+						"          {_c20} as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     enableCdc: true,",
+						"     mode: 'read',",
+						"     skipInitialLoad: false,",
+						"     rowUrlColumn: 'adf_filename',",
+						"     skipLines: 10) ~> ADPHours",
+						"FileTimestamp window(over({Employee ID},",
+						"          {Effective Date},",
+						"          {Pay Code}),",
+						"     {Latest File} = max(file_timestamp)) ~> FlagLatestFileFoRow",
+						"FilterLatest alterRow(upsertIf(Flag==true())) ~> AlterRowUpsert",
+						"ADPHours derive(file_timestamp = replace(replace(replace(replace(concat(substring(adf_filename,20,10),' ',substring(adf_filename,31,11)),'-',''),':',''),'.',''),' ',''),",
+						"          adf_timestamp = fromUTC(currentTimestamp(),'CST')) ~> FileTimestamp",
+						"FlagLatestFileFoRow derive(Flag = file_timestamp == {Latest File}) ~> FlagColumn",
+						"FlagColumn filter(Flag == true()) ~> FilterLatest",
+						"AlterRowUpsert sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          EMPLOYEE_ID as string,",
+						"          EMPLOYEE_NAME as string,",
+						"          MANAGER_ID as string,",
+						"          MANAGER_NAME as string,",
+						"          EFFECTIVE_DATE as timestamp,",
+						"          HISTORICAL_DATE as string,",
+						"          HOME_DEPARTMENT as string,",
+						"          HOME_LOCATION as string,",
+						"          HOME_COMPANY as string,",
+						"          HOME_RESERVED4 as string,",
+						"          HOME_JOBTITLE as string,",
+						"          HOME_RESERVED6 as string,",
+						"          HOME_MANAGER as string,",
+						"          PAY_CODE as string,",
+						"          HOURS as string,",
+						"          MONEY as string,",
+						"          DAYS as string,",
+						"          WAGES as string,",
+						"          BASE_WAGE as string,",
+						"          COMMENTS as string,",
+						"          ADF_FILENAME as string,",
+						"          ADF_TIMESTAMP as timestamp",
+						"     ),",
+						"     format: 'table',",
+						"     tableName: 'ADP_HOURS',",
+						"     schemaName: 'ADP_RAW',",
+						"     deletable: false,",
+						"     insertable: true,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['EMPLOYEE_ID','EFFECTIVE_DATE','PAY_CODE'],",
+						"     store: 'snowflake',",
+						"     store: 'snowflakeV2',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     stageInsert: true,",
+						"     mapColumn(",
+						"          EMPLOYEE_ID = {Employee ID},",
+						"          EMPLOYEE_NAME = {Employee Name},",
+						"          MANAGER_ID = {Manager ID},",
+						"          MANAGER_NAME = {Manager Name},",
+						"          EFFECTIVE_DATE = {Effective Date},",
+						"          HISTORICAL_DATE = {Historical Date},",
+						"          HOME_DEPARTMENT = {Home DEPARTMENT},",
+						"          HOME_LOCATION = {Home LOCATION},",
+						"          HOME_COMPANY = {Home COMPANY},",
+						"          HOME_RESERVED4 = {Home Reserved4},",
+						"          HOME_JOBTITLE = {Home JOBTITLE},",
+						"          HOME_RESERVED6 = {Home Reserved6},",
+						"          HOME_MANAGER = {Home MANAGER},",
+						"          PAY_CODE = {Pay Code},",
+						"          HOURS = Hours,",
+						"          MONEY = Money,",
+						"          DAYS = Days,",
+						"          WAGES = Wages,",
+						"          BASE_WAGE = {Base Wage},",
+						"          COMMENTS = {Comment(s)},",
+						"          ADF_FILENAME = adf_filename,",
+						"          ADF_TIMESTAMP = adf_timestamp",
+						"     )) ~> Snowflake"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ADP_WEEKLY_LOAD_Test')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy ADP Term to Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Loop Through All Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "File Name",
+										"value": {
+											"value": "@variables('Var_File_Name')",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "Last Modified",
+										"value": {
+											"value": "@variables('Var_Last_Modified')",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "truncate table LRS_SANDBOX.ADP_RAW.ADP_TERMINATION",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "msaz01_dm01_Azure_Blob",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Position ID",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position ID",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Legal Last Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal Last Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Legal First Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Legal First Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Position Status",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Position Status",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Home Department Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Home Department Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Union Local Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Union Local Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Job Title Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Job Title Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Location Description",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Location Description",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Reports To Legal Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Reports To Legal Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Hire Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Hire Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Date",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Reason Description12",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Reason Description12",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Termination Reason Description13",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Termination Reason Description13",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Worked in State Code",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Worked in State Code",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Home Phone",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Personal Contact: Personal Mobile",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Tax Withholdings - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Employment Profile - Effective Date",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "File Name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "File Name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Last Modified",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Last Modified",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ADP_Terminations_Raw_Each_File",
+								"type": "DatasetReference",
+								"parameters": {
+									"FileName": {
+										"value": "@variables('Var_File_Name')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Sandbox_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "ADP_TERMINATION",
+									"Snowflake_Schema": "ADP_RAW"
+								}
+							}
+						]
+					},
+					{
+						"name": "Get All ADP Files",
+						"type": "GetMetadata",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop Through All Files",
+						"description": "Loop through all ADP Files in the blob storage",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get All ADP Files",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get All ADP Files').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Get Files Attributes",
+									"description": "Get File's name and last modified date",
+									"type": "GetMetadata",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": "@item().name"
+											}
+										},
+										"fieldList": [
+											"lastModified",
+											"itemName"
+										],
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										},
+										"formatSettings": {
+											"type": "DelimitedTextReadSettings"
+										}
+									}
+								},
+								{
+									"name": "If Condition1",
+									"description": "find the newest file using last modified attribute",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Get Files Attributes",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@greater(activity('Get Files Attributes').output.lastModified, variables('Var_Last_Modified'))",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "File Name",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_File_Name",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.itemName",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Last Modified",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "File Name",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "Var_Last_Modified",
+													"value": {
+														"value": "@activity('Get Files Attributes').output.lastModified",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Get Older FIles",
+						"description": "Get files older than 365 days",
+						"type": "GetMetadata",
+						"dependsOn": [
+							{
+								"activity": "Copy ADP Term to Snowflake",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "ADP_Terminations_Raw_All_Files",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"fieldList": [
+								"childItems"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true,
+								"modifiedDatetimeEnd": {
+									"value": "@addDays(utcnow(),-365)",
+									"type": "Expression"
+								},
+								"enablePartitionDiscovery": false
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
+							}
+						}
+					},
+					{
+						"name": "Loop through older files",
+						"description": "loop through each files older than 365 days for deletion",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Get Older FIles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get Older FIles').output.childItems",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Delete files older than 365 days",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "ADP_Terminations_Raw_Each_File",
+											"type": "DatasetReference",
+											"parameters": {
+												"FileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"Var_File_Name": {
+						"type": "String",
+						"defaultValue": "terms.csv_2023-09-01T12:48:46Z"
+					},
+					"Var_Last_Modified": {
+						"type": "String",
+						"defaultValue": "1900-01-01 00:00:00"
+					}
+				},
+				"folder": {
+					"name": "Sandbox/ADP"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-30T17:57:59Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DELETE ALL OLD TRUX SNOWFLAKE SCHEMAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Database Lookup",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SnowflakeV2Source",
+								"exportSettings": {
+									"type": "SnowflakeExportCopyCommand"
+								}
+							},
+							"dataset": {
+								"referenceName": "LRS_Snowflake_Raw_V2",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_COMBINED",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Loop over databases",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Database Lookup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Database Lookup').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Delete all Schemas",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LRS_Snowflake_V2",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@{concat(\n'DROP SCHEMA LRS_RAW.', item().Snowflake_Name_OLD\n\t)}",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Maximum_DIU": {
+						"type": "int",
+						"defaultValue": 2
+					},
+					"Degree_Copy_Parallelism": {
+						"type": "int",
+						"defaultValue": 8
+					}
+				},
+				"folder": {
+					"name": "Production/TRUX"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-08-27T20:53:45Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_DAILY_LOAD')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -26706,4273 +27583,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-10-04T23:18:24Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY_DATA_LOAD_copy1')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Loop over databases",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Database Lookup",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Database Lookup').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Copy SL01",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.SL01')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "msaz01_dm01_Azure_Blob",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "SL01_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "SL01_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_NAME",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SL01_NAME",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_ADDS",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SL01_ADDS",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_CITY",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SL01_CITY",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_STAT",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SL01_STAT",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_PZIP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SL01_PZIP",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_LATT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "SL01_LATT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_LONG",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "SL01_LONG",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SL01_ACTIVE",
-														"type": "Boolean"
-													},
-													"sink": {
-														"name": "SL01_ACTIVE",
-														"type": "String"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "SL01",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "SL01",
-												"Snowflake_Schema": "@item().Snowflake_Name_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "Copy SP03",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Copy SL01",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.SP03')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "msaz01_dm01_Azure_Blob",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "SP03_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "SP03_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SP03_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "SP03_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SP03_CUST",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "SP03_CUST",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "SP03_REFE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "SP03_REFE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "SP03_SITE",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "SP03_SITE",
-														"type": "Int64"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "SP03",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "SP03",
-												"Snowflake_Schema": "@item().Snowflake_Name_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "Copy CC02",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Copy SP03",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"sqlReaderQuery": "SELECT \n      [CC02_CUST]\n      ,[CC02_SITE]\n      ,[CC02_TYPE]\n      , NULL AS [CC02_NUMBER]\n      ,[CC02_EXPMO]\n      ,[CC02_EXPYE]\n      , NULL AS [CC02_CVV2]\n      ,[CC02_HFNAME]\n      ,[CC02_HLNAME]\n      ,[CC02_HADD]\n      ,[CC02_HCITY]\n      ,[CC02_HSTAT]\n      ,[CC02_HZIP]\n      ,[CC02_HCOUN]\n      ,[CC02_HPHON]\n      ,[CC02_HEMAIL]\n      ,[CC02_ACTIVE]\n      ,[CC02_CHRGTYPE]\n      ,[CC02_ID]\n      , NULL AS [CC02_ROUTNUM]\n      ,[CC02_ACCTYPE]\n      ,[CC02_BANKN]\n      ,[CC02_LICNUM]\n      ,[CC02_LICSTAT]\n      ,[CC02_DOB]\n      ,[CC02_ACCNAME]\n      ,[CC02_TOKEN]\n      ,[CC02_ACCOUNTTYPE]\nFROM \n      dbo.CC02",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.CC02')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "msaz01_dm01_Azure_Blob",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "CC02_CUST",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_CUST",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_SITE",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_SITE",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_TYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_TYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_NUMBER",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_NUMBER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_EXPMO",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_EXPMO",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_EXPYE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_EXPYE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_CVV2",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_CVV2",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HFNAME",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HFNAME",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HLNAME",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HLNAME",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HADD",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HADD",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HCITY",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HCITY",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HSTAT",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HSTAT",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HZIP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HZIP",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HCOUN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HCOUN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HPHON",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HPHON",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_HEMAIL",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_HEMAIL",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_ACTIVE",
-														"type": "Boolean"
-													},
-													"sink": {
-														"name": "CC02_ACTIVE",
-														"type": "Boolean"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_CHRGTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_CHRGTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_ROUTNUM",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CC02_ROUTNUM",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_ACCTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_ACCTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_BANKN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_BANKN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_LICNUM",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_LICNUM",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_LICSTAT",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_LICSTAT",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_DOB",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "CC02_DOB",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "CC02_ACCNAME",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CC02_ACCNAME",
-														"type": "String"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "CC02",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "CC02",
-												"Snowflake_Schema": "@item().Snowflake_Name_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "Copy LF05O",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "Copy CC02",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.LF05O')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "msaz01_dm01_Azure_Blob",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "LF05O_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "LF05O_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "LF05O_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "LF05O_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "LF05O_ORIG",
-														"type": "String"
-													},
-													"sink": {
-														"name": "LF05O_ORIG",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "LF05O_PERC",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "LF05O_PERC",
-														"type": "Int64"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "LF05O",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "LF05O",
-												"Snowflake_Schema": "@item().Snowflake_Name_New"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "Database Lookup",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SnowflakeV2Source",
-								"query": "SELECT * FROM LRS_RAW.MASTER_DATA.DATABASE_LOOKUP_TRUX_COMBINED\nWHERE SERVERNAME = 'LEGACY';",
-								"exportSettings": {
-									"type": "SnowflakeExportCopyCommand"
-								}
-							},
-							"dataset": {
-								"referenceName": "LRS_Snowflake_Raw_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_COMBINED",
-									"Snowflake_Schema": "MASTER_DATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Maximum_DIU": {
-						"type": "int",
-						"defaultValue": 2
-					},
-					"Degree_Copy_Parallelism": {
-						"type": "int",
-						"defaultValue": 8
-					}
-				},
-				"folder": {
-					"name": "Test"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-09-27T13:51:14Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY_FULL_LOAD_DIM')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Loop over databases",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Database Lookup",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Database Lookup').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "LM03 Copy",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.LM03')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											}
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "LM03_TYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "LM03_TYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_SIZE",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "LM03_SIZE",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_COMP",
-														"type": "Boolean"
-													},
-													"sink": {
-														"name": "LM03_COMP",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_WTYP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "LM03_WTYP",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_CAP",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "LM03_CAP",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_MATL",
-														"type": "String"
-													},
-													"sink": {
-														"name": "LM03_MATL",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_PRICE",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "LM03_PRICE",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "LM03_UOM",
-														"type": "String"
-													},
-													"sink": {
-														"name": "LM03_UOM",
-														"type": "String"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "LM03",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "LM03",
-												"Snowflake_Schema": "@item().Snowflake_Name"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "Database Lookup",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SnowflakeV2Source",
-								"exportSettings": {
-									"type": "SnowflakeExportCopyCommand"
-								}
-							},
-							"dataset": {
-								"referenceName": "LRS_Snowflake_Raw_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "STG_LEGACY_SY03",
-									"Snowflake_Schema": "MASTER_DATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Maximum_DIU": {
-						"type": "int",
-						"defaultValue": 16
-					},
-					"Degree_Copy_Parallelism": {
-						"type": "int",
-						"defaultValue": 32
-					}
-				},
-				"folder": {
-					"name": "Production/TRUX_OLD"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-08-30T17:58:00Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY_FULL_LOAD_FACT')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Loop over databases",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Database Lookup",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Database Lookup').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "DM01p Copy",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcnow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM01P')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM01P_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_TYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_TYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_DATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM01P_DATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_REFN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_REFN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM01P_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM01P_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_BATCH",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_BATCH",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_GLNU",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_GLNU",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_LINKID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_LINKID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_GROUP",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_GROUP",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM01P",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM01P",
-												"Snowflake_Schema": "@item().Snowflake_Name"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05B Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05A Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcnow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05B')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05B_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05B_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05B_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_BILLF",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_BILLF",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_BILLT",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_BILLT",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_ARATEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_ARATEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05B",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05B",
-												"Snowflake_Schema": "@item().Snowflake_Name"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05Z Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05B Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcnow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05Z')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05Z_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05Z_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05Z_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05Z_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_REFN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_REFN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05Z_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05Z",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05Z",
-												"Snowflake_Schema": "@item().Snowflake_Name"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05A Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM01p Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcnow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05A')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05A_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05A_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_ROUT",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_ROUT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_SEQU",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_SEQU",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05A_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05A",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05A",
-												"Snowflake_Schema": "@item().Snowflake_Name"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "Database Lookup",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SnowflakeV2Source",
-								"exportSettings": {
-									"type": "SnowflakeExportCopyCommand"
-								}
-							},
-							"dataset": {
-								"referenceName": "LRS_Snowflake_Raw_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_LEGACY",
-									"Snowflake_Schema": "MASTER_DATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Maximum_DIU": {
-						"type": "int",
-						"defaultValue": 2
-					},
-					"Degree_Copy_Parallelism": {
-						"type": "int",
-						"defaultValue": 8
-					}
-				},
-				"folder": {
-					"name": "Production/TRUX_OLD"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-08-30T17:58:01Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY_FULL_LOAD_FACT_NEW')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Loop over databases",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Database Lookup",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Database Lookup').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "DM01p Copy",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.DM01P')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM01P_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_TYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_TYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_DATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM01P_DATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_REFN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_REFN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM01P_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM01P_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_BATCH",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_BATCH",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_GLNU",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM01P_GLNU",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_LINKID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_LINKID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM01P_GROUP",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM01P_GROUP",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM01P",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM01P",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05A Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM01p Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.DM05A')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05A_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05A_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_ROUT",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_ROUT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_SEQU",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05A_SEQU",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05A_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05A_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05A_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05A_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05A",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05A",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05B Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05A Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.DM05B')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05B_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05B_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05B_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_BILLF",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_BILLF",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_BILLT",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_BILLT",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_ARATEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_ARATEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05B_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05B_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05B_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05B_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05B",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05B",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05Z Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05B Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.DM05Z')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05Z_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05Z_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05Z_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05Z_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_REFN",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_REFN",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05Z_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05Z_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05Z_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05Z_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05Z",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05Z",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "RM07 Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05Z Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.RM07')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "RM07_RDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "RM07_RDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_ROUT",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "RM07_ROUT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_REASON",
-														"type": "String"
-													},
-													"sink": {
-														"name": "RM07_REASON",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_TIME",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "RM07_TIME",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_TRUK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "RM07_TRUK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_ODOM",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "RM07_ODOM",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_STIME",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "RM07_STIME",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_ETIME",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "RM07_ETIME",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "RM07_DRIV",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "RM07_DRIV",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "RM07",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "RM07",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "DM05L Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "RM07 Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.DM05L')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "DM05L_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05L_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_LINK",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05L_LINK",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_TDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05L_TDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05L_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_QTY",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "DM05L_QTY",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_DSTE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_DSTE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_TICK",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_TICK",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_DTID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05L_DTID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_PERIODCLOSEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05L_PERIODCLOSEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_RTYPE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_RTYPE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_RDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "DM05L_RDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_ADJR",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_ADJR",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_CODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "DM05L_CODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "DM05L_NOTEID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "DM05L_NOTEID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "DM05l",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "DM05L",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "CCLOG Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "DM05L Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CCLOG')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "CCLOG_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_CUST",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_CUST",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_SITE",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_SITE",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_TDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "CCLOG_TDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_PDATE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "CCLOG_PDATE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_INVC",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_INVC",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_AMNT",
-														"type": "Decimal"
-													},
-													"sink": {
-														"name": "CCLOG_AMNT",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_APPV",
-														"type": "Boolean"
-													},
-													"sink": {
-														"name": "CCLOG_APPV",
-														"type": "Boolean"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_TRANID",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_TRANID",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_ACODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_ACODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RCODE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RCODE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RTEXT",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RTEXT",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_RTRANID",
-														"type": "String"
-													},
-													"sink": {
-														"name": "CCLOG_RTRANID",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "CCLOG_CC02ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "CCLOG_CC02ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "CCLOG",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "CCLOG",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								},
-								{
-									"name": "EA01 Copy",
-									"type": "Copy",
-									"dependsOn": [
-										{
-											"activity": "CCLOG Copy",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "SqlServerSource",
-											"additionalColumns": [
-												{
-													"name": "ADF_TIMESTAMP",
-													"value": {
-														"value": "@utcNow()",
-														"type": "Expression"
-													}
-												}
-											],
-											"sqlReaderQuery": "-- SELECT [EA01_ID]\n--      , [EA01_DM01ID]\n--      , [EA01_EMAILTO]\n--      , [EA01_USER]\n--      , CAST ([EA01_SDTE ] AS DATE) AS [EA01_SDTE]\n--      , [EA01_STATUS]\n--      , [EA01_MESSAGE]\n--   FROM [dbo].[EA01]\n\nSELECT [EA01_ID]\n     , [EA01_DM01ID]\n     , [EA01_EMAILTO]\n     , [EA01_USER]\n     , CAST ([EA01_SDTE ] AS smalldatetime) AS [EA01_SDTE]\n     , [EA01_STATUS]\n     , [EA01_MESSAGE]\n  FROM [dbo].[EA01]",
-											"queryTimeout": "02:00:00",
-											"partitionOption": "None"
-										},
-										"sink": {
-											"type": "SnowflakeV2Sink",
-											"preCopyScript": {
-												"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.EA01')}",
-												"type": "Expression"
-											},
-											"importSettings": {
-												"type": "SnowflakeImportCopyCommand",
-												"additionalCopyOptions": {
-													"ON_ERROR": "CONTINUE"
-												}
-											}
-										},
-										"enableStaging": true,
-										"stagingSettings": {
-											"linkedServiceName": {
-												"referenceName": "msaz01_dm01_Azure_Blob",
-												"type": "LinkedServiceReference"
-											},
-											"path": "staging",
-											"enableCompression": true
-										},
-										"parallelCopies": {
-											"value": "@pipeline().parameters.Degree_Copy_Parallelism",
-											"type": "Expression"
-										},
-										"enableSkipIncompatibleRow": true,
-										"logSettings": {
-											"enableCopyActivityLog": true,
-											"copyActivityLogSettings": {
-												"logLevel": "Warning",
-												"enableReliableLogging": false
-											},
-											"logLocationSettings": {
-												"linkedServiceName": {
-													"referenceName": "AzureBlobLinkedService",
-													"type": "LinkedServiceReference"
-												}
-											}
-										},
-										"dataIntegrationUnits": {
-											"value": "@pipeline().parameters.Maximum_DIU",
-											"type": "Expression"
-										},
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"name": "EA01_ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "EA01_ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_DM01ID",
-														"type": "Int32"
-													},
-													"sink": {
-														"name": "EA01_DM01ID",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_EMAILTO",
-														"type": "String"
-													},
-													"sink": {
-														"name": "EA01_EMAILTO",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_USER",
-														"type": "String"
-													},
-													"sink": {
-														"name": "EA01_USER",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_SDTE",
-														"type": "DateTime"
-													},
-													"sink": {
-														"name": "EA01_SDTE",
-														"type": "DateTime"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_STATUS",
-														"type": "Boolean"
-													},
-													"sink": {
-														"name": "EA01_STATUS",
-														"type": "Boolean"
-													}
-												},
-												{
-													"source": {
-														"name": "EA01_MESSAGE",
-														"type": "String"
-													},
-													"sink": {
-														"name": "EA01_MESSAGE",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"name": "ADF_TIMESTAMP",
-														"type": "String"
-													},
-													"sink": {
-														"name": "ADF_TIMESTAMP",
-														"type": "DateTime"
-													}
-												}
-											]
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "TRUX_LEGACY01",
-											"type": "DatasetReference",
-											"parameters": {
-												"schema": "dbo",
-												"table": "EA01",
-												"database": {
-													"value": "@item().sql_db_name",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "LRS_Snowflake_Raw_V2",
-											"type": "DatasetReference",
-											"parameters": {
-												"Snowflake_Sink_Table": "EA01",
-												"Snowflake_Schema": "@item().Snowflake_Schema_New"
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "Database Lookup",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "SnowflakeV2Source",
-								"exportSettings": {
-									"type": "SnowflakeExportCopyCommand"
-								}
-							},
-							"dataset": {
-								"referenceName": "LRS_Snowflake_Raw_V2",
-								"type": "DatasetReference",
-								"parameters": {
-									"Snowflake_Sink_Table": "VW_TRUX_LEGACY_WATERMARK_PVT",
-									"Snowflake_Schema": "MASTER_DATA"
-								}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Maximum_DIU": {
-						"type": "int",
-						"defaultValue": 2
-					},
-					"Degree_Copy_Parallelism": {
-						"type": "int",
-						"defaultValue": 8
-					}
-				},
-				"folder": {
-					"name": "Production/TRUX"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-08-30T17:58:01Z"
 			},
 			"dependsOn": []
 		}
