@@ -872,7 +872,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeV2Source",
-						"query": "SELECT * FROM LRS_RAW.MASTER_DATA.DATABASE_LOOKUP_TRUX_COMBINED\nWHERE SERVERNAME = 'MIDWEST';",
+						"query": "SELECT * FROM LRS_RAW.MASTER_DATA.DATABASE_LOOKUP_TRUX_COMBINED;",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}

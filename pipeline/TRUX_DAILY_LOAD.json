@@ -46,7 +46,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_FULL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_FULL_LOAD_FACT_NEW",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
