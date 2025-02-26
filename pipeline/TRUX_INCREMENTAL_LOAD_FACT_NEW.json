@@ -1056,7 +1056,7 @@
 							]
 						},
 						{
-							"name": "RM07 Incremental Delta Load",
+							"name": "RM07",
 							"type": "Copy",
 							"dependsOn": [
 								{
@@ -1105,7 +1105,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -1228,21 +1228,19 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
 										"table": "RM07",
-										"database": {
-											"value": "@item().sql_db_name",
-											"type": "Expression"
-										}
+										"database": "@item().sql_db_name",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "RM07",
