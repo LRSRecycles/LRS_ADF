@@ -89,10 +89,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_LEGACY_DATA_LOAD",
-						"type": "PipelineReference"
-					},
 					"waitOnCompletion": true
 				}
 			},
@@ -113,7 +109,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_DATA_LOAD",
+						"referenceName": "TRUX_DATA_LOAD",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
