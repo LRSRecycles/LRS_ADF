@@ -17,10 +17,10 @@
 			"database": "@{linkedService().database}",
 			"warehouse": "LRS_RAW_ADF_COMPUTE",
 			"role": "ACCOUNTADMIN",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI0NmZhOWZiMy04OTg4LTQ1MDAtOWU3ZS00MjRjNWYwZjhjZjEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4MDUyOWUyMC01NDUwLTRkNmItYjMwNi1iZWY3ZmI2NTY0ZWQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
-			"referenceName": "msaz01-dm01",
+			"referenceName": "IR-MSAZ01-SQL-P12",
 			"type": "IntegrationRuntimeReference"
 		}
 	}
