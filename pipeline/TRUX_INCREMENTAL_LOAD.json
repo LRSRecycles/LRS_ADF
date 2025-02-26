@@ -33,7 +33,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -75,7 +75,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+						"referenceName": "TRUX_LOGGING_INCREMENTAL_LOAD",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
