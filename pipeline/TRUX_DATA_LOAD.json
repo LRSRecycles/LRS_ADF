@@ -41,7 +41,7 @@
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.SL01')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.SL01')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -199,7 +199,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "SL01",
-										"Snowflake_Schema": "@item().Snowflake_Name_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -232,7 +235,7 @@
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.SP03')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.SP03')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -347,7 +350,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "SP03",
-										"Snowflake_Schema": "@item().Snowflake_Name_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -381,7 +387,7 @@
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.CC02')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CC02')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -706,7 +712,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "CC02",
-										"Snowflake_Schema": "@item().Snowflake_Name_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -739,7 +748,7 @@
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name_New,'.LF05O')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.LF05O')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -844,7 +853,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "LF05O",
-										"Snowflake_Schema": "@item().Snowflake_Name_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -867,7 +879,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeV2Source",
-						"query": "SELECT * FROM LRS_RAW.MASTER_DATA.DATABASE_LOOKUP_TRUX_COMBINED;",
+						"query": "SELECT * FROM LRS_RAW.MASTER_DATA.SQL_DB_TO_SNOWFLAKE_SCHEMA;",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
@@ -876,7 +888,7 @@
 						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_COMBINED",
+							"Snowflake_Sink_Table": "SQL_DB_TO_SNOWFLAKE_SCHEMA",
 							"Snowflake_Schema": "MASTER_DATA"
 						}
 					},
