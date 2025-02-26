@@ -1,5 +1,5 @@
 {
-	"name": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
+	"name": "TRUX_INCREMENTAL_LOAD_FACT_NEW",
 	"properties": {
 		"activities": [
 			{
