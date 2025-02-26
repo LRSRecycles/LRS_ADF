@@ -27,7 +27,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Snowflake_Sink_Table": "VW_TRUX_LOGGING_WATERMARK",
-							"Snowflake_Schema": " MASTER_DATA"
+							"Snowflake_Schema": "MASTER_DATA"
 						}
 					},
 					"firstRowOnly": false
