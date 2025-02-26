@@ -2050,8 +2050,8 @@
 						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "DESTINATION",
-							"Snowflake_Schema": "TOWER_RAW"
+							"Snowflake_Sink_Table": "VW_TRUX_WATERMARK_PVT",
+							"Snowflake_Schema": "MASTER_DATA"
 						}
 					},
 					"firstRowOnly": false
