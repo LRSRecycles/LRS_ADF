@@ -54,7 +54,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -73,7 +73,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "msaz01_dm01_Azure_Blob",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -244,7 +244,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -263,7 +263,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "msaz01_dm01_Azure_Blob",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -395,7 +395,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -414,7 +414,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "msaz01_dm01_Azure_Blob",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -785,7 +785,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -804,7 +804,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "msaz01_dm01_Azure_Blob",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
