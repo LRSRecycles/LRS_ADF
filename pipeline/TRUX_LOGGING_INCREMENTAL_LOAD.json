@@ -1,5 +1,5 @@
 {
-	"name": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+	"name": "TRUX_LOGGING_INCREMENTAL_LOAD",
 	"properties": {
 		"activities": [
 			{
@@ -23,19 +23,19 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "LRS_Snowflake_Raw_V2",
+						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
 							"Snowflake_Sink_Table": "VW_TRUX_LOGGING_WATERMARK",
-							"Snowflake_Schema": "MASTER_DATA"
+							"Snowflake_Schema": " MASTER_DATA"
 						}
 					},
 					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "Incremental Loop Over Midwest Watermark Table",
-				"description": "Activity to loop over tables that have primary keys with incremental IDs. This loop looks at our Midwest Logging Watermark table in Snowflake and appends any IDs found in SQL Server that are greater than the latest watermark in Snowflake.",
+				"name": "Incremental Loop Over Watermark Table",
+				"description": "Activity to loop over tables that have primary keys with incremental IDs. This loop looks at our Trux Logging Watermark table in Snowflake and appends any IDs found in SQL Server that are greater than the latest watermark in Snowflake.",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -53,7 +53,7 @@
 					},
 					"activities": [
 						{
-							"name": "Midwest Logging Incremental Delta Load",
+							"name": "Trux Logging Incremental Delta Load",
 							"description": "",
 							"type": "Copy",
 							"dependsOn": [],
@@ -366,7 +366,13 @@
 									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
-										"schema": "dbo"
+										"schema": "dbo",
+										"table": {
+											"value": "@item().sql_table_name",
+											"type": "Expression"
+										},
+										"database": "TRUX_LOGGING",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
