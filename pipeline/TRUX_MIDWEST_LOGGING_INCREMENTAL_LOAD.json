@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Watermark Lookup for Midwest Logging",
+				"name": "Watermark Lookup for Trux Logging",
 				"description": "Look up schema, database and table names from SQL Server and Snowflake",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -26,7 +26,7 @@
 						"referenceName": "LRS_Snowflake_Raw_V2",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "VW_TRUX_MIDWEST_LOGGING_WATERMARK",
+							"Snowflake_Sink_Table": "VW_TRUX_LOGGING_WATERMARK",
 							"Snowflake_Schema": "MASTER_DATA"
 						}
 					},
@@ -39,7 +39,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Watermark Lookup for Midwest Logging",
+						"activity": "Watermark Lookup for Trux Logging",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,7 +48,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Watermark Lookup for Midwest Logging').output.value",
+						"value": "@activity('Watermark Lookup for Trux Logging').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -110,7 +110,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -363,24 +363,19 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
-										"schema": "dbo",
-										"table": {
-											"value": "@item().sql_table_name",
-											"type": "Expression"
-										},
-										"database": "TRUX_LOGGING"
+										"schema": "dbo"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "MIDWEST_LOG",
+										"Snowflake_Sink_Table": "TRUX_LOG_COMBINED",
 										"Snowflake_Schema": "TRUX_LOGGING_RAW"
 									}
 								}
