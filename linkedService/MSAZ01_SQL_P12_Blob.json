@@ -6,7 +6,7 @@
 		"type": "AzureBlobStorage",
 		"typeProperties": {
 			"sasUri": "https://lakeshoreblob.blob.core.windows.net/",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3NjMxYzVkNS1lNDVlLTQwMjQtYjAyYy00NGYxNTcyN2U4ZDgiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI2ZTNjODc2Yy01ZmIwLTQ4NGYtYTNlYi1mNTgxYWMwNjE4MjQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "IR-MSAZ01-SQL-P12",
