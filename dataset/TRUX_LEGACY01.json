@@ -3,7 +3,16 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "msaz01_dm01_SQL_Server",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"server": "msaz01-sql01\\TRUX_LEGACY01",
+				"db": {
+					"value": "@dataset().database",
+					"type": "Expression"
+				},
+				"username": "AzureSQLReadOnly",
+				"pw": "4QcH9zAzure01"
+			}
 		},
 		"parameters": {
 			"schema": {
