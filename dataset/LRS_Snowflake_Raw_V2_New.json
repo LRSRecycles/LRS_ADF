@@ -1,0 +1,35 @@
+{
+	"name": "LRS_Snowflake_Raw_V2_New",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MSAZ01_SQL_P12_Snowflake",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"database": "LRS_RAW"
+			}
+		},
+		"parameters": {
+			"Snowflake_Sink_Table": {
+				"type": "string",
+				"defaultValue": "DESTINATION"
+			},
+			"Snowflake_Schema": {
+				"type": "string",
+				"defaultValue": "TOWER_RAW"
+			}
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().Snowflake_Schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().Snowflake_Sink_Table",
+				"type": "Expression"
+			}
+		}
+	}
+}
