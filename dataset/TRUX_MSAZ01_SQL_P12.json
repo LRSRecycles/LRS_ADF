@@ -5,10 +5,7 @@
 			"referenceName": "MSAZ01_SQL_P12",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"server": {
-					"value": "@dataset().server",
-					"type": "Expression"
-				},
+				"server": "MSAZ01_SQL_P12",
 				"db": {
 					"value": "@dataset().database",
 					"type": "Expression"
