@@ -274,11 +274,14 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM01P",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -519,7 +522,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "TRUX_LEGACY01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -527,17 +530,21 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01_SQL_P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM05A",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
