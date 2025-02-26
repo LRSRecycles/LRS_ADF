@@ -63,7 +63,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -82,7 +82,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "AzureBlobLinkedService",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -259,7 +259,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -267,23 +267,27 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM01P",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05A Copy",
+							"name": "DM05A",
 							"type": "Copy",
 							"dependsOn": [
 								{
@@ -332,7 +336,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -351,7 +355,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "AzureBlobLinkedService",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -518,7 +522,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -526,17 +530,21 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM05A",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -546,7 +554,7 @@
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05A Copy",
+									"activity": "DM05A",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -2019,11 +2027,11 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "LRS_Snowflake_Raw_V2",
+						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "VW_TRUX_MIDWEST_WATERMARK_PVT",
-							"Snowflake_Schema": "MASTER_DATA"
+							"Snowflake_Sink_Table": "DESTINATION",
+							"Snowflake_Schema": "TOWER_RAW"
 						}
 					},
 					"firstRowOnly": false
