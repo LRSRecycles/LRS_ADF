@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Trux Midwest ID Watermark Lookup",
+				"name": "Trux ID Watermark Lookup",
 				"description": "look up schema, database and table names from sqlsever and snowflake",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -23,11 +23,11 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "LRS_Snowflake_Raw_V2",
+						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "VW_TRUX_MIDWEST_WATERMARK_PVT",
-							"Snowflake_Schema": "MASTER_DATA"
+							"Snowflake_Sink_Table": "DESTINATION",
+							"Snowflake_Schema": "TOWER_RAW"
 						}
 					},
 					"firstRowOnly": false
@@ -39,7 +39,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Trux Midwest ID Watermark Lookup",
+						"activity": "Trux ID Watermark Lookup",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,12 +48,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Trux Midwest ID Watermark Lookup').output.value",
+						"value": "@activity('Trux ID Watermark Lookup').output.value",
 						"type": "Expression"
 					},
 					"activities": [
 						{
-							"name": "DM01p Incremental Delta Load",
+							"name": "DM01P",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -95,7 +95,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -278,7 +278,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -286,27 +286,31 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM01P",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05A Incremental Delta Load",
+							"name": "DM05A",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM01p Incremental Delta Load",
+									"activity": "DM01P",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -351,7 +355,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -524,7 +528,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -532,27 +536,31 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM05A",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05B Incremental Delta Load",
+							"name": "DM05B",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05A Incremental Delta Load",
+									"activity": "DM05A",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -597,7 +605,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -780,7 +788,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -788,27 +796,31 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM05B",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05Z Incremental Delta Load",
+							"name": "DM05Z",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05B Incremental Delta Load",
+									"activity": "DM05B",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -853,7 +865,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -1016,7 +1028,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -1024,17 +1036,21 @@
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
 										"Snowflake_Sink_Table": "DM05Z",
-										"Snowflake_Schema": "@item().Snowflake_Schema_New"
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -1044,7 +1060,7 @@
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05Z Incremental Delta Load",
+									"activity": "DM05Z",
 									"dependencyConditions": [
 										"Succeeded"
 									]
