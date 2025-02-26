@@ -2,7 +2,7 @@
 	"name": "LRS_Snowflake_Raw_V2",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "MSAZ01_SQL_P12_Snowflake",
+			"referenceName": "msaz01_dm01_Snowflake_Raw_V2",
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"database": "LRS_RAW"
