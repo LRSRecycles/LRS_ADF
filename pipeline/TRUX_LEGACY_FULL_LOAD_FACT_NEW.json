@@ -263,7 +263,12 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
-										"table": "DM01P"
+										"table": "DM01P",
+										"database": {
+											"value": "@item().sql_db_name",
+											"type": "Expression"
+										},
+										"server": "MSAZ01_SQL_P12"
 									}
 								}
 							],
