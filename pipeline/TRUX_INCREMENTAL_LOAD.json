@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Run TRUX LEGACY Incremental",
+				"name": "Run Trux Incremental Load Fact New",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"policy": {
@@ -12,7 +12,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_LEGACY_INCREMENTAL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -24,7 +24,7 @@
 				}
 			},
 			{
-				"name": "Run TRUX MIDWEST Incremental",
+				"name": "Run Trux Logging Incremental Load",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"policy": {
@@ -33,49 +33,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_INCREMENTAL_LOAD_FACT_NEW",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32,
-						"Incremental_Range": "14"
-					}
-				}
-			},
-			{
-				"name": "Run TRUX LEGACY LOGGING Incremental",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_LEGACY_LOGGING_INCREMENTAL_LOAD",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32,
-						"Incremental_Range": 14
-					}
-				}
-			},
-			{
-				"name": "Run TRUX MIDWEST LOGGING Incremental",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_LOGGING_INCREMENTAL_LOAD",
+						"referenceName": "TRUX_LOGGING_INCREMENTAL_LOAD",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

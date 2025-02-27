@@ -2,7 +2,7 @@
 	"name": "MSAZ01",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "MSAZ01_SQL_P12",
+			"referenceName": "msaz01_dm01_SQL_Server",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
