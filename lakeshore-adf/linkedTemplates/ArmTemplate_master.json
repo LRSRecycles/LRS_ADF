@@ -27,6 +27,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LRS_Snowflake_V2'"
 		},
+		"MSAZ01_SQL_P12_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MSAZ01_SQL_P12'"
+		},
+		"MSAZ01_SQL_P12_Snowflake_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'MSAZ01_SQL_P12_Snowflake'"
+		},
 		"ildc93_dm01_SQL_Server_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ildc93_dm01_SQL_Server'",
@@ -54,6 +62,18 @@
 			"defaultValue": "LRS_RAW"
 		},
 		"LRS_Snowflake_V2_properties_typeProperties_role": {
+			"type": "string",
+			"defaultValue": "ACCOUNTADMIN"
+		},
+		"MSAZ01_SQL_P12_Blob_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'MSAZ01_SQL_P12_Blob'"
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().database}"
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role": {
 			"type": "string",
 			"defaultValue": "ACCOUNTADMIN"
 		},
@@ -141,6 +161,12 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"MSAZ01_SQL_P12_connectionString": {
+						"value": "[parameters('MSAZ01_SQL_P12_connectionString')]"
+					},
+					"MSAZ01_SQL_P12_Snowflake_password": {
+						"value": "[parameters('MSAZ01_SQL_P12_Snowflake_password')]"
+					},
 					"ildc93_dm01_SQL_Server_connectionString": {
 						"value": "[parameters('ildc93_dm01_SQL_Server_connectionString')]"
 					},
@@ -149,6 +175,15 @@
 					},
 					"msaz01_dm01_Snowflake_Raw_V2_password": {
 						"value": "[parameters('msaz01_dm01_Snowflake_Raw_V2_password')]"
+					},
+					"MSAZ01_SQL_P12_Blob_sasUri": {
+						"value": "[parameters('MSAZ01_SQL_P12_Blob_sasUri')]"
+					},
+					"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database": {
+						"value": "[parameters('MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database')]"
+					},
+					"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role": {
+						"value": "[parameters('MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role')]"
 					},
 					"msaz01_dm01_Azure_Blob_sasUri": {
 						"value": "[parameters('msaz01_dm01_Azure_Blob_sasUri')]"

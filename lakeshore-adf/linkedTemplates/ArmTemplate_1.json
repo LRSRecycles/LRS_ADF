@@ -7,6 +7,14 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "lakeshore-adf"
 		},
+		"MSAZ01_SQL_P12_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MSAZ01_SQL_P12'"
+		},
+		"MSAZ01_SQL_P12_Snowflake_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'MSAZ01_SQL_P12_Snowflake'"
+		},
 		"ildc93_dm01_SQL_Server_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ildc93_dm01_SQL_Server'",
@@ -20,6 +28,18 @@
 		"msaz01_dm01_Snowflake_Raw_V2_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'msaz01_dm01_Snowflake_Raw_V2'"
+		},
+		"MSAZ01_SQL_P12_Blob_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'MSAZ01_SQL_P12_Blob'"
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "@{linkedService().database}"
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role": {
+			"type": "string",
+			"defaultValue": "ACCOUNTADMIN"
 		},
 		"msaz01_dm01_Azure_Blob_sasUri": {
 			"type": "secureString",
@@ -562,6 +582,87 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MSAZ01_SQL_P12')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "SQL server linked service for MSAZ01_SQL_P12",
+				"parameters": {
+					"server": {
+						"type": "string"
+					},
+					"db": {
+						"type": "string"
+					},
+					"username": {
+						"type": "string"
+					},
+					"pw": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"connectionString": "[parameters('MSAZ01_SQL_P12_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-MSAZ01-SQL-P12",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MSAZ01_SQL_P12_Blob')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('MSAZ01_SQL_P12_Blob_sasUri')]"
+				},
+				"connectVia": {
+					"referenceName": "IR-MSAZ01-SQL-P12",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/MSAZ01_SQL_P12_Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"database": {
+						"type": "string",
+						"defaultValue": "LRS_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2",
+				"typeProperties": {
+					"authenticationType": "Basic",
+					"accountIdentifier": "bk40410.central-us.azure",
+					"user": "SVC_ELT",
+					"database": "[parameters('MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database')]",
+					"warehouse": "LRS_RAW_ADF_COMPUTE",
+					"role": "[parameters('MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('MSAZ01_SQL_P12_Snowflake_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IR-MSAZ01-SQL-P12",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
 			"dependsOn": []
 		},
@@ -1252,6 +1353,46 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_Raw_V2_New')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "MSAZ01_SQL_P12_Snowflake",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"database": "LRS_RAW"
+					}
+				},
+				"parameters": {
+					"Snowflake_Sink_Table": {
+						"type": "string",
+						"defaultValue": "DESTINATION"
+					},
+					"Snowflake_Schema": {
+						"type": "string",
+						"defaultValue": "TOWER_RAW"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeV2Table",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Snowflake_Schema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Snowflake_Sink_Table",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/MSAZ01_SQL_P12_Snowflake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LRS_Snowflake_Sandbox_V2')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1298,16 +1439,7 @@
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "msaz01_dm01_SQL_Server",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"server": "msaz01-sql01",
-						"db": {
-							"value": "@dataset().database",
-							"type": "Expression"
-						},
-						"username": "AzureSQLReadOnlyMW",
-						"pw": "4QcH9zAzure01"
-					}
+					"type": "LinkedServiceReference"
 				},
 				"parameters": {
 					"schema": {
@@ -1406,327 +1538,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_SQL_Server')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SOFTPAK_DISPOSAL_SITE_RAW_ALL_FILES')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "msaz01_dm01_Azure_Blob",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "SOFTPAK"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "Variable_disposal_site_report",
-						"container": "softpak"
-					},
-					"columnDelimiter": ",",
-					"rowDelimiter": "\n",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "CO",
-						"type": "String"
-					},
-					{
-						"name": "DISPOSAL",
-						"type": "String"
-					},
-					{
-						"name": "MATERIAL",
-						"type": "String"
-					},
-					{
-						"name": "DATE",
-						"type": "String"
-					},
-					{
-						"name": "ROUTE",
-						"type": "String"
-					},
-					{
-						"name": "DRIVER",
-						"type": "String"
-					},
-					{
-						"name": "VEHICLE",
-						"type": "String"
-					},
-					{
-						"name": "TAX BODY",
-						"type": "String"
-					},
-					{
-						"name": "TICKET",
-						"type": "String"
-					},
-					{
-						"name": "UNITS",
-						"type": "String"
-					},
-					{
-						"name": "COST",
-						"type": "String"
-					},
-					{
-						"name": "BIL$",
-						"type": "String"
-					},
-					{
-						"name": "ROUTE TYPE",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SoftPak_Disposal_site_Raw_EachFile')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "msaz01_dm01_Azure_Blob",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"pFileName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@dataset().pFileName",
-							"type": "Expression"
-						},
-						"folderPath": "Variable_disposal_site_report",
-						"container": "softpak"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "CO",
-						"type": "String"
-					},
-					{
-						"name": "DISPOSAL",
-						"type": "String"
-					},
-					{
-						"name": "MATERIAL",
-						"type": "String"
-					},
-					{
-						"name": "DATE",
-						"type": "String"
-					},
-					{
-						"name": "ROUTE",
-						"type": "String"
-					},
-					{
-						"name": "DRIVER",
-						"type": "String"
-					},
-					{
-						"name": "VEHICLE",
-						"type": "String"
-					},
-					{
-						"name": "TAX BODY",
-						"type": "String"
-					},
-					{
-						"name": "TICKET",
-						"type": "String"
-					},
-					{
-						"name": "UNITS",
-						"type": "String"
-					},
-					{
-						"name": "COST",
-						"type": "String"
-					},
-					{
-						"name": "BIL$",
-						"type": "String"
-					},
-					{
-						"name": "ROUTE TYPE",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TRUX_LEGACY01')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "msaz01_dm01_SQL_Server",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"server": "msaz01-sql01\\TRUX_LEGACY01",
-						"db": {
-							"value": "@dataset().database",
-							"type": "Expression"
-						},
-						"username": "AzureSQLReadOnly",
-						"pw": "4QcH9zAzure01"
-					}
-				},
-				"parameters": {
-					"schema": {
-						"type": "string"
-					},
-					"table": {
-						"type": "string"
-					},
-					"database": {
-						"type": "String"
-					}
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "AC01_PART",
-						"type": "nvarchar"
-					},
-					{
-						"name": "AC01_DATE",
-						"type": "smalldatetime",
-						"precision": 16,
-						"scale": 0
-					},
-					{
-						"name": "AC01_QTY",
-						"type": "decimal",
-						"precision": 18,
-						"scale": 2
-					},
-					{
-						"name": "AC01_AVGCOST",
-						"type": "decimal",
-						"precision": 18,
-						"scale": 2
-					}
-				],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().schema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().table",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_SQL_Server')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/VENA_Raw_All_Files')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "msaz01_dm01_Azure_Blob",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Vena"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "finance_model",
-						"container": "vena"
-					},
-					"columnDelimiter": "|",
-					"escapeChar": "",
-					"firstRowAsHeader": true,
-					"quoteChar": ""
-				},
-				"schema": [
-					{
-						"name": "_Account",
-						"type": "String"
-					},
-					{
-						"name": "_Location",
-						"type": "String"
-					},
-					{
-						"name": "_Line/Dept",
-						"type": "String"
-					},
-					{
-						"name": "_Material Type/Customer",
-						"type": "String"
-					},
-					{
-						"name": "_Data Source",
-						"type": "String"
-					},
-					{
-						"name": "_Year",
-						"type": "String"
-					},
-					{
-						"name": "_Period",
-						"type": "String"
-					},
-					{
-						"name": "_Scenario",
-						"type": "String"
-					},
-					{
-						"name": "_Measure",
-						"type": "String"
-					},
-					{
-						"name": "_value",
-						"type": "String"
-					},
-					{
-						"name": "_etl_id",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/msaz01_dm01_Azure_Blob')]"
 			]
 		}
 	]

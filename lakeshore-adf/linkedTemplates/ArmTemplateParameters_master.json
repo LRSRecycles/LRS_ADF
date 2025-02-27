@@ -20,6 +20,12 @@
 		"LRS_Snowflake_V2_password": {
 			"value": ""
 		},
+		"MSAZ01_SQL_P12_connectionString": {
+			"value": ""
+		},
+		"MSAZ01_SQL_P12_Snowflake_password": {
+			"value": ""
+		},
 		"ildc93_dm01_SQL_Server_connectionString": {
 			"value": "Integrated Security=False;Data Source=@{linkedService().server};Initial Catalog=@{linkedService().db};User ID=@{linkedService().username};Password=@{linkedService().pw}"
 		},
@@ -39,6 +45,15 @@
 			"value": "LRS_RAW"
 		},
 		"LRS_Snowflake_V2_properties_typeProperties_role": {
+			"value": "ACCOUNTADMIN"
+		},
+		"MSAZ01_SQL_P12_Blob_sasUri": {
+			"value": ""
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_database": {
+			"value": "@{linkedService().database}"
+		},
+		"MSAZ01_SQL_P12_Snowflake_properties_typeProperties_role": {
 			"value": "ACCOUNTADMIN"
 		},
 		"msaz01_dm01_Azure_Blob_sasUri": {
