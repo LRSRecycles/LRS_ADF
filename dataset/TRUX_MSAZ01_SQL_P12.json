@@ -1,0 +1,45 @@
+{
+	"name": "TRUX_MSAZ01_SQL_P12",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MSAZ01_SQL_P12",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"server": "MSAZ01-SQL-P12",
+				"db": {
+					"value": "@dataset().database",
+					"type": "Expression"
+				},
+				"username": "svc_az_sql_fivetran_readonly_prod",
+				"pw": "3QxK/VLbBWM6DIH0nhHJqAPQW+HJpAdX29XuFAXEi84="
+			}
+		},
+		"parameters": {
+			"schema": {
+				"type": "string"
+			},
+			"table": {
+				"type": "string"
+			},
+			"database": {
+				"type": "string"
+			},
+			"server": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().table",
+				"type": "Expression"
+			}
+		}
+	}
+}

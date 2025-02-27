@@ -1,5 +1,5 @@
 {
-	"name": "TRUX_MIDWEST_FULL_LOAD_FACT",
+	"name": "TRUX_DATA_LOAD",
 	"properties": {
 		"activities": [
 			{
@@ -21,7 +21,7 @@
 					},
 					"activities": [
 						{
-							"name": "DM01P",
+							"name": "Copy SL01",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -35,22 +35,13 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"additionalColumns": [
-										{
-											"name": "ADF_TIMESTAMP",
-											"value": {
-												"value": "@utcnow()",
-												"type": "Expression"
-											}
-										}
-									],
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM01P')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.SL01')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -63,7 +54,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -72,6 +63,20 @@
 								"parallelCopies": {
 									"value": "@pipeline().parameters.Degree_Copy_Parallelism",
 									"type": "Expression"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "MSAZ01_SQL_P12_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
 								},
 								"dataIntegrationUnits": {
 									"value": "@pipeline().parameters.Maximum_DIU",
@@ -82,162 +87,92 @@
 									"mappings": [
 										{
 											"source": {
-												"name": "DM01P_ID",
+												"name": "SL01_ID",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM01P_ID",
+												"name": "SL01_ID",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM01P_LINK",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_LINK",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_TYPE",
+												"name": "SL01_NAME",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM01P_TYPE",
+												"name": "SL01_NAME",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM01P_DATE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM01P_DATE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_REFN",
+												"name": "SL01_ADDS",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM01P_REFN",
+												"name": "SL01_ADDS",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM01P_AMNT",
+												"name": "SL01_CITY",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SL01_CITY",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SL01_STAT",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SL01_STAT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SL01_PZIP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "SL01_PZIP",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "SL01_LATT",
 												"type": "Decimal"
 											},
 											"sink": {
-												"name": "DM01P_AMNT",
+												"name": "SL01_LATT",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM01P_ADJR",
-												"type": "String"
+												"name": "SL01_LONG",
+												"type": "Decimal"
 											},
 											"sink": {
-												"name": "DM01P_ADJR",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_PERIODCLOSEID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_PERIODCLOSEID",
+												"name": "SL01_LONG",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM01P_USER",
+												"name": "SL01_ACTIVE",
+												"type": "Boolean"
+											},
+											"sink": {
+												"name": "SL01_ACTIVE",
 												"type": "String"
-											},
-											"sink": {
-												"name": "DM01P_USER",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_RDATE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM01P_RDATE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_BATCH",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_BATCH",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_GLNU",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM01P_GLNU",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_NOTEID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_NOTEID",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_LINKID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_LINKID",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM01P_GROUP",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM01P_GROUP",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "ADF_TIMESTAMP",
-												"type": "String"
-											},
-											"sink": {
-												"name": "ADF_TIMESTAMP",
-												"type": "DateTime"
 											}
 										}
 									]
@@ -245,35 +180,39 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
-										"table": "DM01P",
+										"table": "SL01",
 										"database": {
 											"value": "@item().sql_db_name",
 											"type": "Expression"
-										}
+										},
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "DM01P",
-										"Snowflake_Schema": "@item().Snowflake_Name"
+										"Snowflake_Sink_Table": "SL01",
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05A Copy",
+							"name": "Copy SP03",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM01P",
+									"activity": "Copy SL01",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -290,22 +229,13 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"additionalColumns": [
-										{
-											"name": "ADF_TIMESTAMP",
-											"value": {
-												"value": "@utcnow()",
-												"type": "Expression"
-											}
-										}
-									],
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05A')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.SP03')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -318,7 +248,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -327,6 +257,20 @@
 								"parallelCopies": {
 									"value": "@pipeline().parameters.Degree_Copy_Parallelism",
 									"type": "Expression"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "MSAZ01_SQL_P12_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
 								},
 								"dataIntegrationUnits": {
 									"value": "@pipeline().parameters.Maximum_DIU",
@@ -337,152 +281,52 @@
 									"mappings": [
 										{
 											"source": {
-												"name": "DM05A_ID",
+												"name": "SP03_ID",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05A_ID",
+												"name": "SP03_ID",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05A_LINK",
+												"name": "SP03_LINK",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05A_LINK",
+												"name": "SP03_LINK",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05A_TDTE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05A_TDTE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_AMNT",
-												"type": "Decimal"
-											},
-											"sink": {
-												"name": "DM05A_AMNT",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_QTY",
-												"type": "Decimal"
-											},
-											"sink": {
-												"name": "DM05A_QTY",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_ROUT",
+												"name": "SP03_CUST",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05A_ROUT",
+												"name": "SP03_CUST",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05A_SEQU",
-												"type": "Decimal"
+												"name": "SP03_REFE",
+												"type": "String"
 											},
 											"sink": {
-												"name": "DM05A_SEQU",
-												"type": "Int64"
+												"name": "SP03_REFE",
+												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05A_PERIODCLOSEID",
+												"name": "SP03_SITE",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05A_PERIODCLOSEID",
+												"name": "SP03_SITE",
 												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_USER",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05A_USER",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_RTYPE",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05A_RTYPE",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_RDATE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05A_RDATE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_ADJR",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05A_ADJR",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_CODE",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05A_CODE",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05A_NOTEID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM05A_NOTEID",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "ADF_TIMESTAMP",
-												"type": "String"
-											},
-											"sink": {
-												"name": "ADF_TIMESTAMP",
-												"type": "DateTime"
 											}
 										}
 									]
@@ -490,35 +334,36 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
-										"table": "DM05A",
-										"database": {
-											"value": "@item().sql_db_name",
-											"type": "Expression"
-										}
+										"table": "SP03",
+										"database": "@item().sql_db_name",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "DM05A",
-										"Snowflake_Schema": "@item().Snowflake_Name"
+										"Snowflake_Sink_Table": "SP03",
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05B Copy",
+							"name": "Copy CC02",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05A Copy",
+									"activity": "Copy SP03",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -535,22 +380,14 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"additionalColumns": [
-										{
-											"name": "ADF_TIMESTAMP",
-											"value": {
-												"value": "@utcnow()",
-												"type": "Expression"
-											}
-										}
-									],
+									"sqlReaderQuery": "SELECT \r\n      [CC02_CUST]\r\n      ,[CC02_SITE]\r\n      ,[CC02_TYPE]\r\n      , NULL AS [CC02_NUMBER]\r\n      ,[CC02_EXPMO]\r\n      ,[CC02_EXPYE]\r\n      , NULL AS [CC02_CVV2]\r\n      ,[CC02_HFNAME]\r\n      ,[CC02_HLNAME]\r\n      ,[CC02_HADD]\r\n      ,[CC02_HCITY]\r\n      ,[CC02_HSTAT]\r\n      ,[CC02_HZIP]\r\n      ,[CC02_HCOUN]\r\n      ,[CC02_HPHON]\r\n      ,[CC02_HEMAIL]\r\n      ,[CC02_ACTIVE]\r\n      ,[CC02_CHRGTYPE]\r\n      ,[CC02_ID]\r\n      , NULL AS [CC02_ROUTNUM]\r\n      ,[CC02_ACCTYPE]\r\n      ,[CC02_BANKN]\r\n      ,[CC02_LICNUM]\r\n      ,[CC02_LICSTAT]\r\n      ,[CC02_DOB]\r\n      ,[CC02_ACCNAME]\r\n      ,[CC02_TOKEN]\r\n      ,[CC02_ACCOUNTTYPE]\r\nFROM \r\n      dbo.CC02",
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05B')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.CC02')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -563,7 +400,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -572,6 +409,20 @@
 								"parallelCopies": {
 									"value": "@pipeline().parameters.Degree_Copy_Parallelism",
 									"type": "Expression"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "MSAZ01_SQL_P12_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
 								},
 								"dataIntegrationUnits": {
 									"value": "@pipeline().parameters.Maximum_DIU",
@@ -582,162 +433,262 @@
 									"mappings": [
 										{
 											"source": {
-												"name": "DM05B_ID",
+												"name": "CC02_CUST",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05B_ID",
+												"name": "CC02_CUST",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_LINK",
+												"name": "CC02_SITE",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05B_LINK",
+												"name": "CC02_SITE",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_TDTE",
-												"type": "DateTime"
+												"name": "CC02_TYPE",
+												"type": "String"
 											},
 											"sink": {
-												"name": "DM05B_TDTE",
-												"type": "DateTime"
+												"name": "CC02_TYPE",
+												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_AMNT",
-												"type": "Decimal"
-											},
-											"sink": {
-												"name": "DM05B_AMNT",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05B_QTY",
-												"type": "Decimal"
-											},
-											"sink": {
-												"name": "DM05B_QTY",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05B_BILLF",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05B_BILLF",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05B_BILLT",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05B_BILLT",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05B_ARATEID",
+												"name": "CC02_NUMBER",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05B_ARATEID",
-												"type": "Int64"
+												"name": "CC02_NUMBER",
+												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_PERIODCLOSEID",
+												"name": "CC02_EXPMO",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_EXPMO",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_EXPYE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_EXPYE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_CVV2",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05B_PERIODCLOSEID",
-												"type": "Int64"
+												"name": "CC02_CVV2",
+												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_USER",
+												"name": "CC02_HFNAME",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM05B_USER",
+												"name": "CC02_HFNAME",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_RTYPE",
+												"name": "CC02_HLNAME",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM05B_RTYPE",
+												"name": "CC02_HLNAME",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_RDATE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05B_RDATE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05B_ADJR",
+												"name": "CC02_HADD",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM05B_ADJR",
+												"name": "CC02_HADD",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_CODE",
+												"name": "CC02_HCITY",
 												"type": "String"
 											},
 											"sink": {
-												"name": "DM05B_CODE",
+												"name": "CC02_HCITY",
 												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05B_NOTEID",
+												"name": "CC02_HSTAT",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_HSTAT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_HZIP",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_HZIP",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_HCOUN",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_HCOUN",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_HPHON",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_HPHON",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_HEMAIL",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_HEMAIL",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_ACTIVE",
+												"type": "Boolean"
+											},
+											"sink": {
+												"name": "CC02_ACTIVE",
+												"type": "Boolean"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_CHRGTYPE",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_CHRGTYPE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_ID",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05B_NOTEID",
+												"name": "CC02_ID",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "ADF_TIMESTAMP",
+												"name": "CC02_ROUTNUM",
+												"type": "Int32"
+											},
+											"sink": {
+												"name": "CC02_ROUTNUM",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_ACCTYPE",
 												"type": "String"
 											},
 											"sink": {
-												"name": "ADF_TIMESTAMP",
+												"name": "CC02_ACCTYPE",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_BANKN",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_BANKN",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_LICNUM",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_LICNUM",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_LICSTAT",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_LICSTAT",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_DOB",
 												"type": "DateTime"
+											},
+											"sink": {
+												"name": "CC02_DOB",
+												"type": "DateTime"
+											}
+										},
+										{
+											"source": {
+												"name": "CC02_ACCNAME",
+												"type": "String"
+											},
+											"sink": {
+												"name": "CC02_ACCNAME",
+												"type": "String"
 											}
 										}
 									]
@@ -745,35 +696,36 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
-										"table": "DM05B",
-										"database": {
-											"value": "@item().sql_db_name",
-											"type": "Expression"
-										}
+										"table": "CC02",
+										"database": "@item().sql_db_name",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "DM05B",
-										"Snowflake_Schema": "@item().Snowflake_Name"
+										"Snowflake_Sink_Table": "CC02",
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
 						},
 						{
-							"name": "DM05Z Copy",
+							"name": "Copy LF05O",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "DM05B Copy",
+									"activity": "Copy CC02",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -790,22 +742,13 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"additionalColumns": [
-										{
-											"name": "ADF_TIMESTAMP",
-											"value": {
-												"value": "@utcnow()",
-												"type": "Expression"
-											}
-										}
-									],
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "SnowflakeV2Sink",
 									"preCopyScript": {
-										"value": "@{concat('truncate table',' ',item().Snowflake_Name,'.DM05Z')}",
+										"value": "@{concat('truncate table',' ',item().Snowflake_Schema_New,'.LF05O')}",
 										"type": "Expression"
 									},
 									"importSettings": {
@@ -818,7 +761,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -827,6 +770,20 @@
 								"parallelCopies": {
 									"value": "@pipeline().parameters.Degree_Copy_Parallelism",
 									"type": "Expression"
+								},
+								"enableSkipIncompatibleRow": true,
+								"logSettings": {
+									"enableCopyActivityLog": true,
+									"copyActivityLogSettings": {
+										"logLevel": "Warning",
+										"enableReliableLogging": false
+									},
+									"logLocationSettings": {
+										"linkedServiceName": {
+											"referenceName": "MSAZ01_SQL_P12_Blob",
+											"type": "LinkedServiceReference"
+										}
+									}
 								},
 								"dataIntegrationUnits": {
 									"value": "@pipeline().parameters.Maximum_DIU",
@@ -837,142 +794,42 @@
 									"mappings": [
 										{
 											"source": {
-												"name": "DM05Z_ID",
+												"name": "LF05O_ID",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05Z_ID",
+												"name": "LF05O_ID",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05Z_LINK",
+												"name": "LF05O_LINK",
 												"type": "Int32"
 											},
 											"sink": {
-												"name": "DM05Z_LINK",
+												"name": "LF05O_LINK",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05Z_TDTE",
-												"type": "DateTime"
+												"name": "LF05O_ORIG",
+												"type": "String"
 											},
 											"sink": {
-												"name": "DM05Z_TDTE",
-												"type": "DateTime"
+												"name": "LF05O_ORIG",
+												"type": "String"
 											}
 										},
 										{
 											"source": {
-												"name": "DM05Z_AMNT",
+												"name": "LF05O_PERC",
 												"type": "Decimal"
 											},
 											"sink": {
-												"name": "DM05Z_AMNT",
+												"name": "LF05O_PERC",
 												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_QTY",
-												"type": "Decimal"
-											},
-											"sink": {
-												"name": "DM05Z_QTY",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_REFN",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05Z_REFN",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_PERIODCLOSEID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM05Z_PERIODCLOSEID",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_USER",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05Z_USER",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_RTYPE",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05Z_RTYPE",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_RDATE",
-												"type": "DateTime"
-											},
-											"sink": {
-												"name": "DM05Z_RDATE",
-												"type": "DateTime"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_ADJR",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05Z_ADJR",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_CODE",
-												"type": "String"
-											},
-											"sink": {
-												"name": "DM05Z_CODE",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"name": "DM05Z_NOTEID",
-												"type": "Int32"
-											},
-											"sink": {
-												"name": "DM05Z_NOTEID",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"name": "ADF_TIMESTAMP",
-												"type": "String"
-											},
-											"sink": {
-												"name": "ADF_TIMESTAMP",
-												"type": "DateTime"
 											}
 										}
 									]
@@ -980,25 +837,26 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
-										"table": "DM05Z",
-										"database": {
-											"value": "@item().sql_db_name",
-											"type": "Expression"
-										}
+										"table": "LF05O",
+										"database": "@item().sql_db_name",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "DM05Z",
-										"Snowflake_Schema": "@item().Snowflake_Name"
+										"Snowflake_Sink_Table": "LF05O",
+										"Snowflake_Schema": {
+											"value": "@item().Snowflake_Schema_New",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -1021,15 +879,16 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeV2Source",
+						"query": "SELECT * FROM LRS_RAW.MASTER_DATA.SQL_DB_TO_SNOWFLAKE_SCHEMA;",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
 					},
 					"dataset": {
-						"referenceName": "LRS_Snowflake_Raw_V2",
+						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "DATABASE_LOOKUP_TRUX_MIDWEST",
+							"Snowflake_Sink_Table": "SQL_DB_TO_SNOWFLAKE_SCHEMA",
 							"Snowflake_Schema": "MASTER_DATA"
 						}
 					},
@@ -1048,10 +907,10 @@
 			}
 		},
 		"folder": {
-			"name": "Production/TRUX_OLD"
+			"name": "Production/TRUX"
 		},
 		"annotations": [],
-		"lastPublishTime": "2024-08-30T17:58:01Z"
+		"lastPublishTime": "2024-09-27T13:50:15Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }

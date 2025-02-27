@@ -1,0 +1,27 @@
+{
+	"name": "MSAZ01_SQL_P12_Snowflake",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"database": {
+				"type": "string",
+				"defaultValue": "LRS_RAW"
+			}
+		},
+		"annotations": [],
+		"type": "SnowflakeV2",
+		"typeProperties": {
+			"authenticationType": "Basic",
+			"accountIdentifier": "bk40410.central-us.azure",
+			"user": "SVC_ELT",
+			"database": "@{linkedService().database}",
+			"warehouse": "LRS_RAW_ADF_COMPUTE",
+			"role": "ACCOUNTADMIN",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4MDUyOWUyMC01NDUwLTRkNmItYjMwNi1iZWY3ZmI2NTY0ZWQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-MSAZ01-SQL-P12",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

@@ -1,5 +1,5 @@
 {
-	"name": "TRUX_MIDWEST_LOGGING_FULL_LOAD",
+	"name": "TRUX_LOGGING_FULL_LOAD",
 	"properties": {
 		"activities": [
 			{
@@ -17,24 +17,24 @@
 				"typeProperties": {
 					"source": {
 						"type": "SnowflakeV2Source",
-						"query": "SELECT * \r\n  FROM LRS_RAW.MASTER_DATA.LOGGING_LOOKUP_TRUX_COMBINED\r\n WHERE SQL_SERVER_NAME = 'MIDWEST';",
+						"query": "SELECT * \r\n  FROM LRS_RAW.MASTER_DATA.LOGGING_LOOKUP_TRUX_COMBINED;",
 						"exportSettings": {
 							"type": "SnowflakeExportCopyCommand"
 						}
 					},
 					"dataset": {
-						"referenceName": "LRS_Snowflake_Raw_V2",
+						"referenceName": "LRS_Snowflake_Raw_V2_New",
 						"type": "DatasetReference",
 						"parameters": {
-							"Snowflake_Sink_Table": "LOGGING_LOOKUP_TRUX_COMBINED",
-							"Snowflake_Schema": "MASTER_DATA"
+							"Snowflake_Sink_Table": "TRUX_LOG_COMBINED",
+							"Snowflake_Schema": "TRUX_LOGGING_RAW"
 						}
 					},
 					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "Loop over MIDWEST logging tables",
+				"name": "Loop over TRUX logging tables",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -52,7 +52,7 @@
 					},
 					"activities": [
 						{
-							"name": "Copy MIDWEST logs",
+							"name": "Copy Trux logs",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -104,7 +104,7 @@
 								"enableStaging": true,
 								"stagingSettings": {
 									"linkedServiceName": {
-										"referenceName": "msaz01_dm01_Azure_Blob",
+										"referenceName": "MSAZ01_SQL_P12_Blob",
 										"type": "LinkedServiceReference"
 									},
 									"path": "staging",
@@ -123,7 +123,7 @@
 									},
 									"logLocationSettings": {
 										"linkedServiceName": {
-											"referenceName": "msaz01_dm01_Azure_Blob",
+											"referenceName": "MSAZ01_SQL_P12_Blob",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -370,7 +370,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "MSAZ01",
+									"referenceName": "TRUX_MSAZ01_SQL_P12",
 									"type": "DatasetReference",
 									"parameters": {
 										"schema": "dbo",
@@ -378,16 +378,17 @@
 											"value": "@item().sql_table_name",
 											"type": "Expression"
 										},
-										"database": "TRUX_LOGGING"
+										"database": "TRUX_LOGGING",
+										"server": "MSAZ01-SQL-P12"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "LRS_Snowflake_Raw_V2",
+									"referenceName": "LRS_Snowflake_Raw_V2_New",
 									"type": "DatasetReference",
 									"parameters": {
-										"Snowflake_Sink_Table": "MIDWEST_LOG",
+										"Snowflake_Sink_Table": "TRUX_LOG_COMBINED",
 										"Snowflake_Schema": "TRUX_LOGGING_RAW"
 									}
 								}

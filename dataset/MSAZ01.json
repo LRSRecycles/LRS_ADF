@@ -3,16 +3,7 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "msaz01_dm01_SQL_Server",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"server": "msaz01-sql01",
-				"db": {
-					"value": "@dataset().database",
-					"type": "Expression"
-				},
-				"username": "AzureSQLReadOnlyMW",
-				"pw": "4QcH9zAzure01"
-			}
+			"type": "LinkedServiceReference"
 		},
 		"parameters": {
 			"schema": {

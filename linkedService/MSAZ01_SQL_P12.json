@@ -1,0 +1,31 @@
+{
+	"name": "MSAZ01_SQL_P12",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"description": "SQL server linked service for MSAZ01_SQL_P12",
+		"parameters": {
+			"server": {
+				"type": "string"
+			},
+			"db": {
+				"type": "string"
+			},
+			"username": {
+				"type": "string"
+			},
+			"pw": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=MSAZ01-SQL-P12;initial catalog=@{linkedService().db};user id=svc_az_sql_fivetran_readonly_prod",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJmMWNmNTM4My1kNGRlLTQxZjAtODg3Ni1kYjk4MGY5NzYyNmQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IR-MSAZ01-SQL-P12",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

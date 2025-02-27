@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Execute Pipeline Legacy Full Load Fact",
+				"name": "Execute Trux Full Load Fact New",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -19,34 +19,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_LEGACY_FULL_LOAD_FACT_NEW",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32
-					}
-				}
-			},
-			{
-				"name": "Execute Pipeline Midwest Full Load Fact",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Master Data Load",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_FULL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_FULL_LOAD_FACT_NEW",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -74,11 +47,11 @@
 				}
 			},
 			{
-				"name": "Execute Pipeline Legacy Full Load Dim",
+				"name": "Execute Pipeline Trux Data Load",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Execute Pipeline Legacy Full Load Fact",
+						"activity": "Execute Trux Full Load Fact New",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -90,30 +63,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_LEGACY_DATA_LOAD",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Execute Pipeline Midwest Full Load Dim",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Execute Pipeline Midwest Full Load Fact",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_MIDWEST_DATA_LOAD",
+						"referenceName": "TRUX_DATA_LOAD",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
