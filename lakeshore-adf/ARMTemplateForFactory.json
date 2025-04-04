@@ -41861,6 +41861,282 @@
 								}
 							}
 						]
+					},
+					{
+						"name": "COPY PROFILE TABLE",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.TRUX_DATA_PROFILE;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "MSAZ01_SQL_P12_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging",
+								"enableCompression": true
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "PROFILE_ID",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "PROFILE_ID",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_NAME",
+											"type": "String"
+										},
+										"sink": {
+											"name": "PROFILE_NAME",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_SYS",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "PROFILE_SYS",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_CHGTICKDTE",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_CHGTICKDTE",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_VOIDCASHTICK",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_VOIDCASHTICK",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_VOIDINVOTICK",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_VOIDINVOTICK",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_OVERRIDEMINPRICE",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_OVERRIDEMINPRICE",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_EXPORT",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_EXPORT",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_LOCKCREDITFIELDS",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_LOCKCREDITFIELDS",
+											"type": "Boolean"
+										}
+									},
+									{
+										"source": {
+											"name": "PROFILE_HOBO",
+											"type": "Boolean"
+										},
+										"sink": {
+											"name": "PROFILE_HOBO",
+											"type": "Boolean"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "TRUX_MSAZ01_SQL_P12",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema": "dbo",
+									"table": "PROFILE",
+									"database": "TRUX_DATA",
+									"server": "MSAZ01-SQL-P12"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_V2_New",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "TRUX_DATA_PROFILE",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							}
+						]
+					},
+					{
+						"name": "COPY USERCOMP TABLE",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SnowflakeV2Sink",
+								"preCopyScript": "TRUNCATE TABLE LRS_RAW.MASTER_DATA.TRUX_DATA_USERCOMP;",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "MSAZ01_SQL_P12_Blob",
+									"type": "LinkedServiceReference"
+								},
+								"path": "staging",
+								"enableCompression": true
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "USERCOMP_USER",
+											"type": "String"
+										},
+										"sink": {
+											"name": "USERCOMP_USER",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "USERCOMP_COMPANY",
+											"type": "String"
+										},
+										"sink": {
+											"name": "USERCOMP_COMPANY",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "USERCOMP_PROFILE",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "USERCOMP_PROFILE",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "USERCOMP_PROFILEW",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "USERCOMP_PROFILEW",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "USERCOMP_PROFILEM",
+											"type": "Int32"
+										},
+										"sink": {
+											"name": "USERCOMP_PROFILEM",
+											"type": "Int64"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "TRUX_MSAZ01_SQL_P12",
+								"type": "DatasetReference",
+								"parameters": {
+									"schema": "dbo",
+									"table": "USERCOMP",
+									"database": "TRUX_DATA",
+									"server": "MSAZ01-SQL-P12"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "LRS_Snowflake_Raw_V2_New",
+								"type": "DatasetReference",
+								"parameters": {
+									"Snowflake_Sink_Table": "TRUX_DATA_USERCOMP",
+									"Snowflake_Schema": "MASTER_DATA"
+								}
+							}
+						]
 					}
 				],
 				"policy": {
