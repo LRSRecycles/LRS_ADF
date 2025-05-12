@@ -308,6 +308,8 @@
 						{
 							"name": "DM05A",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "DM01P",
@@ -558,6 +560,8 @@
 						{
 							"name": "DM05B",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "DM05A",
@@ -818,6 +822,8 @@
 						{
 							"name": "DM05Z",
 							"type": "Copy",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "DM05B",
