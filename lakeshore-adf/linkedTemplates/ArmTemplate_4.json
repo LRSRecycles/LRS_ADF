@@ -7845,33 +7845,6 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Execute Trux Full Load Fact New",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "Master Data Load",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "TRUX_FULL_LOAD_FACT_NEW",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Maximum_DIU": 16,
-								"Degree_Copy_Parallelism": 32
-							}
-						}
-					},
-					{
 						"name": "Master Data Load",
 						"description": "Reloading TRUX master metadata.",
 						"type": "ExecutePipeline",
@@ -7890,11 +7863,11 @@
 						}
 					},
 					{
-						"name": "Execute Pipeline Trux Data Load",
+						"name": "Execute Trux Full Load",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "Execute Trux Full Load Fact New",
+								"activity": "Master Data Load",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -7906,7 +7879,31 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "TRUX_DATA_LOAD",
+								"referenceName": "TRUX_FULL_LOAD_FACT_NEW_2",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Execute Pipeline TRUX DATA LOAD1",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Trux Full Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_DATA_LOAD_2",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -7932,27 +7929,6 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Run Trux Incremental Load Fact New",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Maximum_DIU": 16,
-								"Degree_Copy_Parallelism": 32,
-								"Incremental_Range": "14"
-							}
-						}
-					},
-					{
 						"name": "Run Trux Logging Incremental Load",
 						"type": "ExecutePipeline",
 						"dependsOn": [],
@@ -7971,6 +7947,23 @@
 								"Degree_Copy_Parallelism": 32,
 								"Incremental_Range": 14
 							}
+						}
+					},
+					{
+						"name": "Run Trux Incremental Load Fact New1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW_2",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
 						}
 					}
 				],
