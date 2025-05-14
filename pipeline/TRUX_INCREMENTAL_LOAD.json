@@ -33,15 +33,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_INCREMENTAL_LOAD_FACT_NEW_2",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32,
-						"Incremental_Range": "14"
-					}
+					"waitOnCompletion": true
 				}
 			}
 		],

@@ -36,14 +36,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_FULL_LOAD_FACT_NEW",
+						"referenceName": "TRUX_FULL_LOAD_FACT_NEW_2",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32
-					}
+					"waitOnCompletion": true
 				}
 			},
 			{
@@ -63,14 +59,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TRUX_DATA_LOAD",
+						"referenceName": "TRUX_DATA_LOAD_2",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Maximum_DIU": 16,
-						"Degree_Copy_Parallelism": 32
-					}
+					"waitOnCompletion": true
 				}
 			}
 		],
