@@ -3,7 +3,24 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Execute Trux Full Load Fact New",
+				"name": "Master Data Load",
+				"description": "Reloading TRUX master metadata.",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TRUX_MASTER_DATA_FULL_LOAD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Execute Trux Full Load",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -30,28 +47,11 @@
 				}
 			},
 			{
-				"name": "Master Data Load",
-				"description": "Reloading TRUX master metadata.",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TRUX_MASTER_DATA_FULL_LOAD",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Execute Pipeline Trux Data Load",
+				"name": "Execute Pipeline TRUX DATA LOAD1",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Execute Trux Full Load Fact New",
+						"activity": "Execute Trux Full Load",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -66,7 +66,11 @@
 						"referenceName": "TRUX_DATA_LOAD",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"Maximum_DIU": 16,
+						"Degree_Copy_Parallelism": 32
+					}
 				}
 			}
 		],
