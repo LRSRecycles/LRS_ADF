@@ -6,6 +6,8 @@
 				"name": "Master Data Load",
 				"description": "Reloading TRUX master metadata.",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -22,14 +24,7 @@
 			{
 				"name": "Execute Trux Full Load",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Master Data Load",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"secureInput": false
 				},
