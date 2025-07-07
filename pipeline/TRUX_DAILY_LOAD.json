@@ -40,6 +40,8 @@
 			{
 				"name": "Execute Pipeline TRUX DATA LOAD1",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Execute Trux Full Load",
