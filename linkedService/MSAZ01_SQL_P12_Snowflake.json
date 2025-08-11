@@ -11,13 +11,13 @@
 		"annotations": [],
 		"type": "SnowflakeV2",
 		"typeProperties": {
-			"authenticationType": "Basic",
+			"authenticationType": "KeyPair",
 			"accountIdentifier": "bk40410.central-us.azure",
-			"user": "SVC_ELT",
+			"user": "SVC_AZURE_ADF",
 			"database": "@{linkedService().database}",
 			"warehouse": "LRS_RAW_ADF_COMPUTE",
 			"role": "ACCOUNTADMIN",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI4MDUyOWUyMC01NDUwLTRkNmItYjMwNi1iZWY3ZmI2NTY0ZWQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIwMWY0M2U2ZS1kZjMzLTQwNGEtODEyMS01YTJhMmMxODIzODYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "IR-MSAZ01-SQL-P12",
