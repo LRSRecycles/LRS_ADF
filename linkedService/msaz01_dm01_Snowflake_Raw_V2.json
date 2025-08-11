@@ -17,7 +17,7 @@
 			"database": "@{linkedService().database}",
 			"warehouse": "LRS_RAW_ADF_COMPUTE",
 			"role": "ACCOUNTADMIN",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJhYzI1OGY4ZC0wNTgzLTRmNmQtYjNlMC1lZDYwYzMxNGI4MTIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJjNTVhZjQ4ZS02M2E3LTRiMGItOTI0My02ZWY4MjIyZTAyMzUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "msaz01-dm01",
