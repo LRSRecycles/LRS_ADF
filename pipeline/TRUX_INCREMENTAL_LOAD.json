@@ -26,6 +26,8 @@
 			{
 				"name": "Run Trux Incremental Load Fact New1",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
