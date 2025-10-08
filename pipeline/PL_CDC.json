@@ -1,0 +1,74 @@
+{
+	"name": "PL_CDC",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupCDCChanges",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "SELECT TOP 1000\n       __$start_lsn as LSN,\n       __$operation as Operation,\n       __$update_mask as UpdateMask,\n       CM03_CUST,\n       CM03_NAME,\n       CM03_CUSTTYPE,\n       CM03_ADD1,\n       CM03_CITY,\n       CM03_STAT,\n       CM03_PZIP,\n       CM03_PHON\n   FROM @{pipeline().parameters.CDCTableName}\n   WHERE __$start_lsn > CONVERT(binary(10), '@{pipeline().parameters.LastProcessedLSN}', 1)\n   ORDER BY __$start_lsn",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_CDC_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "cdc",
+							"TableName": "@pipeline().parameters.CDCTableName"
+						}
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupCDCChanges",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupCDCChanges').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 20
+				}
+			}
+		],
+		"parameters": {
+			"DatabaseName": {
+				"type": "string",
+				"defaultValue": "TRUX_MN_COMP"
+			},
+			"CDCTableName": {
+				"type": "string",
+				"defaultValue": "dbo_CM03_CT"
+			},
+			"LastProcessedLSN": {
+				"type": "string",
+				"defaultValue": "0x00000000000000000000"
+			}
+		},
+		"annotations": []
+	}
+}
