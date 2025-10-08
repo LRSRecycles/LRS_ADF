@@ -1,0 +1,65 @@
+{
+	"name": "DS_Snowflake_CDC_Target",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LRS_Snowflake_V2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SnowflakeV2Table",
+		"schema": [
+			{
+				"name": "SOURCE_DATABASE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "SOURCE_LSN",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CDC_OPERATION",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "LOAD_TIMESTAMP",
+				"type": "TIMESTAMP_NTZ"
+			},
+			{
+				"name": "CM03_CUST",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_NAME",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_CUSTTYPE",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_ADD1",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_CITY",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_STAT",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_PZIP",
+				"type": "VARCHAR"
+			},
+			{
+				"name": "CM03_PHON",
+				"type": "VARCHAR"
+			}
+		],
+		"typeProperties": {
+			"schema": "TRUX_CDC",
+			"table": "CM03_CUSTOMER_CDC"
+		}
+	}
+}
