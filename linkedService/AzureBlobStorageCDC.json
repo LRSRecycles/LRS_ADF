@@ -1,0 +1,11 @@
+{
+	"name": "AzureBlobStorageCDC",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"sasUri": "https://lrsdatalinkfilerepo.blob.core.windows.net/?sv=2024-11-04&ss=b&srt=so&sp=rwdlaciytfx&se=2135-10-09T04:33:39Z&st=2025-10-08T20:18:39Z&spr=https&sig=EeEjcOBsuPu7fMZpp1%2FqFmmJK0s07lCWvexIVFcWQ%2Fc%3D?sv=2024-11-04&ss=b&srt=so&sp=rwdlaciytfx&se=2135-10-09T04:33:39Z&st=2025-10-08T20:18:39Z&spr=https&sig=EeEjcOBsuPu7fMZpp1%2FqFmmJK0s07lCWvexIVFcWQ%2Fc%3D"
+		}
+	}
+}
