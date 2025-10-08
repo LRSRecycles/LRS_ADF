@@ -69,14 +69,7 @@
 							"type": "SnowflakeImportCopyCommand"
 						}
 					},
-					"enableStaging": true,
-					"stagingSettings": {
-						"linkedServiceName": {
-							"referenceName": "AzureBlobStorage2",
-							"type": "LinkedServiceReference"
-						},
-						"path": "truxcdcstaging"
-					}
+					"enableStaging": true
 				},
 				"inputs": [
 					{
