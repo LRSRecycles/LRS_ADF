@@ -35,8 +35,8 @@
 				}
 			},
 			{
-				"name": "ForEach1",
-				"type": "ForEach",
+				"name": "Copy data1",
+				"type": "Copy",
 				"dependsOn": [
 					{
 						"activity": "LookupCDCChanges",
@@ -45,14 +45,48 @@
 						]
 					}
 				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupCDCChanges').output.value",
-						"type": "Expression"
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": {
+							"value": "SELECT \n    '@{pipeline().parameters.DatabaseName}' as SOURCE_DATABASE,\n    CONCAT('0x', UPPER(CONVERT(VARCHAR(50), __$start_lsn, 2))) as SOURCE_LSN,\n    CASE __$operation\n        WHEN 1 THEN 'DELETE'\n        WHEN 2 THEN 'INSERT'\n        WHEN 3 THEN 'UPDATE_BEFORE'\n        WHEN 4 THEN 'UPDATE_AFTER'\n    END as CDC_OPERATION,\n    CM03_CUST,\n    CM03_NAME,\n    CM03_CUSTTYPE,\n    CM03_ADD1,\n    CM03_CITY,\n    CM03_STAT,\n    CM03_PZIP,\n    CM03_PHON\nFROM @{pipeline().parameters.CDCTableName}\nWHERE __$start_lsn > CONVERT(binary(10), '@{pipeline().parameters.LastProcessedLSN}', 1)\nORDER BY __$start_lsn",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
-					"batchCount": 20
-				}
+					"sink": {
+						"type": "SnowflakeV2Sink",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_CDC_Source",
+						"type": "DatasetReference",
+						"parameters": {
+							"SchemaName": "cdc",
+							"TableName": "dbo_CM03_CT"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Snowflake_CDC_Target",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"parameters": {
