@@ -7,9 +7,15 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "GetWatermark",
+						"activity": "SetLSN_Default",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "SetLSN_FromWatermark",
+						"dependencyConditions": [
+							"Succeeded"
 						]
 					}
 				],
@@ -25,7 +31,7 @@
 					"source": {
 						"type": "SqlServerSource",
 						"sqlReaderQuery": {
-							"value": "SELECT \n    '@{pipeline().parameters.DatabaseName}' as SOURCE_DATABASE,\n    CONVERT(VARCHAR(50), __$start_lsn, 1) as SOURCE_LSN,\n    CASE __$operation\n        WHEN 1 THEN 'DELETE'\n        WHEN 2 THEN 'INSERT'\n        WHEN 3 THEN 'UPDATE_BEFORE'\n        WHEN 4 THEN 'UPDATE_AFTER'\n        ELSE 'UNKNOWN'\n    END as CDC_OPERATION,\n    ISNULL(CM03_CUST, '') as CM03_CUST,\n    ISNULL(CM03_NAME, '') as CM03_NAME,\n    ISNULL(CM03_CUSTTYPE, '') as CM03_CUSTTYPE,\n    ISNULL(CM03_ADD1, '') as CM03_ADD1,\n    ISNULL(CM03_CITY, '') as CM03_CITY,\n    ISNULL(CM03_STAT, '') as CM03_STAT,\n    ISNULL(CM03_PZIP, '') as CM03_PZIP,\n    ISNULL(CM03_PHON, '') as CM03_PHON\nFROM @{pipeline().parameters.CDCSchemaName}.@{pipeline().parameters.CDCTableName}\nWHERE __$start_lsn > CONVERT(binary(10), '@{activity('GetWatermark').output.firstRow.last_lsn}', 1)\nORDER BY __$start_lsn",
+							"value": "SELECT \n    '@{pipeline().parameters.DatabaseName}' as SOURCE_DATABASE,\n    CONVERT(VARCHAR(50), __$start_lsn, 1) as SOURCE_LSN,\n    CASE __$operation\n        WHEN 1 THEN 'DELETE'\n        WHEN 2 THEN 'INSERT'\n        WHEN 3 THEN 'UPDATE_BEFORE'\n        WHEN 4 THEN 'UPDATE_AFTER'\n        ELSE 'UNKNOWN'\n    END as CDC_OPERATION,\n    ISNULL(CM03_CUST, '') as CM03_CUST,\n    ISNULL(CM03_NAME, '') as CM03_NAME,\n    ISNULL(CM03_CUSTTYPE, '') as CM03_CUSTTYPE,\n    ISNULL(CM03_ADD1, '') as CM03_ADD1,\n    ISNULL(CM03_CITY, '') as CM03_CITY,\n    ISNULL(CM03_STAT, '') as CM03_STAT,\n    ISNULL(CM03_PZIP, '') as CM03_PZIP,\n    ISNULL(CM03_PHON, '') as CM03_PHON\nFROM @{pipeline().parameters.CDCSchemaName}.@{pipeline().parameters.CDCTableName}\nWHERE __$start_lsn > CONVERT(binary(10), '@{variables('CurrentLSN')}', 1)\nORDER BY __$start_lsn",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -101,6 +107,48 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "SetLSN_FromWatermark",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetWatermark",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "CurrentLSN",
+					"value": "@activity('GetWatermark').output.firstRow.last_lsn"
+				}
+			},
+			{
+				"name": "SetLSN_Default",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "GetWatermark",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "CurrentLSN",
+					"value": "0x00000000000000000000"
+				}
 			}
 		],
 		"parameters": {
@@ -119,6 +167,12 @@
 			"CDCSchemaName": {
 				"type": "string",
 				"defaultValue": "cdc"
+			}
+		},
+		"variables": {
+			"CurrentLSN": {
+				"type": "String",
+				"defaultValue": "0x00000000000000000000"
 			}
 		},
 		"folder": {
