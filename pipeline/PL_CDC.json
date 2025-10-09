@@ -82,6 +82,7 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"method": "GET",
 					"url": {
 						"value": "https://lrsdatalinkfilerepo.blob.core.windows.net/cdc-watermarks/@{pipeline().parameters.DatabaseName}.json",
 						"type": "Expression"
