@@ -176,6 +176,22 @@
 						"value": "@activity('CheckWatermarkExists').output.exists",
 						"type": "Expression"
 					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "CurrentLSN",
+								"value": "0x00000000000000000000"
+							}
+						}
+					],
 					"ifTrueActivities": [
 						{
 							"name": "GetWatermark_copy1",
