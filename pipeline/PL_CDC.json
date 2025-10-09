@@ -89,7 +89,14 @@
 						"referenceName": "DS_CDC_Source",
 						"type": "DatasetReference",
 						"parameters": {
-							"TableSchema": "cdc"
+							"TableName": {
+								"value": "@pipeline().parameters.CDCTableName",
+								"type": "Expression"
+							},
+							"TableSchema": {
+								"value": "@pipeline().parameters.CDCSchemaName",
+								"type": "Expression"
+							}
 						}
 					}
 				],
