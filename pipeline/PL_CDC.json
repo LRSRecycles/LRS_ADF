@@ -170,7 +170,7 @@
 							}
 						},
 						{
-							"name": "SetLSN_FromWatermark_copy1",
+							"name": "SetLSN_FromWatermark",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
