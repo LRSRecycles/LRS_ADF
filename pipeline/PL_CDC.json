@@ -81,6 +81,9 @@
 				"defaultValue": "cdc"
 			}
 		},
+		"folder": {
+			"name": "Test"
+		},
 		"annotations": []
 	}
 }
