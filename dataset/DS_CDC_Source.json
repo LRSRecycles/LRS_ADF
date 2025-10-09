@@ -9,6 +9,10 @@
 			"TableName": {
 				"type": "string",
 				"defaultValue": "dbo_CM03_CT"
+			},
+			"TableSchema": {
+				"type": "string",
+				"defaultValue": "cdc"
 			}
 		},
 		"annotations": [],
