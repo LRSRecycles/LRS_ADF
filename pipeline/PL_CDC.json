@@ -81,11 +81,7 @@
 				"inputs": [
 					{
 						"referenceName": "DS_CDC_Source",
-						"type": "DatasetReference",
-						"parameters": {
-							"SchemaName": "cdc",
-							"TableName": "dbo_CM03_CT"
-						}
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
