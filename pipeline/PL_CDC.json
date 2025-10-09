@@ -18,7 +18,7 @@
 					"source": {
 						"type": "SqlServerSource",
 						"sqlReaderQuery": {
-							"value": "SELECT TOP 1000\n    CONVERT(VARCHAR(50), __$start_lsn, 1) as LSN,\n    __$operation as Operation,\n    __$update_mask as UpdateMask,\n    CM03_CUST,\n    CM03_NAME,\n    CM03_CUSTTYPE,\n    CM03_ADD1,\n    CM03_CITY,\n    CM03_STAT,\n    CM03_PZIP,\n    CM03_PHON\nFROM cdc.dbo_CM03_CT\nWHERE __$start_lsn > CONVERT(binary(10), '0x00000000000000000000', 1)\nORDER BY __$start_lsn",
+							"value": "SELECT TOP 1000\n    CONVERT(VARCHAR(50), __$start_lsn, 1) as LSN,\n    __$operation as Operation,\n    CM03_CUST,\n    CM03_NAME,\n    CM03_CUSTTYPE,\n    CM03_ADD1,\n    CM03_CITY,\n    CM03_STAT,\n    CM03_PZIP,\n    CM03_PHON\nFROM cdc.dbo_CM03_CT\nWHERE __$start_lsn > CONVERT(binary(10), '0x00000000000000000000', 1)\nORDER BY __$start_lsn",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
