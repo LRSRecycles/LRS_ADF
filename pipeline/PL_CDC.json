@@ -25,9 +25,13 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "SnowflakeV2Sink",
-						"importSettings": {
-							"type": "SnowflakeImportCopyCommand"
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings",
+							"filePattern": "arrayOfObjects"
 						}
 					},
 					"enableStaging": true,
@@ -57,8 +61,11 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_Snowflake_CDC_Target",
-						"type": "DatasetReference"
+						"referenceName": "DS_Blob_CDC_JSON",
+						"type": "DatasetReference",
+						"parameters": {
+							"DatabaseName": "@pipeline().parameters.DatabaseName"
+						}
 					}
 				]
 			}
