@@ -70,67 +70,6 @@
 				]
 			},
 			{
-				"name": "GetWatermark",
-				"type": "Lookup",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "JsonSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "JsonReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "DS_Blob_Watermark",
-						"type": "DatasetReference",
-						"parameters": {
-							"DatabaseName": "@pipeline().parameters.DatabaseName"
-						}
-					}
-				}
-			},
-			{
-				"name": "SetLSN_FromWatermark",
-				"type": "SetVariable",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [
-					{
-						"activity": "GetWatermark",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "CurrentLSN",
-					"value": {
-						"value": "@activity('GetWatermark').output.firstRow.last_lsn",
-						"type": "Expression"
-					}
-				}
-			},
-			{
 				"name": "CheckWatermarkExists",
 				"type": "GetMetadata",
 				"dependsOn": [],
