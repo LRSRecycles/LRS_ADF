@@ -1,0 +1,25 @@
+{
+	"name": "DS_Blob_CDC_JSON",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage2",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"DatabaseName": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "@concat(formatDateTime(utcnow(), 'HHmmss'), '-', guid(), '.json')",
+				"folderPath": "@concat(dataset().DatabaseName, '/', formatDateTime(utcnow(), 'yyyy/MM/dd'))",
+				"container": "cdc-staging"
+			}
+		},
+		"schema": {}
+	}
+}
