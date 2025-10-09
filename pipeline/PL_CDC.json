@@ -137,7 +137,7 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "GetWatermark_copy1",
+							"name": "GetWatermark",
 							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
@@ -174,7 +174,7 @@
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "GetWatermark_copy1",
+									"activity": "GetWatermark",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -188,7 +188,7 @@
 							"typeProperties": {
 								"variableName": "CurrentLSN",
 								"value": {
-									"value": "@activity('GetWatermark_copy1').output.firstRow.last_lsn",
+									"value": "@activity('GetWatermark').output.firstRow.last_lsn",
 									"type": "Expression"
 								}
 							}
