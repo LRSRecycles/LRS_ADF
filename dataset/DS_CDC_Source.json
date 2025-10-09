@@ -6,13 +6,9 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"SchemaName": {
-				"type": "string",
-				"defaultValue": "cdc"
-			},
 			"TableName": {
 				"type": "string",
-				"defaultValue": "dbo_CM03_CT"
+				"defaultValue": "cdc.dbo_CM03_CT"
 			}
 		},
 		"annotations": [],

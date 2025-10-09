@@ -28,7 +28,6 @@
 						"referenceName": "DS_CDC_Source",
 						"type": "DatasetReference",
 						"parameters": {
-							"SchemaName": "cdc",
 							"TableName": "@pipeline().parameters.CDCTableName"
 						}
 					}
