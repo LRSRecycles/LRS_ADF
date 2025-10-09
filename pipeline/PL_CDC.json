@@ -34,14 +34,7 @@
 							"filePattern": "arrayOfObjects"
 						}
 					},
-					"enableStaging": true,
-					"stagingSettings": {
-						"linkedServiceName": {
-							"referenceName": "AzureBlobStorageCDC",
-							"type": "LinkedServiceReference"
-						},
-						"path": "truxcdcstaging"
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
