@@ -5,14 +5,7 @@
 			{
 				"name": "CopyCDCChangesToBlob",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "GetWatermark",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -71,7 +64,7 @@
 			},
 			{
 				"name": "GetWatermark",
-				"type": "WebActivity",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -82,10 +75,23 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"method": "GET",
-					"url": {
-						"value": "https://lrsdatalinkfilerepo.blob.core.windows.net/cdc-watermarks/@{pipeline().parameters.DatabaseName}.json",
-						"type": "Expression"
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_Blob_Watermark",
+						"type": "DatasetReference",
+						"parameters": {
+							"DatabaseName": "@pipeline().parameters.DatabaseName"
+						}
 					}
 				}
 			}
