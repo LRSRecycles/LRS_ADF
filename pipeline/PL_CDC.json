@@ -7,12 +7,6 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "SetLSN_Default",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
 						"activity": "SetLSN_FromWatermark",
 						"dependencyConditions": [
 							"Succeeded"
@@ -78,6 +72,8 @@
 			{
 				"name": "GetWatermark",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -111,6 +107,8 @@
 			{
 				"name": "SetLSN_FromWatermark",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "GetWatermark",
@@ -130,25 +128,56 @@
 				}
 			},
 			{
-				"name": "SetLSN_Default",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "GetWatermark",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
+				"name": "CreateDefaultWatermark",
+				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
 				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "CurrentLSN",
-					"value": "0x00000000000000000000"
-				}
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Inline_JSON",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Blob_Watermark",
+						"type": "DatasetReference",
+						"parameters": {
+							"DatabaseName": "DatabaseName: @pipeline().parameters.DatabaseName"
+						}
+					}
+				]
 			}
 		],
 		"parameters": {
