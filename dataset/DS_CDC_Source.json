@@ -364,7 +364,10 @@
 			}
 		],
 		"typeProperties": {
-			"schema": "cdc",
+			"schema": {
+				"value": "@dataset().TableSchema",
+				"type": "Expression"
+			},
 			"table": "@dataset().TableName"
 		}
 	}
