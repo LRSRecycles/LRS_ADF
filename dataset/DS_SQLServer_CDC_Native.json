@@ -1,0 +1,335 @@
+{
+	"name": "DS_SQLServer_CDC_Native",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MSAZ01_SQLDEV01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "CM03_CUST",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_NAME",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_CUSTTYPE",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_ADD1",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_ADD2",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_ADD3",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_CITY",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_STAT",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_PZIP",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_PHON",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_FAX",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_CONT",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_SREP",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_AGRE",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_ADTE",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_XDTE",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_ALPH",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_ICHG",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_CDTE",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_CRED",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "CM03_WARN",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "CM03_CARR",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_TXJU",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_SUSREA",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_SUSDATE",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_CCARDTYPE",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_CCARDNUM",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_CCARDEXP",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_CURR",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_FLD1",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD2",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD3",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD4",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD5",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD6",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD7",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD8",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_FLD10",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_OLDCUST",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_ADD4",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_FLD9",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_PCLASS",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_PONUM",
+				"type": "nvarchar"
+			},
+			{
+				"name": "CM03_CONTRACTSIGNED",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_INVNOTEEXPIRES",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_BILLTO",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_EMAIL",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_COD",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_BROKE",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_STOREDID",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_SURCHARGEEXEMPTION",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_LOST",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_EREA",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_INVNOTE",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_REINSDATE",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_INVACTION",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_SCALENOTE",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_ODUL",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_DEFPC",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_NATIONAL",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_INITIALTERM",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_RENEWTERM",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CM03_CASHACCT",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_COLLAGNT",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_GLOB",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_ADDVERI",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_GENCASHACCT",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_BILG",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_APPLYCCPROCFEE",
+				"type": "bit"
+			},
+			{
+				"name": "CM03_DRIVERNOTE",
+				"type": "varchar"
+			},
+			{
+				"name": "CM03_DRIVERNOTESTART",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			},
+			{
+				"name": "CM03_DRIVERNOTEEXPIRES",
+				"type": "smalldatetime",
+				"precision": 16,
+				"scale": 0
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "cm03"
+		}
+	}
+}
