@@ -57,7 +57,7 @@
 					"source": {
 						"type": "SqlServerSource",
 						"sqlReaderQuery": {
-							"value": "SELECT \n    '@{pipeline().parameters.DatabaseName}' as SOURCE_DATABASE,\n    CONCAT('0x', UPPER(CONVERT(VARCHAR(50), __$start_lsn, 2))) as SOURCE_LSN,\n    CASE __$operation\n        WHEN 1 THEN 'DELETE'\n        WHEN 2 THEN 'INSERT'\n        WHEN 3 THEN 'UPDATE_BEFORE'\n        WHEN 4 THEN 'UPDATE_AFTER'\n    END as CDC_OPERATION,\n    CM03_CUST,\n    CM03_NAME,\n    CM03_CUSTTYPE,\n    CM03_ADD1,\n    CM03_CITY,\n    CM03_STAT,\n    CM03_PZIP,\n    CM03_PHON\nFROM @{pipeline().parameters.CDCTableName}\nWHERE __$start_lsn > CONVERT(binary(10), '@{pipeline().parameters.LastProcessedLSN}', 1)\nORDER BY __$start_lsn",
+							"value": "SELECT \n    '@{pipeline().parameters.DatabaseName}' as SOURCE_DATABASE,\n    CONVERT(VARCHAR(50), __$start_lsn, 1) as SOURCE_LSN,\n    CASE __$operation\n        WHEN 1 THEN 'DELETE'\n        WHEN 2 THEN 'INSERT'\n        WHEN 3 THEN 'UPDATE_BEFORE'\n        WHEN 4 THEN 'UPDATE_AFTER'\n    END as CDC_OPERATION,\n    CM03_CUST,\n    CM03_NAME,\n    CM03_CUSTTYPE,\n    CM03_ADD1,\n    CM03_CITY,\n    CM03_STAT,\n    CM03_PZIP,\n    CM03_PHON\nFROM @{pipeline().parameters.CDCTableName}\nWHERE __$start_lsn > CONVERT(binary(10), '@{pipeline().parameters.LastProcessedLSN}', 1)\nORDER BY __$start_lsn",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
