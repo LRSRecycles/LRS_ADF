@@ -156,7 +156,8 @@
 								"dataset": {
 									"referenceName": "DS_TableStorage_CDCConfig",
 									"type": "DatasetReference"
-								}
+								},
+								"firstRowOnly": false
 							}
 						},
 						{
