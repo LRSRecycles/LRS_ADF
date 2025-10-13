@@ -72,6 +72,8 @@
 			{
 				"name": "CheckWatermarkExists",
 				"type": "GetMetadata",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -105,14 +107,7 @@
 			{
 				"name": "If Watermark Exists",
 				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "CheckWatermarkExists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
@@ -185,6 +180,43 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "GetCDCConfigs",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureTableSource",
+						"azureTableSourceIgnoreTableNotFound": false
+					},
+					"dataset": {
+						"referenceName": "DS_TableStorage_CDCConfig",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachConfig",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetCDCConfigs').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 20
 				}
 			}
 		],
