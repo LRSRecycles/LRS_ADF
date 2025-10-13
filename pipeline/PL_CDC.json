@@ -121,7 +121,7 @@
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Set variable1",
+							"name": "Set_SN_to_Default",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"policy": {
