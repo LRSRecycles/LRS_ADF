@@ -209,14 +209,46 @@
 			{
 				"name": "ForEachConfig",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "GetCDCConfigs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
 						"value": "@activity('GetCDCConfigs').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 20
+					"batchCount": 20,
+					"activities": [
+						{
+							"name": "CheckWatermark",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"typeProperties": {
+								"source": {
+									"type": "AzureTableSource",
+									"azureTableSourceQuery": "PartitionKey eq '@{item().PartitionKey}' and RowKey eq '@{item().RowKey}'",
+									"azureTableSourceIgnoreTableNotFound": false
+								},
+								"dataset": {
+									"referenceName": "DS_TableStorage_Watermarks",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
 				}
 			}
 		],
