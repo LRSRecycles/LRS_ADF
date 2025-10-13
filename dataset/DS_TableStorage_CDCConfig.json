@@ -1,0 +1,15 @@
+{
+	"name": "DS_TableStorage_CDCConfig",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_TableStorage_CDC",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "cdcconfig"
+		}
+	}
+}

@@ -150,22 +150,12 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "JsonSource",
-									"storeSettings": {
-										"type": "AzureBlobStorageReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
-									},
-									"formatSettings": {
-										"type": "JsonReadSettings"
-									}
+									"type": "AzureTableSource",
+									"azureTableSourceIgnoreTableNotFound": false
 								},
 								"dataset": {
-									"referenceName": "DS_Blob_Watermark",
-									"type": "DatasetReference",
-									"parameters": {
-										"DatabaseName": "@pipeline().parameters.DatabaseName"
-									}
+									"referenceName": "DS_TableStorage_CDCConfig",
+									"type": "DatasetReference"
 								}
 							}
 						},
